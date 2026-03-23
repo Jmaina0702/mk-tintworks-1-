@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#05070a">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <title>MK Tintworks | Premium Window Tinting</title>
   <meta name="description" content="MK Tintworks provides premium automotive, residential, and commercial window tinting with genuine 3M and Llumar films.">
   <link rel="preload" as="image" href="tint%20pictures/file_00000000fa5871fda8041e2a6a8dceb0-opt-fast.webp" type="image/webp" fetchpriority="high">
@@ -1794,5 +1795,16 @@
     })();
   </script>
   <!--End of Tawk.to Script-->
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
 </body>
 </html>
