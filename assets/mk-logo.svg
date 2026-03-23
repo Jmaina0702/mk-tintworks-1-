@@ -1,0 +1,10 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-label="MK Tintworks logo">
+  <defs>
+    <style>
+      .mark { font-family: "Cinzel", "Times New Roman", serif; font-size: 96px; font-weight: 600; letter-spacing: 2px; }
+      .type { font-family: "Cinzel", "Times New Roman", serif; font-size: 28px; font-weight: 600; letter-spacing: 3px; }
+    </style>
+  </defs>
+  <text class="mark" x="10" y="86" fill="#FFFFFF">MK</text>
+  <text class="type" x="12" y="112" fill="#FFFFFF">MK TINTWORKS</text>
+</svg>
