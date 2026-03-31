@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 8 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 9 on top of the original static marketing site.
 
 ## Current system
 
@@ -33,6 +33,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The products manager and discount system were implemented, including live public hydration and scheduled discount activation/expiry.
 - Section 8:
   The gallery manager and image pipeline were implemented, including drag-and-drop uploads, shared client compression, D1-backed gallery CRUD, public gallery API, gallery runtime refresh, and initial gallery seeding.
+- Section 9:
+  The blog system and Workers AI integration were implemented, including the CMS article list, rich editor, browser-side Word/PDF import, AI SEO generation, article CRUD, public blog APIs, and build-time generation of public blog pages.
 
 ## Architecture
 
@@ -50,7 +52,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 1. Root HTML files remain static and fast by default.
 2. [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs) pulls live CMS state from the Worker at build time.
 3. The build injects `window.CMS_PAGE_CONTENT`, `window.CMS_SHARED_CONTENT`, `window.CMS_PRODUCTS_STATE`, and `window.CMS_GALLERY_STATE` into the generated Pages output.
-4. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), and [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js) can then refresh selected data at runtime with cache-bypassed fetches.
+4. The build now also generates the public blog index and each published blog article from Worker-backed blog data.
+5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), and [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
 
 ### 3. Storage model
 
@@ -121,6 +124,71 @@ Important implementation details:
 
 The seed uses the existing public gallery images as launch content and marks them `is_placeholder = 1` so they are visibly replaceable inside the CMS.
 
+## Section 9 details
+
+### CMS blog system
+
+- Listing page:
+  [`mktintworks-cms/pages/blog.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/blog.html)
+- Editor page:
+  [`mktintworks-cms/pages/blog-editor.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/blog-editor.html)
+- Clients:
+  [`mktintworks-cms/assets/js/blog.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/blog.js) and [`mktintworks-cms/assets/js/blog-editor.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/blog-editor.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-blog.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-blog.css)
+
+Implemented behavior:
+
+- CMS article table with published/draft totals
+- New article flow and existing article load by id
+- Rich-text editing with heading, list, and link controls
+- Browser-side `.docx` import via Mammoth
+- Browser-side `.pdf` text extraction via PDF.js
+- AI SEO generation against Cloudflare Workers AI
+- Manual SEO editing and live character counters
+- Featured image upload through the existing media pipeline
+- Draft save, publish, and delete flows
+- Slug validation and uniqueness enforcement
+
+### Worker blog API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/blog.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/blog.js)
+
+Endpoints:
+
+- `GET /api/blog`
+  Protected CMS listing
+- `GET /api/blog/:id`
+  Protected single-article load for the editor
+- `POST /api/blog/save`
+  Protected create/update for drafts and published posts
+- `DELETE /api/blog/:id`
+  Protected delete
+- `POST /api/blog/generate-seo`
+  Protected Workers AI SEO generation
+- `GET /api/blog/public`
+  Public published-article feed with optional `full=1` for build generation
+
+Important implementation details:
+
+- The Worker keeps blog publishing usable even if Workers AI is unavailable, because AI metadata generation is optional rather than required.
+- Published article routes are public, but all CMS write/read routes still require JWT auth.
+- Existing static article bodies were synced back into D1 so the CMS editor and new build generator preserve current live long-form content.
+
+### Public blog generation
+
+- Template source:
+  [`blog/index.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/blog/index.html)
+- Build pipeline:
+  [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs)
+
+Section 9 changes the public blog flow from hardcoded static pages to Worker-backed build output:
+
+- `/blog/` is rendered from the published rows in `blog_posts`
+- `/blog/[slug].html` is generated at build time for each published article
+- related-article cards, metadata, JSON-LD, hero image, and article body now come from D1-backed blog content
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -136,7 +204,7 @@ The seed uses the existing public gallery images as launch content and marks the
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current live shape after Section 8
+## Current live shape after Section 9
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -146,6 +214,10 @@ The seed uses the existing public gallery images as launch content and marks the
   `mktintworks-cms`
 - Public gallery data:
   Served from `GET /api/gallery/public`
+- Public blog data:
+  Served from `GET /api/blog/public`
+- Published blog pages:
+  Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
   Section status files in [`mktintworks-cms/data`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/data) plus fallback production hosts
 
@@ -154,8 +226,8 @@ The seed uses the existing public gallery images as launch content and marks the
 - Use `npm run build` at the repo root before direct public Pages deployments.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback markup for resilience, but Sections 6-8 now treat the Worker as the source of truth for editable content, products, and gallery items.
+- The public site still keeps static fallback patterns where useful, but Sections 6-9 now treat the Worker as the source of truth for editable content, products, gallery items, and published blog articles.
 
 ## Next section
 
-The next PRD milestone is Section 9: Blog & Articles System plus Workers AI.
+The next PRD milestone is Section 10: Testimonials Pipeline.

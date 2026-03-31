@@ -6,6 +6,7 @@
     "https://www.mktintworks.com",
   ]);
   const PREVIEW_ORIGIN_SOURCES = [
+    "/data/section-9-status.json",
     "/data/section-8-status.json",
     "/data/section-7-status.json",
     "/data/section-6-status.json",

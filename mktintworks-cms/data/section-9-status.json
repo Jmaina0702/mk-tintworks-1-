@@ -1,0 +1,64 @@
+{
+  "section": 9,
+  "title": "Blog & Articles System + Cloudflare Workers AI",
+  "completed_at": "2026-03-31T20:15:00Z",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "57763434-ac0f-400d-9795-050350d0888c",
+    "verified": {
+      "public_blog_endpoint": true,
+      "protected_blog_listing_returns_401_without_jwt": true,
+      "protected_blog_save_returns_401_without_jwt": true,
+      "protected_blog_delete_returns_401_without_jwt": true,
+      "protected_blog_seo_generation_returns_401_without_jwt": true,
+      "full_public_blog_payload_available_for_builds": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://963ecf83.mk-tintworks-1.pages.dev",
+    "verified": {
+      "blog_index_generated_from_published_articles": true,
+      "published_article_pages_generated_at_build": true,
+      "legacy_static_article_bodies_synced_into_d1": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://8b60b087.mktintworks-cms.pages.dev",
+    "verified": {
+      "blog_listing_page_built": true,
+      "blog_editor_page_built": true,
+      "docx_import_ready": true,
+      "pdf_import_ready": true,
+      "featured_image_upload_ready": true,
+      "ai_seo_button_wired": true
+    }
+  },
+  "content_sync": {
+    "legacy_published_articles_synced": 2,
+    "synced_slugs": [
+      "3m-vs-llumar-kenya",
+      "ntsa-tint-regulations-kenya-2026"
+    ]
+  },
+  "features": {
+    "cms_blog_listing": true,
+    "cms_blog_editor": true,
+    "direct_write_mode": true,
+    "docx_import_mode": true,
+    "pdf_import_mode": true,
+    "workers_ai_seo_generation": true,
+    "draft_and_publish_flow": true,
+    "slug_uniqueness_enforced": true,
+    "public_blog_listing_api": true,
+    "build_time_blog_article_generation": true
+  },
+  "notes": [
+    "Workers AI remains an enhancement rather than a publishing dependency; manual SEO entry still works if AI is unavailable or quota-limited.",
+    "The existing long-form public article bodies were synced back into D1 so the new CMS editor and build pipeline preserve current live content instead of shortening it.",
+    "The public website now treats the Worker-backed blog_posts table as the source of truth for blog index output and generated article pages."
+  ]
+}
