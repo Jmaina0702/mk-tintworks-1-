@@ -27,6 +27,7 @@ const PUBLIC_ENDPOINTS = new Set([
   "/api/gallery/public",
   "/api/pages/content",
   "/api/products/site-data",
+  "/api/testimonials/public",
   "/api/testimonials/submit",
 ]);
 

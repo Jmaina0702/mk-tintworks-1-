@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 9 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 10 on top of the original static marketing site.
 
 ## Current system
 
@@ -35,6 +35,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The gallery manager and image pipeline were implemented, including drag-and-drop uploads, shared client compression, D1-backed gallery CRUD, public gallery API, gallery runtime refresh, and initial gallery seeding.
 - Section 9:
   The blog system and Workers AI integration were implemented, including the CMS article list, rich editor, browser-side Word/PDF import, AI SEO generation, article CRUD, public blog APIs, and build-time generation of public blog pages.
+- Section 10:
+  The testimonials pipeline was implemented, including the public review form, honeypot and validation layers, Worker-backed moderation routes, email notification, CMS approval/rejection UI, and build-time rendering of approved public testimonials.
 
 ## Architecture
 
@@ -51,7 +53,7 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 
 1. Root HTML files remain static and fast by default.
 2. [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs) pulls live CMS state from the Worker at build time.
-3. The build injects `window.CMS_PAGE_CONTENT`, `window.CMS_SHARED_CONTENT`, `window.CMS_PRODUCTS_STATE`, and `window.CMS_GALLERY_STATE` into the generated Pages output.
+3. The build injects `window.CMS_PAGE_CONTENT`, `window.CMS_SHARED_CONTENT`, `window.CMS_PRODUCTS_STATE`, `window.CMS_GALLERY_STATE`, and `window.CMS_TESTIMONIALS_STATE` into the generated Pages output.
 4. The build now also generates the public blog index and each published blog article from Worker-backed blog data.
 5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), and [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
 
@@ -189,6 +191,68 @@ Section 9 changes the public blog flow from hardcoded static pages to Worker-bac
 - `/blog/[slug].html` is generated at build time for each published article
 - related-article cards, metadata, JSON-LD, hero image, and article body now come from D1-backed blog content
 
+## Section 10 details
+
+### Public testimonials experience
+
+- Page:
+  [`testimonials.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/testimonials.html)
+- Client:
+  [`assets/js/testimonials.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/testimonials.js)
+- Styles:
+  [`assets/css/main.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/css/main.css)
+
+Implemented behavior:
+
+- Approved testimonials render into the public page from Worker-backed state
+- The public page still has a static empty-state fallback if no reviews are approved yet
+- Visitors can submit name, service type, star rating, and review text from the live site
+- The form uses a hidden honeypot field, client-side validation, and live character counting
+- Runtime refresh can pull the latest approved testimonials from the Worker without breaking the static fallback
+
+### CMS testimonials moderation
+
+- Page:
+  [`mktintworks-cms/pages/testimonials.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/testimonials.html)
+- Client:
+  [`mktintworks-cms/assets/js/testimonials.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/testimonials.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-testimonials.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-testimonials.css)
+
+Implemented behavior:
+
+- Pending, approved, and rejected tabs now render from live Worker data instead of placeholder demo rows
+- The sidebar pending badge and the module tab badge now reflect real pending-review counts
+- Approve actions promote a review into the public feed and trigger the public-site deploy hook
+- Reject actions remove a live review from public output or keep a pending one hidden
+- Rejected reviews can be restored by approving them again, which appends them back into the display order
+
+### Worker testimonials API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/testimonials.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/testimonials.js)
+
+Endpoints:
+
+- `POST /api/testimonials/submit`
+  Public submission endpoint with honeypot handling, validation, and submission throttling
+- `GET /api/testimonials/public`
+  Public approved-only feed for the website and build pipeline
+- `GET /api/testimonials`
+  Protected CMS listing across all statuses
+- `GET /api/testimonials/pending-count`
+  Protected pending-count endpoint for CMS badges
+- `POST /api/testimonials/approve`
+  Protected moderation action to publish a testimonial
+- `POST /api/testimonials/reject`
+  Protected moderation action to hide a testimonial
+
+Important implementation details:
+
+- Submissions remain one of the few public CMS endpoints and now include both honeypot protection and KV-backed throttling by client IP when available
+- Notification emails are sent server-side through Web3Forms using Worker secrets, so the business email is not exposed in client-side code
+- Approved testimonials are injected into the static build so the public testimonials page updates after moderation-triggered rebuilds rather than depending only on runtime fetches
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -204,7 +268,7 @@ Section 9 changes the public blog flow from hardcoded static pages to Worker-bac
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current live shape after Section 9
+## Current live shape after Section 10
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -216,6 +280,8 @@ Section 9 changes the public blog flow from hardcoded static pages to Worker-bac
   Served from `GET /api/gallery/public`
 - Public blog data:
   Served from `GET /api/blog/public`
+- Public testimonials data:
+  Served from `GET /api/testimonials/public`
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -226,8 +292,8 @@ Section 9 changes the public blog flow from hardcoded static pages to Worker-bac
 - Use `npm run build` at the repo root before direct public Pages deployments.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-9 now treat the Worker as the source of truth for editable content, products, gallery items, and published blog articles.
+- The public site still keeps static fallback patterns where useful, but Sections 6-10 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, and approved testimonials.
 
 ## Next section
 
-The next PRD milestone is Section 10: Testimonials Pipeline.
+The next PRD milestone is Section 11: Promotions & Announcements Banner System.

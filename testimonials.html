@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="See how MK Tintworks handles consultation, film selection, installation standards, and aftercare for automotive, residential, and commercial tinting in Nairobi.">
+  <meta name="description" content="Read approved MK Tintworks customer reviews and submit your own feedback after your automotive, residential, or commercial tinting service in Nairobi.">
   <meta name="theme-color" content="#0D0D0D">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Process & Standards | MK Tintworks Window Tinting Nairobi">
-  <meta property="og:description" content="See how MK Tintworks handles consultation, film selection, installation standards, and aftercare for automotive, residential, and commercial tinting in Nairobi.">
+  <meta property="og:title" content="Client Testimonials | MK Tintworks Window Tinting Nairobi">
+  <meta property="og:description" content="Read approved MK Tintworks customer reviews and submit your own feedback after your automotive, residential, or commercial tinting service in Nairobi.">
   <meta property="og:image" content="https://mktintworks.com/assets/images/og-default.webp">
   <meta property="og:url" content="https://mktintworks.com/testimonials.html">
   <meta property="og:site_name" content="MK Tintworks">
-  <title>Process & Standards | MK Tintworks Window Tinting Nairobi</title>
+  <title>Client Testimonials | MK Tintworks Window Tinting Nairobi</title>
   <link rel="canonical" href="https://mktintworks.com/testimonials.html">
   <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
   <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
@@ -24,15 +24,16 @@
     window.CMS_PAGE_SLUG = "testimonials";
     window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
     window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+    window.CMS_TESTIMONIALS_STATE = window.CMS_TESTIMONIALS_STATE || { testimonials: [], generated_at: null };
   </script>
 </head>
-<body class="standards-page page-hero-standards" data-page="testimonials">
+<body class="testimonials-page page-hero-testimonials" data-page="testimonials">
   <div class="page-glow" aria-hidden="true"></div>
   <div data-site-nav data-active="testimonials"></div>
   <div data-wa-float></div>
   <main id="main-content">
-    <section class="page-hero page-hero-standards" aria-label="Process and standards hero">
-      <div class="page-hero-media" role="img" aria-label="MK Tintworks installation standards and process"></div>
+    <section class="page-hero page-hero-testimonials" aria-label="Testimonials page hero">
+      <div class="page-hero-media" role="img" aria-label="MK Tintworks customer testimonials and review pipeline"></div>
       <div class="page-hero-overlay" aria-hidden="true"></div>
       <div class="container page-hero-content">
         <p class="eyebrow">Testimonials</p>
@@ -48,11 +49,97 @@
           <h2>Approved feedback from the MK Tintworks review pipeline.</h2>
           <p class="lead">Every review shown here is submitted from the website and approved inside the CMS before it goes live.</p>
         </div>
-        <div class="testimonials-strip">
-          <article class="testimonial-card">
+        <div class="testimonials-strip" id="approved-testimonials" aria-live="polite">
+          <article class="testimonial-card glass-card">
             <p>Client reviews will appear here as soon as they are approved in the CMS.</p>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section class="section review-submit" aria-labelledby="submit-heading">
+      <div class="container">
+        <div class="section-header review-submit-intro">
+          <p class="section-kicker">Leave A Review</p>
+          <h2 id="submit-heading">Share your experience with MK Tintworks.</h2>
+          <p class="lead">
+            Honest feedback helps future clients make better decisions. Every review is checked before it appears publicly.
+          </p>
+        </div>
+
+        <form id="review-form" class="review-form glass-card" novalidate>
+          <div class="hp-trap" aria-hidden="true">
+            <input type="text" name="website" id="hp-website" autocomplete="off" tabindex="-1">
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field" data-field="client_name">
+              <label for="reviewer-name">Full Name <span class="req">*</span></label>
+              <input
+                type="text"
+                id="reviewer-name"
+                name="client_name"
+                required
+                maxlength="100"
+                placeholder="Your full name"
+              >
+              <span class="field-error" id="name-error"></span>
+            </div>
+
+            <div class="form-field" data-field="service_type">
+              <label for="service-type">Service Received <span class="req">*</span></label>
+              <select id="service-type" name="service_type" required>
+                <option value="">Select a service</option>
+                <option value="automotive">Automotive Tinting</option>
+                <option value="residential">Residential Tinting</option>
+                <option value="commercial">Commercial Tinting</option>
+              </select>
+              <span class="field-error" id="service-error"></span>
+            </div>
+
+            <div class="form-field full-width" data-field="rating">
+              <label for="s5" class="review-label">
+                <span>Your Rating <span class="req">*</span></span>
+                <span class="rating-hint">Choose 1 to 5 stars</span>
+              </label>
+              <div class="star-rating" role="group" aria-label="Star rating">
+                <input type="radio" id="s5" name="rating" value="5">
+                <label for="s5" title="5 stars - Excellent">★</label>
+                <input type="radio" id="s4" name="rating" value="4">
+                <label for="s4" title="4 stars - Good">★</label>
+                <input type="radio" id="s3" name="rating" value="3">
+                <label for="s3" title="3 stars - Average">★</label>
+                <input type="radio" id="s2" name="rating" value="2">
+                <label for="s2" title="2 stars - Poor">★</label>
+                <input type="radio" id="s1" name="rating" value="1">
+                <label for="s1" title="1 star - Very Poor">★</label>
+              </div>
+              <span class="field-error" id="rating-error"></span>
+            </div>
+
+            <div class="form-field full-width" data-field="review_text">
+              <label for="review-text" class="review-label">
+                <span>Your Review <span class="req">*</span></span>
+                <span class="char-counter" id="review-counter">0 / 1000</span>
+              </label>
+              <textarea
+                id="review-text"
+                name="review_text"
+                required
+                minlength="20"
+                maxlength="1000"
+                rows="5"
+                placeholder="Tell others about your experience with MK Tintworks..."
+              ></textarea>
+              <span class="field-error" id="review-error"></span>
+            </div>
+          </div>
+
+          <div class="review-form-actions">
+            <button type="submit" class="btn-primary" id="submit-review-btn">Submit Review</button>
+            <div id="review-status" class="form-status" role="status" aria-live="polite"></div>
+          </div>
+        </form>
       </div>
     </section>
 
@@ -143,6 +230,7 @@
   <div data-book-cta></div>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/testimonials.js" defer></script>
   <script src="/assets/js/cms-content.js" defer></script>
   <script>
     if (window.location.search.includes("cms_preview=true")) {

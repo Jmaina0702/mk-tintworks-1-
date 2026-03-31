@@ -157,7 +157,28 @@ const fetchBlogState = async () => {
   };
 };
 
-const injectContentState = (html, pageContent, sharedContent, productState) =>
+const fetchTestimonialsState = async () => {
+  const url = new URL(`${apiBase}/api/testimonials/public`);
+  url.searchParams.set("_build", buildStamp);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch testimonials: ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return {
+    testimonials: Array.isArray(payload?.testimonials) ? payload.testimonials : [],
+    generated_at: new Date().toISOString(),
+  };
+};
+
+const injectContentState = (
+  html,
+  pageContent,
+  sharedContent,
+  productState,
+  testimonialsState
+) =>
   html
     .replace(
       /window\.CMS_PAGE_CONTENT = window\.CMS_PAGE_CONTENT \|\| \{\};/,
@@ -170,6 +191,10 @@ const injectContentState = (html, pageContent, sharedContent, productState) =>
     .replace(
       /window\.CMS_PRODUCTS_STATE = window\.CMS_PRODUCTS_STATE \|\| \{ products: \[\], groups: \{ "3m": \[\], llumar: \[\], other: \[\] \}, generated_at: null \};/,
       `window.CMS_PRODUCTS_STATE = ${JSON.stringify(productState)};`
+    )
+    .replace(
+      /window\.CMS_TESTIMONIALS_STATE = window\.CMS_TESTIMONIALS_STATE \|\| \{ testimonials: \[\], generated_at: null \};/,
+      `window.CMS_TESTIMONIALS_STATE = ${JSON.stringify(testimonialsState)};`
     );
 
 const renderBlogCards = (articles) => {
@@ -438,6 +463,10 @@ let galleryState = {
 let blogState = {
   articles: [],
 };
+let testimonialsState = {
+  testimonials: [],
+  generated_at: null,
+};
 let blogStateLoaded = false;
 
 try {
@@ -468,6 +497,15 @@ try {
   console.warn("Blog state fetch failed. Static blog content will remain.", error.message);
 }
 
+try {
+  testimonialsState = await fetchTestimonialsState();
+} catch (error) {
+  console.warn(
+    "Testimonials state fetch failed. Static testimonials content will remain.",
+    error.message
+  );
+}
+
 for (const page of htmlPages) {
   let sourcePath = path.join(root, page.file);
   if (page.file === "blog/index.html") {
@@ -493,7 +531,8 @@ for (const page of htmlPages) {
       nav: navContent,
       footer: footerContent,
     },
-    productState
+    productState,
+    testimonialsState
   ).replace(
     /window\.CMS_GALLERY_STATE = window\.CMS_GALLERY_STATE \|\| \{ images: \[\] \};/,
     `window.CMS_GALLERY_STATE = ${JSON.stringify(galleryState)};`
