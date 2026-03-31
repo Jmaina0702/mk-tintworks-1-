@@ -221,9 +221,6 @@
   const fetchContent = async (slug) => {
     const response = await fetch(buildFreshContentUrl(slug), {
       cache: "no-store",
-      headers: {
-        "Cache-Control": "no-cache",
-      },
     });
 
     if (!response.ok) {

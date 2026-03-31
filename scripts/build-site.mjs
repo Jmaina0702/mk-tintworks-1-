@@ -44,9 +44,6 @@ const fetchContent = async (slug) => {
   url.searchParams.set("_build", buildStamp);
   const response = await fetch(url, {
     cache: "no-store",
-    headers: {
-      "Cache-Control": "no-cache",
-    },
   });
 
   if (!response.ok) {
@@ -62,9 +59,6 @@ const fetchProductState = async () => {
   url.searchParams.set("_build", buildStamp);
   const response = await fetch(url, {
     cache: "no-store",
-    headers: {
-      "Cache-Control": "no-cache",
-    },
   });
 
   if (!response.ok) {
