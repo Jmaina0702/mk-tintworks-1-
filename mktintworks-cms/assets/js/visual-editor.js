@@ -6,6 +6,7 @@
     "https://www.mktintworks.com",
   ]);
   const PREVIEW_ORIGIN_SOURCES = [
+    "/data/section-8-status.json",
     "/data/section-7-status.json",
     "/data/section-6-status.json",
   ];
@@ -287,67 +288,15 @@
     }
   };
 
-  const compressImage = (file, targetKb = 200) =>
-    new Promise((resolve, reject) => {
-      const image = new Image();
-      const url = URL.createObjectURL(file);
+  const compressImage = (...args) => {
+    if (typeof window.compressImage !== "function") {
+      return Promise.reject(
+        new Error("Shared image compression helper is unavailable")
+      );
+    }
 
-      image.onload = () => {
-        URL.revokeObjectURL(url);
-
-        const maxSide = 1920;
-        let { width, height } = image;
-        if (width > maxSide || height > maxSide) {
-          const ratio = Math.min(maxSide / width, maxSide / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext("2d");
-
-        if (!context) {
-          reject(new Error("Canvas is unavailable in this browser"));
-          return;
-        }
-
-        context.drawImage(image, 0, 0, width, height);
-        const targetBytes = targetKb * 1024;
-        let quality = 0.88;
-
-        const attempt = (mimeType) => {
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                if (mimeType === "image/webp") {
-                  attempt("image/jpeg");
-                  return;
-                }
-                reject(new Error("Canvas compression failed"));
-                return;
-              }
-
-              if (blob.size <= targetBytes || quality <= 0.35) {
-                resolve(blob);
-                return;
-              }
-
-              quality -= 0.06;
-              attempt(mimeType);
-            },
-            mimeType,
-            quality
-          );
-        };
-
-        attempt("image/webp");
-      };
-
-      image.onerror = () => reject(new Error("Failed to load image"));
-      image.src = url;
-    });
+    return window.compressImage(...args);
+  };
 
   const renderTextEditor = (key, currentValue) => {
     editPanel.innerHTML = `

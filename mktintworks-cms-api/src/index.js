@@ -78,6 +78,7 @@ const health = (request, env) =>
       public_endpoints: [
         "POST /api/auth/login",
         "POST /api/analytics/event",
+        "GET /api/gallery/public?category=...",
         "GET /api/pages/content?slug=...",
         "GET /api/products/site-data",
         "POST /api/testimonials/submit",

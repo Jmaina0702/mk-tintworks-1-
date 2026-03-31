@@ -1,0 +1,63 @@
+{
+  "section": 8,
+  "title": "Gallery Manager & Image Pipeline",
+  "completed_at": "2026-03-31T19:56:00Z",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "d2a180ae-a2b2-4337-b52d-f107c50ebe32",
+    "verified": {
+      "public_gallery_endpoint": true,
+      "protected_gallery_endpoint_returns_401_without_jwt": true,
+      "protected_upload_endpoint_returns_401_without_jwt": true,
+      "protected_update_endpoint_returns_401_without_jwt": true,
+      "protected_delete_endpoint_returns_401_without_jwt": true,
+      "protected_reorder_endpoint_returns_401_without_jwt": true,
+      "fresh_cache_headers_on_gallery_reads": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://a5897885.mk-tintworks-1.pages.dev",
+    "verified": {
+      "gallery_page_build_injects_gallery_state": true,
+      "runtime_gallery_refresh_hits_public_endpoint": true,
+      "static_fallback_retained_if_api_is_unavailable": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://5d8dd554.mktintworks-cms.pages.dev",
+    "verified": {
+      "gallery_manager_ui_built": true,
+      "shared_compression_helper_reused": true,
+      "upload_zone_drag_drop_click_ready": true,
+      "edit_delete_reorder_flows_implemented": true
+    }
+  },
+  "seed_data": {
+    "remote_gallery_rows_inserted": 10,
+    "all_seed_rows_flagged_placeholder": true,
+    "seed_source": "mktintworks-cms-api/section8-gallery-seed.sql"
+  },
+  "features": {
+    "cms_gallery_manager": true,
+    "client_side_compression_pipeline": true,
+    "webp_first_upload_flow": true,
+    "batch_uploads": true,
+    "caption_management": true,
+    "category_filtering": true,
+    "placeholder_badges": true,
+    "drag_to_reorder": true,
+    "delete_with_best_effort_r2_cleanup": true,
+    "public_gallery_api": true,
+    "build_time_gallery_state_injection": true,
+    "runtime_public_gallery_refresh": true
+  },
+  "notes": [
+    "The initial gallery library was seeded from the current public-site gallery assets so the CMS manager is usable immediately instead of loading an empty grid.",
+    "Seeded gallery rows are marked as placeholders because the current public images are launch visuals rather than confirmed real-job photography.",
+    "Gallery reads now return no-store headers to reduce stale responses in both the CMS manager and the public site runtime refresh path."
+  ]
+}

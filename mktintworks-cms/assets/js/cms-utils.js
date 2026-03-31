@@ -164,6 +164,72 @@
     };
   };
 
+  window.compressImage = (file, targetKb = 200, maxSide = 1920) =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+
+        let { width, height } = image;
+        if (width > maxSide || height > maxSide) {
+          const ratio = Math.min(maxSide / width, maxSide / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("Canvas is unavailable in this browser"));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+
+        const targetBytes = Math.max(1, Number(targetKb || 0)) * 1024;
+        let quality = 0.88;
+
+        const attempt = (mimeType) => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                if (mimeType === "image/webp") {
+                  attempt("image/jpeg");
+                  return;
+                }
+
+                reject(new Error("Canvas compression failed"));
+                return;
+              }
+
+              if (blob.size <= targetBytes || quality <= 0.35) {
+                resolve(blob);
+                return;
+              }
+
+              quality -= 0.06;
+              attempt(mimeType);
+            },
+            mimeType,
+            quality
+          );
+        };
+
+        attempt("image/webp");
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Failed to load image"));
+      };
+      image.src = objectUrl;
+    });
+
   window.statusBadge = (status) => {
     const key = String(status || "neutral").toLowerCase();
     const tone = statusToneMap[key] || "neutral";

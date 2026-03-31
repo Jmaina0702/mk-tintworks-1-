@@ -23,6 +23,7 @@ const PUBLIC_SITE_ORIGINS = new Set([
 
 const PUBLIC_ENDPOINTS = new Set([
   "/api/analytics/event",
+  "/api/gallery/public",
   "/api/pages/content",
   "/api/products/site-data",
   "/api/testimonials/submit",

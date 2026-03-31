@@ -1,9 +1,9 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 6.
-It includes the Cloudflare-authenticated admin entry page, dashboard,
-all Phase 1 module routes, the shared design system, and the live visual
-editor that talks to the Worker-backed page-content API.
+This directory now holds the CMS implementation through PRD Section 8.
+It contains the Access-protected admin shell, shared CMS design system,
+Worker-backed module clients, the live visual editor, the products manager,
+and the gallery manager with client-side image compression.
 
 ## Current structure
 
@@ -12,43 +12,43 @@ editor that talks to the Worker-backed page-content API.
 - `dashboard.html`
   Main admin landing page with links into every Phase 1 module.
 - `pages/`
-  All module routes, including the Section 6 visual editor workspace.
+  All CMS routes, including the visual editor, products manager, and gallery manager.
 - `assets/css/`
-  Shared design tokens, layout, sidebar, components, tables, forms, badges,
-  modals, toasts, and animation files.
+  Shared design tokens and shell styles plus module-specific additions such as `cms-gallery.css`.
 - `assets/js/`
-  Auth helper, shared UI/bootstrap utilities, auth gateway logic, dashboard,
-  one script per module page, and the visual-editor client.
+  Auth bootstrap, shared UI helpers, same-origin API usage, and one script per CMS module.
+- `functions/api/[[path]].js`
+  Pages Function proxy that forwards `/api/*` requests from the CMS origin to the Worker.
 - `assets/images/`
-  CMS logo plus the copied M-Pesa and Equity logos requested for later payment
-  and document flows.
+  CMS logo and supporting brand assets used by later operations modules.
 - `data/`
-  Section baseline and status files from earlier PRD work.
+  Section baseline and status files, now including Section 8 delivery state.
 
-## What Section 6 adds
+## What Sections 6-8 add
 
-- The iframe-based visual editor at `pages/visual-editor.html`.
-- Same-origin-friendly CMS auth/API bootstrapping for an Access-protected admin host.
-- A Pages Function proxy at `functions/api/[[path]].js` so CMS requests can stay on the same origin while forwarding to the Worker.
-- Public-site preview overlay messaging via `cms-preview-overlay.js`.
-- Worker-backed `GET /api/pages/content`, `POST /api/pages/update`, and image upload wiring.
-- A root-site build pipeline that injects `window.CMS_PAGE_CONTENT` and `window.CMS_SHARED_CONTENT` into the website output.
+- Section 6:
+  Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
+- Section 7:
+  Products manager, discount CRUD, public product hydration, and scheduled discount transitions.
+- Section 8:
+  Gallery manager UI, shared `compressImage()` reuse, drag-and-drop uploads, edit/delete/reorder flows, a public gallery endpoint, and gallery-state injection into the website build.
 
-## What still comes later
+## Runtime model
 
-- Real D1-backed listing and save flows for each module.
-- Deeper CRUD flows beyond the visual editor for products, blog, testimonials, and records.
-- PDF generation for invoices and warranties.
-- Approval workflows, richer publishing controls, and reporting depth.
+- CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
+- CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
+- The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
+- The public website is still a static site, but Sections 6-8 now inject live state at build time and refresh selected modules at runtime.
 
 ## Deployment note
 
-The CMS login exchange is designed to work when the Worker is reachable through
-the same Access-protected admin origin. The local code now stops hardcoding the
-raw Worker URL in page templates, and the CMS project includes a Pages Function
-proxy for `/api/*`, so a host such as `https://admin.mktintworks.com` or the
-Pages domain can keep auth and API traffic same-origin while forwarding to the
-Worker.
+The main production flow is:
 
-For the public website build, use `npm run build` from the repo root and deploy
-the generated `dist/` directory.
+- Deploy the Worker from `mktintworks-cms-api/`
+- Build the public site from the repo root with `npm run build`
+- Deploy `dist/` to the `mk-tintworks-1` Pages project
+- Deploy `mktintworks-cms/` to the `mktintworks-cms` Pages project
+
+The Access-protected admin hostname should remain the real CMS entry point so auth
+and API requests stay same-origin before the Pages Function proxy forwards them to
+the Worker.

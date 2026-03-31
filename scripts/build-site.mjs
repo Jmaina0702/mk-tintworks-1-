@@ -99,6 +99,9 @@ let productState = {
   groups: { "3m": [], llumar: [], other: [] },
   generated_at: null,
 };
+let galleryState = {
+  images: [],
+};
 
 try {
   [navContent, footerContent] = await Promise.all([
@@ -113,6 +116,18 @@ try {
   productState = await fetchProductState();
 } catch (error) {
   console.warn("Product state fetch failed. Static product content will remain.", error.message);
+}
+
+try {
+  const url = new URL(`${apiBase}/api/gallery/public`);
+  url.searchParams.set("_build", buildStamp);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch gallery: ${response.status}`);
+  }
+  galleryState = await response.json();
+} catch (error) {
+  console.warn("Gallery state fetch failed. Static gallery content will remain.", error.message);
 }
 
 for (const page of htmlPages) {
@@ -136,6 +151,9 @@ for (const page of htmlPages) {
       footer: footerContent,
     },
     productState
+  ).replace(
+    /window\.CMS_GALLERY_STATE = window\.CMS_GALLERY_STATE \|\| \{ images: \[\] \};/,
+    `window.CMS_GALLERY_STATE = ${JSON.stringify(galleryState)};`
   );
   await writeFile(filePath, nextHtml);
 }

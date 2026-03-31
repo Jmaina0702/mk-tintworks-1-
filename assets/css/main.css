@@ -1612,6 +1612,14 @@ body.light .launch-meta {
   display: none;
 }
 
+.gallery-empty-state {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: 48px 24px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
 .lightbox {
   position: fixed;
   inset: 0;
