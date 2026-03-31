@@ -1,0 +1,41 @@
+.cms-toast-stack {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 90;
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.cms-toast {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--border-weak);
+  border-radius: 14px;
+  background: rgba(17, 17, 17, 0.96);
+  box-shadow: var(--shadow-md);
+  animation: toast-in 0.32s ease both;
+}
+
+.cms-toast[data-type="success"] {
+  border-color: rgba(57, 194, 121, 0.24);
+}
+
+.cms-toast[data-type="error"] {
+  border-color: rgba(234, 92, 101, 0.28);
+}
+
+.cms-toast[data-type="warning"] {
+  border-color: rgba(255, 179, 71, 0.24);
+}
+
+.cms-toast strong {
+  font-size: 0.92rem;
+}
+
+.cms-toast span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}

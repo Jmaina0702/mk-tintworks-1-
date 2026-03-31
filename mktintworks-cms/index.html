@@ -3,255 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MK Tintworks CMS bootstrap for PRD Section 1: architecture, scope, seed data, and current-site audit.">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0D0D0D">
-  <title>MK Tintworks CMS Bootstrap | Section 1</title>
+  <title>MK Tintworks CMS Access</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="./assets/css/cms.css">
+  <link rel="stylesheet" href="/assets/css/cms-variables.css">
+  <link rel="stylesheet" href="/assets/css/cms-reset.css">
+  <link rel="stylesheet" href="/assets/css/cms-layout.css">
+  <link rel="stylesheet" href="/assets/css/cms-sidebar.css">
+  <link rel="stylesheet" href="/assets/css/cms-components.css">
+  <link rel="stylesheet" href="/assets/css/cms-tables.css">
+  <link rel="stylesheet" href="/assets/css/cms-modals.css">
+  <link rel="stylesheet" href="/assets/css/cms-toasts.css">
+  <link rel="stylesheet" href="/assets/css/cms-forms.css">
+  <link rel="stylesheet" href="/assets/css/cms-badges.css">
+  <link rel="stylesheet" href="/assets/css/cms-animations.css">
 </head>
-<body>
-  <div class="page-glow" aria-hidden="true"></div>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <div>
-        <p class="eyebrow">MK Tintworks CMS</p>
-        <h1>Section 1 bootstrap locked.</h1>
-      </div>
-      <a class="pill-link" href="./data/section-1-baseline.json">Open Baseline JSON</a>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="hero-card">
-      <div class="hero-copy">
-        <p class="eyebrow">Project Overview</p>
-        <h2>Custom CMS foundation for a two-repository Cloudflare architecture.</h2>
+<body class="cms-auth-page">
+  <div class="auth-shell">
+    <section class="hero-banner">
+      <div class="content-cluster">
+        <span class="eyebrow">Cloudflare Access + JWT</span>
+        <h2>Enter the MK Tintworks CMS without exposing the public website.</h2>
         <p>
-          This bootstrap captures the non-negotiable parts of PRD Section 1:
-          the module inventory, the public website versus CMS split, the Cloudflare
-          stack, the editable page surface map, and the seed product catalog.
+          This gateway exchanges the Cloudflare Access assertion for a short-lived CMS token,
+          then routes you into the admin panel. No password form lives in source control.
         </p>
       </div>
-      <div class="hero-status">
-        <span class="status-chip">Bootstrap Only</span>
-        <p>No auth, API, D1, R2, KV, or Access wiring has been added yet.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" id="auth-action" type="button">Retry Access Check</button>
       </div>
     </section>
 
-    <section class="stats-grid" aria-label="Bootstrap summary">
-      <article class="stat-card">
-        <span class="stat-value">14</span>
-        <span class="stat-label">Phase 1 modules</span>
-      </article>
-      <article class="stat-card">
-        <span class="stat-value">10</span>
-        <span class="stat-label">Seed products</span>
-      </article>
-      <article class="stat-card">
-        <span class="stat-value">7</span>
-        <span class="stat-label">Controlled page groups</span>
-      </article>
-      <article class="stat-card">
-        <span class="stat-value">4</span>
-        <span class="stat-label">Current-state gaps frozen</span>
-      </article>
-    </section>
-
-    <section class="panel-grid">
-      <article class="panel">
-        <p class="eyebrow">Three Layers</p>
-        <h3>Architecture</h3>
-        <div class="stack-list">
-          <div class="stack-card">
-            <strong>Layer 1</strong>
-            <h4>Public Website</h4>
-            <p>Static HTML/CSS/JS. Reads structured content at build time and uses real-time reads only where PRD requires it.</p>
-          </div>
-          <div class="stack-card">
-            <strong>Layer 2</strong>
-            <h4>CMS Admin Panel</h4>
-            <p>Separate application at `admin.mktintworks.com`, visually aligned with the website and protected by Cloudflare Access.</p>
-          </div>
-          <div class="stack-card">
-            <strong>Layer 3</strong>
-            <h4>Worker API</h4>
-            <p>Cloudflare Worker for auth, D1 writes, R2 uploads, Workers AI calls, PDF generation, analytics, and deploy hooks.</p>
-          </div>
+    <div class="auth-grid">
+      <section class="auth-card">
+        <img class="auth-logo" src="/assets/images/cms-logo-dark.png" alt="MK Tintworks logo">
+        <div class="content-cluster">
+          <span class="eyebrow">Admin Entry</span>
+          <h1>Premium control room for content, sales, and client documents.</h1>
+          <p>
+            Section 5 sets the shell: responsive navigation, design tokens, shared components,
+            protected page templates, and the module surfaces needed for later CRUD work.
+          </p>
         </div>
-      </article>
+        <aside>
+          <strong>What this page expects</strong>
+          <p>Cloudflare Access should already be protecting this CMS origin or route.</p>
+          <p>The Worker login exchange runs against the live admin API and stores the JWT in local storage.</p>
+        </aside>
+      </section>
 
-      <article class="panel">
-        <p class="eyebrow">Repository Split</p>
-        <h3>Website and CMS stay independent.</h3>
-        <div class="repo-grid">
-          <div class="repo-card">
-            <strong>Repo 1</strong>
-            <h4>mktintworks-website</h4>
-            <p>Public site files, Pages deployment, rebuild-on-content-save workflow.</p>
-          </div>
-          <div class="repo-card">
-            <strong>Repo 2</strong>
-            <h4>mktintworks-cms</h4>
-            <p>Admin interface and CMS-side logic, deployed separately so CMS code changes never redeploy the public site.</p>
-          </div>
+      <section class="auth-status-card">
+        <span class="eyebrow">Session Status</span>
+        <h3 id="auth-status">Preparing secure entry</h3>
+        <p id="auth-detail">The CMS is about to request a fresh worker token for this browser.</p>
+        <div class="surface-note">
+          <strong>If this fails</strong>
+          Confirm that Cloudflare Access is active on the CMS URL and that the Worker is reachable through the same protected route.
         </div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <p class="eyebrow">Core Principles</p>
-      <h3>Section 1 rules that cannot drift later.</h3>
-      <div class="principles-grid">
-        <article class="mini-card">
-          <h4>A child could use it</h4>
-          <p>Plain-English labels, obvious actions, zero hidden complexity.</p>
-        </article>
-        <article class="mini-card">
-          <h4>Premium feel</h4>
-          <p>Same colors, fonts, and visual quality as the MK Tintworks website.</p>
-        </article>
-        <article class="mini-card">
-          <h4>Zero monthly cost</h4>
-          <p>Cloudflare free-tier-first stack with no paid SaaS dependencies.</p>
-        </article>
-        <article class="mini-card">
-          <h4>Fast</h4>
-          <p>Website updates target the 20-30 second post-save window defined in the PRD.</p>
-        </article>
-        <article class="mini-card">
-          <h4>Secure</h4>
-          <p>Cloudflare Access at the edge plus API-level JWT checks on every protected endpoint.</p>
-        </article>
-        <article class="mini-card">
-          <h4>Mobile-capable</h4>
-          <p>Admin layout must remain usable on a phone, not just on a laptop.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <p class="eyebrow">Phase 1 Scope</p>
-          <h3>All 14 modules are in scope.</h3>
+        <div class="surface-note">
+          <strong>What gets stored</strong>
+          Only the CMS JWT and its expiry timestamp are stored in the browser. Secrets stay in Cloudflare.
         </div>
-        <a class="pill-link" href="./data/modules.json">Open modules.json</a>
-      </div>
-      <div class="module-grid">
-        <article class="module-card high"><h4>Visual Editor</h4><span>High</span></article>
-        <article class="module-card"><h4>Products Manager</h4><span>Medium</span></article>
-        <article class="module-card high"><h4>Discount System</h4><span>High</span></article>
-        <article class="module-card"><h4>Gallery Manager</h4><span>Medium</span></article>
-        <article class="module-card high"><h4>Blog System</h4><span>High</span></article>
-        <article class="module-card"><h4>Testimonials Pipeline</h4><span>Medium</span></article>
-        <article class="module-card"><h4>Promotions Banner</h4><span>Medium</span></article>
-        <article class="module-card low"><h4>Media Library</h4><span>Low</span></article>
-        <article class="module-card low"><h4>SEO Manager</h4><span>Low</span></article>
-        <article class="module-card"><h4>Analytics Dashboard</h4><span>Medium</span></article>
-        <article class="module-card high"><h4>Invoice Generator</h4><span>High</span></article>
-        <article class="module-card high"><h4>Warranty Generator</h4><span>High</span></article>
-        <article class="module-card"><h4>Records System</h4><span>Medium</span></article>
-        <article class="module-card"><h4>Sales Dashboard</h4><span>Medium</span></article>
-      </div>
-    </section>
+      </section>
+    </div>
+  </div>
 
-    <section class="panel-grid">
-      <article class="panel">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">Editable Surface Map</p>
-            <h3>Seven page groups are mapped.</h3>
-          </div>
-          <a class="pill-link" href="./data/content-map.json">Open content-map.json</a>
-        </div>
-        <div class="page-grid">
-          <article class="page-card">
-            <h4>Home + About</h4>
-            <p>Hero, trust bar, about block, service cards, gallery preview, approach content.</p>
-          </article>
-          <article class="page-card">
-            <h4>Services</h4>
-            <p>Product collection, residential and commercial content, NTSA guidance, FAQ.</p>
-          </article>
-          <article class="page-card">
-            <h4>Gallery</h4>
-            <p>Hero copy plus gallery collection management.</p>
-          </article>
-          <article class="page-card">
-            <h4>Testimonials</h4>
-            <p>Hero copy, approved reviews, and process standards content.</p>
-          </article>
-          <article class="page-card">
-            <h4>Blog</h4>
-            <p>Blog listing hero plus article collection and individual posts.</p>
-          </article>
-          <article class="page-card">
-            <h4>Book Now</h4>
-            <p>Hero copy, CTA band, contact block, and form labels.</p>
-          </article>
-          <article class="page-card missing">
-            <h4>404 Error</h4>
-            <p>Planned in PRD, currently missing from the website repo and logged as a gap.</p>
-          </article>
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">Seed Catalog</p>
-            <h3>Authoritative product pricing captured.</h3>
-          </div>
-          <a class="pill-link" href="./data/products.seed.json">Open products.seed.json</a>
-        </div>
-        <div class="product-preview">
-          <div class="product-row"><span>3M Crystalline</span><strong>KSh 95,000</strong></div>
-          <div class="product-row"><span>3M Ceramic IR</span><strong>KSh 63,000</strong></div>
-          <div class="product-row"><span>3M Color Stable IR</span><strong>KSh 40,000</strong></div>
-          <div class="product-row"><span>3M Obsidian</span><strong>KSh 15,000</strong></div>
-          <div class="product-row"><span>Llumar IRX</span><strong>KSh 50,000</strong></div>
-          <div class="product-row"><span>Llumar CTX</span><strong>KSh 45,000</strong></div>
-          <div class="product-row"><span>Llumar ATR</span><strong>KSh 30,000</strong></div>
-          <div class="product-row"><span>Llumar ATC Grey</span><strong>KSh 20,000</strong></div>
-          <div class="product-row"><span>Llumar Black Series</span><strong>KSh 12,000</strong></div>
-          <div class="product-row"><span>Chameleon</span><strong>KSh 28,800</strong></div>
-        </div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <p class="eyebrow">Current Website Audit</p>
-      <h3>Known gaps captured before infrastructure work.</h3>
-      <div class="audit-grid">
-        <article class="audit-card">
-          <h4>Missing 404 page</h4>
-          <p>`404.html` is in PRD scope but not present in the current website repo.</p>
-        </article>
-        <article class="audit-card">
-          <h4>Broken blog references</h4>
-          <p>`blog/index.html` references two article files that do not exist in the current repo.</p>
-        </article>
-        <article class="audit-card">
-          <h4>Testimonials still static</h4>
-          <p>The testimonials page is wired for future CMS data but currently renders placeholder copy only.</p>
-        </article>
-        <article class="audit-card">
-          <h4>No backend yet</h4>
-          <p>The public website currently has no D1, R2, KV, Worker API, or admin panel integration.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel callout">
-      <p class="eyebrow">Section 2 Ready</p>
-      <h3>This foundation is ready for Cloudflare setup and schema work.</h3>
-      <p>
-        The next section can wire Pages, Workers, D1, KV, R2, Access, and deploy hooks
-        against a fixed content map and seed set instead of restarting architecture discussions.
-      </p>
-    </section>
-  </main>
+  <script>
+    window.MKT_CMS_CONFIG = {
+      autoAuth: false
+    };
+  </script>
+  <script src="/assets/js/cms-core.js" defer></script>
+  <script src="/assets/js/cms-ui.js" defer></script>
+  <script src="/assets/js/cms-utils.js" defer></script>
+  <script src="/assets/js/auth-gateway.js" defer></script>
 </body>
 </html>

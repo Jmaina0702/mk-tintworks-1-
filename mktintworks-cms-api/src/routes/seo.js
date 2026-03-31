@@ -1,1 +1,5 @@
-// Filled in by later PRD sections.
+import { createProtectedPlaceholderHandler } from "./protected.js";
+
+export const handleSeoRequest = createProtectedPlaceholderHandler(
+  "SEO manager"
+);

@@ -1,0 +1,64 @@
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.table-search {
+  width: min(320px, 100%);
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--border-weak);
+  border-radius: var(--card-radius);
+}
+
+.data-table {
+  min-width: 640px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  padding: 14px 16px;
+  background: rgba(13, 13, 13, 0.96);
+  color: var(--text-faint);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.data-table tbody td {
+  padding: 15px 16px;
+  border-top: 1px solid var(--border-weak);
+  color: var(--text-soft);
+  vertical-align: top;
+}
+
+.data-table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.data-table tbody td strong {
+  color: var(--text);
+}
+
+.table-empty {
+  display: none;
+  padding: 14px 0 0;
+  color: var(--text-faint);
+}
+
+.table-empty.is-visible {
+  display: block;
+}

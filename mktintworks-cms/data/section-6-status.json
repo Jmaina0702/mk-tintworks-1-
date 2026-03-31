@@ -1,0 +1,79 @@
+{
+  "section": 6,
+  "sectionTitle": "Visual Editor Module",
+  "capturedOn": "2026-03-31",
+  "worker": {
+    "deployed": true,
+    "workerUrl": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "versionId": "e0829360-6ed4-4d7e-90bd-566dd8b9f011",
+    "routes": {
+      "publicPageContent": "GET /api/pages/content?slug=...",
+      "protectedPageUpdate": "POST /api/pages/update",
+      "protectedImageUpload": "POST /api/media/upload-image"
+    },
+    "migrationApplied": "section6-pages-content-type.sql",
+    "mediaPublicBaseUrl": "https://pub-0252224d03e4472da062ccdc92c2482f.r2.dev"
+  },
+  "cmsApp": {
+    "protectedAdminUrl": "https://admin.mktintworks-cms.pages.dev",
+    "productionUrl": "https://mktintworks-cms.pages.dev",
+    "previewDeploymentUrl": "https://461fe8a6.mktintworks-cms.pages.dev",
+    "visualEditorPage": "mktintworks-cms/pages/visual-editor.html",
+    "sameOriginApiReady": true,
+    "sameOriginApiProxyFunction": "mktintworks-cms/functions/api/[[path]].js",
+    "hardcodedWorkerUrlsRemovedFromHtml": true,
+    "previewIframeAllowedByCsp": true,
+    "editablePageOptions": [
+      "home",
+      "services",
+      "gallery",
+      "testimonials",
+      "book",
+      "blog",
+      "blog-3m-vs-llumar-kenya",
+      "blog-ntsa-tint-regulations-kenya-2026",
+      "404"
+    ]
+  },
+  "publicWebsite": {
+    "productionPagesUrl": "https://mk-tintworks-1.pages.dev",
+    "previewDeploymentUrl": "https://406c7470.mk-tintworks-1.pages.dev",
+    "buildScript": "npm run build",
+    "buildOutputDir": "dist",
+    "overlayScript": "cms-preview-overlay.js",
+    "runtimeHydrationScript": "assets/js/cms-content.js",
+    "iframeEmbeddable": true,
+    "pagesTaggedForEditing": [
+      "index.html",
+      "services.html",
+      "gallery.html",
+      "testimonials.html",
+      "book.html",
+      "blog/index.html",
+      "blog/3m-vs-llumar-kenya.html",
+      "blog/ntsa-tint-regulations-kenya-2026.html",
+      "404.html"
+    ]
+  },
+  "verification": {
+    "nodeCheckPassed": true,
+    "siteBuildPassed": true,
+    "healthStatus": 200,
+    "pageContentStatus": 200,
+    "protectedUpdateWithoutJwtStatus": 401,
+    "protectedUploadWithoutJwtStatus": 401,
+    "cmsPreflightStatus": 204,
+    "publicCorsStatus": 200,
+    "cmsPagesProxyHealthStatus": 200,
+    "cmsPagesProxyContentStatus": 200,
+    "publicPagesPreviewStatus": 200
+  },
+  "notes": [
+    "The live public page-content endpoint currently returns empty objects for slugs that have not yet been edited, which is expected because the website HTML still provides the default source copy until the CMS stores overrides.",
+    "The CMS HTML pages no longer hardcode the raw Worker URL, and the CMS Pages project now includes a same-origin /api proxy function that forwards requests to the Worker.",
+    "The public site now auto-tags a much broader set of first-party text elements at runtime so the visual editor can reach well beyond the original hero-only fields while preserving the explicit PRD keys already added by hand.",
+    "The public Pages project was deployed from the generated dist/ output, and the stable Pages hostname serves the embeddable headers plus the CMS preview scripts.",
+    "Cloudflare Access is active on https://admin.mktintworks-cms.pages.dev, so that host should be used as the real admin entry point instead of the unprotected mktintworks-cms.pages.dev hostname.",
+    "The custom domain https://mktintworks.com could not be DNS-resolved from this shell during verification, so live-domain confirmation used the production Pages hostname instead."
+  ]
+}

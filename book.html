@@ -20,6 +20,11 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/animations.css">
+  <script>
+    window.CMS_PAGE_SLUG = "book";
+    window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
+    window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -40,8 +45,8 @@
       <div class="page-hero-overlay" aria-hidden="true"></div>
       <div class="container page-hero-content">
         <p class="eyebrow">Book Now</p>
-        <h1>Professional tinting, scheduled cleanly.</h1>
-        <p>Send your request once and the site will route it to email while preparing your WhatsApp message, so there is no friction in the booking process.</p>
+        <h1 data-cms-key="book:hero_heading" data-cms-type="text">Professional tinting, scheduled cleanly.</h1>
+        <p data-cms-key="book:hero_subtext" data-cms-type="text">Send your request once and the site will route it to email while preparing your WhatsApp message, so there is no friction in the booking process.</p>
       </div>
     </section>
 
@@ -57,7 +62,7 @@
       <div class="container">
         <div class="section-header">
           <p class="section-kicker">Appointment Request</p>
-          <h2>Tell us what you need and when you need it.</h2>
+          <h2 data-cms-key="book:contact_heading" data-cms-type="text">Tell us what you need and when you need it.</h2>
           <p class="lead">This launch build focuses on accurate lead capture, clean validation, and a premium user flow. Your request goes to email and then opens WhatsApp so you can complete the message immediately.</p>
         </div>
         <div class="book-layout">
@@ -156,7 +161,16 @@
   </main>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms-content.js" defer></script>
   <script src="/assets/js/booking.js" defer></script>
+  <script>
+    if (window.location.search.includes("cms_preview=true")) {
+      var cmsPreviewScript = document.createElement("script");
+      cmsPreviewScript.src = "/cms-preview-overlay.js";
+      cmsPreviewScript.defer = true;
+      document.head.appendChild(cmsPreviewScript);
+    }
+  </script>
   <script>
     (function loadTawk() {
       const load = () => {

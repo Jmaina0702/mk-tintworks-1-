@@ -20,6 +20,11 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/animations.css">
+  <script>
+    window.CMS_PAGE_SLUG = "home";
+    window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
+    window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -65,15 +70,15 @@
   <div data-wa-float></div>
   <main id="main-content">
     <section class="hero" id="hero" aria-label="Hero — MK Tintworks">
-      <div class="hero-media" role="img" aria-label="Premium automotive window tinting in Nairobi"></div>
+      <div class="hero-media" role="img" aria-label="Premium automotive window tinting in Nairobi" data-cms-key="home:hero_image" data-cms-type="image"></div>
       <div class="hero-overlay" aria-hidden="true"></div>
       <div class="container hero-content">
         <p class="eyebrow">MK Tintworks</p>
-        <h1>Tint with Precision,<br>Drive with Confidence.</h1>
-        <p class="hero-copy">MK Tintworks is built on precision, professionalism, and trust. We provide high-quality window tinting solutions for vehicles, homes, and commercial spaces, using genuine premium films installed by skilled technicians who care about the details. Every project is handled with the same standard&#8212;clean workmanship, honest pricing, and results that last. From heat protection and privacy to refined aesthetics, we don&#8217;t just apply tint; we deliver confidence in every space.</p>
+        <h1 data-cms-key="home:hero_headline" data-cms-type="html">Tint with Precision,<br>Drive with Confidence.</h1>
+        <p class="hero-copy" data-cms-key="home:hero_body" data-cms-type="text">MK Tintworks is built on precision, professionalism, and trust. We provide high-quality window tinting solutions for vehicles, homes, and commercial spaces, using genuine premium films installed by skilled technicians who care about the details. Every project is handled with the same standard&#8212;clean workmanship, honest pricing, and results that last. From heat protection and privacy to refined aesthetics, we don&#8217;t just apply tint; we deliver confidence in every space.</p>
         <div class="hero-actions">
-          <a href="/book.html" class="btn-primary">Book Now</a>
-          <a href="/services.html" class="btn-ghost">Explore Services</a>
+          <a href="/book.html" class="btn-primary" data-cms-key="home:hero_cta_primary" data-cms-type="link">Book Now</a>
+          <a href="/services.html" class="btn-ghost" data-cms-key="home:hero_cta_secondary" data-cms-type="link">Explore Services</a>
         </div>
       </div>
       <div class="scroll-indicator" aria-hidden="true">
@@ -86,18 +91,23 @@
         <div class="trust-grid">
           <div class="trust-item" data-reveal data-reveal-delay="1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 2.8 7.9 7 10 4.2-2.1 7-5.5 7-10V6l-7-3Z"></path><path d="m9.5 12 1.7 1.7 3.8-3.8"></path></svg>
-            <p class="trust-stat">Authorized</p>
-            <p class="trust-label">3M &amp; Llumar Certified Installer</p>
+            <p class="trust-stat" data-cms-key="home:trust_stat_1" data-cms-type="text">Authorized</p>
+            <p class="trust-label" data-cms-key="home:trust_label_1" data-cms-type="text">3M &amp; Llumar Certified Installer</p>
           </div>
           <div class="trust-item" data-reveal data-reveal-delay="2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 9h10M7 13h7"></path></svg>
-            <p class="trust-stat">Premium</p>
-            <p class="trust-label">Genuine Films Only — No Generics</p>
+            <p class="trust-stat" data-cms-key="home:trust_stat_2" data-cms-type="text">Premium</p>
+            <p class="trust-label" data-cms-key="home:trust_label_2" data-cms-type="text">Genuine Films Only — No Generics</p>
           </div>
           <div class="trust-item" data-reveal data-reveal-delay="3">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 21s6-5 6-11a6 6 0 1 0-12 0c0 6 6 11 6 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
-            <p class="trust-stat">Nairobi-Wide</p>
-            <p class="trust-label">Mobile Service — We Come to You</p>
+            <p class="trust-stat" data-cms-key="home:trust_stat_3" data-cms-type="text">Nairobi-Wide</p>
+            <p class="trust-label" data-cms-key="home:trust_label_3" data-cms-type="text">Mobile Service — We Come to You</p>
+          </div>
+          <div class="trust-item" data-reveal data-reveal-delay="4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12h16"></path><path d="M12 4v16"></path></svg>
+            <p class="trust-stat" data-cms-key="home:trust_stat_4" data-cms-type="text">Factory-Clean</p>
+            <p class="trust-label" data-cms-key="home:trust_label_4" data-cms-type="text">Dust-aware prep and neat finishing on every install</p>
           </div>
         </div>
       </div>
@@ -107,11 +117,11 @@
       <div class="container">
         <div class="section-header">
           <p class="section-kicker">About Us</p>
-          <h2>Precision-led window tinting for vehicles, homes, and commercial spaces.</h2>
+          <h2 data-cms-key="home:about_heading" data-cms-type="text">Precision-led window tinting for vehicles, homes, and commercial spaces.</h2>
         </div>
         <div class="about-grid">
           <div class="about-copy-card glass-card" data-reveal>
-            <p class="lead">MK Tintworks is built on precision, professionalism, and trust. We provide high-quality window tinting solutions for vehicles, homes, and commercial spaces, using genuine premium films installed by skilled technicians who care about the details. Every project is handled with the same standard&#8212;clean workmanship, honest pricing, and results that last. From heat protection and privacy to refined aesthetics, we don&#8217;t just apply tint; we deliver confidence in every space.</p>
+            <p class="lead" data-cms-key="home:brand_statement" data-cms-type="text">MK Tintworks is built on precision, professionalism, and trust. We provide high-quality window tinting solutions for vehicles, homes, and commercial spaces, using genuine premium films installed by skilled technicians who care about the details. Every project is handled with the same standard&#8212;clean workmanship, honest pricing, and results that last. From heat protection and privacy to refined aesthetics, we don&#8217;t just apply tint; we deliver confidence in every space.</p>
             <div class="divider"></div>
             <div class="stats-grid">
               <div class="metric-card">
@@ -142,21 +152,21 @@
         <div class="about-services" style="margin-top:32px;">
           <article class="service-card" data-reveal>
             <div class="service-card-media">
-                <img src="/assets/images/about/automotive-service.webp" alt="Automotive window tinting service by MK Tintworks in Nairobi" loading="lazy" decoding="async" width="520" height="390">
+                <img src="/assets/images/about/automotive-service.webp" alt="Automotive window tinting service by MK Tintworks in Nairobi" loading="lazy" decoding="async" width="520" height="390" data-cms-key="home:auto_card_image" data-cms-type="image">
             </div>
             <div class="service-card-body">
-              <h3>Automotive Window Tinting</h3>
-              <p>We offer professional automotive window tinting designed for performance, comfort, and refined aesthetics. Using genuine premium films from trusted brands, our installations are carried out with precision by skilled technicians who understand both the craft and the standards required. From entry-level tints to advanced ceramic and nano-ceramic solutions, every vehicle is treated with care, consistency, and attention to detail&#8212;delivering heat reduction, UV protection, privacy, and a clean factory-grade finish.</p>
+              <h3 data-cms-key="home:auto_card_heading" data-cms-type="text">Automotive Window Tinting</h3>
+              <p data-cms-key="home:auto_card_body" data-cms-type="text">We offer professional automotive window tinting designed for performance, comfort, and refined aesthetics. Using genuine premium films from trusted brands, our installations are carried out with precision by skilled technicians who understand both the craft and the standards required. From entry-level tints to advanced ceramic and nano-ceramic solutions, every vehicle is treated with care, consistency, and attention to detail&#8212;delivering heat reduction, UV protection, privacy, and a clean factory-grade finish.</p>
               <a class="section-link" href="/services.html#automotive">Explore Automotive Options</a>
             </div>
           </article>
           <article class="service-card service-card-reverse" data-reveal>
             <div class="service-card-media">
-                <img src="/assets/images/products/llumar-ctx.webp" alt="Architectural window tinting installation on office glass by MK Tintworks" loading="lazy" decoding="async" width="520" height="390">
+                <img src="/assets/images/products/llumar-ctx.webp" alt="Architectural window tinting installation on office glass by MK Tintworks" loading="lazy" decoding="async" width="520" height="390" data-cms-key="home:res_card_image" data-cms-type="image">
             </div>
             <div class="service-card-body">
-              <h3>Residential &amp; Commercial Window Tinting</h3>
-              <p>Our residential and commercial window tinting solutions are tailored to improve comfort, efficiency, and privacy across living and working spaces. We install high-quality architectural films that help reduce heat, glare, and UV exposure while maintaining natural light and a clean appearance. Whether it&#8217;s a home, office, or commercial property, we approach every project with professionalism, clear communication, and long-term performance in mind&#8212;ensuring results that add value and last.</p>
+              <h3 data-cms-key="home:res_card_heading" data-cms-type="text">Residential &amp; Commercial Window Tinting</h3>
+              <p data-cms-key="home:res_card_body" data-cms-type="text">Our residential and commercial window tinting solutions are tailored to improve comfort, efficiency, and privacy across living and working spaces. We install high-quality architectural films that help reduce heat, glare, and UV exposure while maintaining natural light and a clean appearance. Whether it&#8217;s a home, office, or commercial property, we approach every project with professionalism, clear communication, and long-term performance in mind&#8212;ensuring results that add value and last.</p>
               <a class="section-link" href="/services.html#residential">Explore Architectural Tinting</a>
             </div>
           </article>
@@ -217,6 +227,15 @@
   <div data-book-cta></div>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms-content.js" defer></script>
+  <script>
+    if (window.location.search.includes("cms_preview=true")) {
+      var cmsPreviewScript = document.createElement("script");
+      cmsPreviewScript.src = "/cms-preview-overlay.js";
+      cmsPreviewScript.defer = true;
+      document.head.appendChild(cmsPreviewScript);
+    }
+  </script>
   <script>
     (function loadTawk() {
       const load = () => {

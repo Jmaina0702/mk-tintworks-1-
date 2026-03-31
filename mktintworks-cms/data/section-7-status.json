@@ -1,0 +1,55 @@
+{
+  "section": 7,
+  "title": "Products Manager & Discount System",
+  "completed_at": "2026-03-31T17:30:00Z",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "206d88e0-db2a-4f5f-8027-043523231b79",
+    "verified": {
+      "public_site_data_endpoint": true,
+      "protected_products_endpoint_returns_401_without_jwt": true,
+      "protected_discount_endpoint_returns_401_without_jwt": true,
+      "scheduled_cron_handler_wired": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://0d35295b.mk-tintworks-1.pages.dev",
+    "verified": {
+      "services_page_serves_products_renderer": true,
+      "services_page_contains_live_product_stack_targets": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://03f50384.mktintworks-cms.pages.dev",
+    "verified": {
+      "products_manager_assets_present_on_latest_deployment": true,
+      "same_origin_pages_function_proxy_serves_site_data": true,
+      "production_host_requires_cloudflare_access_for_anonymous_requests": true
+    }
+  },
+  "features": {
+    "cms_products_manager": true,
+    "product_edit_modal": true,
+    "product_image_upload_to_r2": true,
+    "benefits_add_remove": true,
+    "discount_create_remove": true,
+    "public_discount_states": [
+      "none",
+      "scheduled",
+      "active"
+    ],
+    "countdown_timer_renderer": true,
+    "cron_based_discount_activation_and_expiry": true,
+    "build_time_product_state_injection": true,
+    "runtime_public_product_refresh": true
+  },
+  "notes": [
+    "The public services page now keeps the existing HTML as a no-JS fallback but replaces product stacks with live CMS data at runtime.",
+    "The CMS production hostname is protected by Cloudflare Access, so anonymous verification there returns the Access sign-in page rather than the app HTML.",
+    "The latest CMS production deployment with Section 7 assets is verified at the deployment hostname recorded above."
+  ]
+}

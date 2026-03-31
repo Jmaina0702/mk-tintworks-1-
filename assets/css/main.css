@@ -1221,6 +1221,16 @@ body.light .launch-meta {
   color: var(--ink-inverse);
 }
 
+.badge-mid {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+}
+
+.badge-entry {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--light-grey);
+}
+
 @media (max-width: 640px) {
   .launch-row {
     flex-wrap: wrap;
@@ -1253,6 +1263,11 @@ body.light .launch-meta {
 .product-price-current {
   display: inline-flex;
   align-items: center;
+}
+
+.product-price-current {
+  font: 700 1.5rem/1 "Inter", sans-serif;
+  color: var(--wine);
 }
 
 .product-price {
@@ -2025,13 +2040,16 @@ body.light .launch-meta {
   color: var(--mid-grey);
 }
 
-.hp-field {
+.hp-field,
+.hp-trap {
   position: absolute;
   left: -9999px;
+  top: -9999px;
   width: 1px;
   height: 1px;
   overflow: hidden;
   opacity: 0;
+  pointer-events: none;
 }
 
 .visually-hidden {

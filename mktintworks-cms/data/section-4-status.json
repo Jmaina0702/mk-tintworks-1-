@@ -1,0 +1,50 @@
+{
+  "section": 4,
+  "sectionTitle": "Authentication & Security",
+  "capturedOn": "2026-03-31",
+  "worker": {
+    "routerWired": true,
+    "deployed": true,
+    "loginEndpoint": "/api/auth/login",
+    "publicEndpoints": [
+      "POST /api/analytics/event",
+      "POST /api/testimonials/submit"
+    ],
+    "protectedPrefixes": [
+      "/api/pages",
+      "/api/products",
+      "/api/discounts",
+      "/api/gallery",
+      "/api/blog",
+      "/api/testimonials",
+      "/api/promotions",
+      "/api/media",
+      "/api/seo",
+      "/api/analytics",
+      "/api/invoices",
+      "/api/warranties",
+      "/api/records"
+    ]
+  },
+  "securityLayersImplemented": {
+    "cloudflareAccessExchange": true,
+    "jwtGeneration": true,
+    "jwtValidationMiddleware": true,
+    "inputValidationUtilities": true,
+    "honeypotCheckUtility": true,
+    "httpSecurityHeaders": true,
+    "corsHandling": true,
+    "uploadSecurityUtilities": true
+  },
+  "cmsFrontend": {
+    "tokenHelperFile": "mktintworks-cms/assets/js/cms-core.js",
+    "bootstrapLoaded": true,
+    "autoAuthEnabledOnBootstrap": false
+  },
+  "notes": [
+    "The Worker login endpoint requires the CF-Access-Jwt-Assertion header exactly as defined in the PRD, so live JWT exchange depends on the API request passing through the Access-protected admin route.",
+    "Public website origins are allowed only for the two intentionally public endpoints so analytics and testimonial submission can work without opening the rest of the API to cross-origin callers.",
+    "The current CMS bootstrap page loads the token helper with autoAuth disabled so the Section 1/2/3 documentation shell is not redirected before Section 5 turns it into the real admin UI.",
+    "Cloudflare returned a transient schedules API 7010 error after deployment, but the health endpoint confirmed the new Section 4 Worker version was live."
+  ]
+}

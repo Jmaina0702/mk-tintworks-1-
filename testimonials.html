@@ -20,10 +20,15 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/animations.css">
+  <script>
+    window.CMS_PAGE_SLUG = "testimonials";
+    window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
+    window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+  </script>
 </head>
 <body class="standards-page page-hero-standards" data-page="testimonials">
   <div class="page-glow" aria-hidden="true"></div>
-  <div data-site-nav></div>
+  <div data-site-nav data-active="testimonials"></div>
   <div data-wa-float></div>
   <main id="main-content">
     <section class="page-hero page-hero-standards" aria-label="Process and standards hero">
@@ -31,8 +36,8 @@
       <div class="page-hero-overlay" aria-hidden="true"></div>
       <div class="container page-hero-content">
         <p class="eyebrow">Testimonials</p>
-        <h1>Client feedback and service standards in one place.</h1>
-        <p>Read approved reviews, understand how MK Tintworks works, and leave your own feedback after installation.</p>
+        <h1 data-cms-key="testimonials:hero_heading" data-cms-type="text">Client feedback and service standards in one place.</h1>
+        <p data-cms-key="testimonials:hero_subtext" data-cms-type="text">Read approved reviews, understand how MK Tintworks works, and leave your own feedback after installation.</p>
       </div>
     </section>
 
@@ -138,6 +143,15 @@
   <div data-book-cta></div>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms-content.js" defer></script>
+  <script>
+    if (window.location.search.includes("cms_preview=true")) {
+      var cmsPreviewScript = document.createElement("script");
+      cmsPreviewScript.src = "/cms-preview-overlay.js";
+      cmsPreviewScript.defer = true;
+      document.head.appendChild(cmsPreviewScript);
+    }
+  </script>
   <script>
     (function loadTawk() {
       const load = () => {

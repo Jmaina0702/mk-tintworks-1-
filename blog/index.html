@@ -20,6 +20,11 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/animations.css">
+  <script>
+    window.CMS_PAGE_SLUG = "blog";
+    window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
+    window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+  </script>
 </head>
 <body class="blog-index-page page-hero-blog" data-page="blog">
   <div class="page-glow" aria-hidden="true"></div>
@@ -87,6 +92,15 @@
   <div data-book-cta></div>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms-content.js" defer></script>
+  <script>
+    if (window.location.search.includes("cms_preview=true")) {
+      var cmsPreviewScript = document.createElement("script");
+      cmsPreviewScript.src = "/cms-preview-overlay.js";
+      cmsPreviewScript.defer = true;
+      document.head.appendChild(cmsPreviewScript);
+    }
+  </script>
   <script>
     (function loadTawk() {
       const load = () => {

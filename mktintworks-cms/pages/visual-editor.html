@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0D0D0D">
+  <title>Visual Editor | MK Tintworks CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/cms-variables.css">
+  <link rel="stylesheet" href="../assets/css/cms-reset.css">
+  <link rel="stylesheet" href="../assets/css/cms-layout.css">
+  <link rel="stylesheet" href="../assets/css/cms-sidebar.css">
+  <link rel="stylesheet" href="../assets/css/cms-components.css">
+  <link rel="stylesheet" href="../assets/css/cms-tables.css">
+  <link rel="stylesheet" href="../assets/css/cms-modals.css">
+  <link rel="stylesheet" href="../assets/css/cms-toasts.css">
+  <link rel="stylesheet" href="../assets/css/cms-forms.css">
+  <link rel="stylesheet" href="../assets/css/cms-badges.css">
+  <link rel="stylesheet" href="../assets/css/cms-animations.css">
+  <style>
+    .ve-main {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(122, 12, 30, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(13, 13, 13, 1));
+    }
+
+    .ve-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      background: rgba(26, 26, 26, 0.96);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .ve-toolbar-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--light-grey);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .ve-page-select {
+      background: var(--charcoal-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--white);
+      padding: 8px 32px 8px 12px;
+      font-size: 0.875rem;
+      min-width: 220px;
+    }
+
+    .ve-status {
+      font-size: 0.78rem;
+      color: var(--mid-grey);
+      margin-left: auto;
+    }
+
+    .ve-workspace {
+      display: grid;
+      grid-template-columns: 60fr 40fr;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .ve-preview-panel {
+      border-right: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      background: var(--charcoal-2);
+    }
+
+    .ve-preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #0f0f0f;
+    }
+
+    .ve-preview-loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 13, 13, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+
+    .ve-preview-loading.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ve-loading-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border-strong);
+      border-top-color: var(--wine);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .ve-edit-panel {
+      display: flex;
+      flex-direction: column;
+      background: rgba(26, 26, 26, 0.96);
+      overflow-y: auto;
+    }
+
+    .ve-edit-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 16px;
+      color: var(--mid-grey);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .ve-edit-prompt-icon {
+      font-size: 3rem;
+      opacity: 0.3;
+    }
+
+    .ve-edit-panel-inner {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ve-key-label {
+      font-size: 0.72rem;
+      color: var(--mid-grey);
+      font-family: var(--font-mono);
+      background: var(--charcoal-2);
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      word-break: break-all;
+    }
+
+    .ve-edit-actions {
+      display: flex;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .ve-img-preview {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--charcoal-2);
+    }
+
+    .ve-img-upload-zone {
+      border: 2px dashed var(--border-strong);
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--ease), background var(--ease);
+    }
+
+    .ve-img-upload-zone:hover {
+      border-color: var(--wine);
+      background: var(--wine-subtle);
+    }
+
+    @media (max-width: 1080px) {
+      .ve-workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .ve-preview-panel {
+        min-height: 56vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .ve-status {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="cms-app">
+    <aside id="cms-sidebar" class="cms-sidebar" aria-label="Sidebar"></aside>
+    <main class="cms-main ve-main" id="cms-main">
+      <div class="ve-toolbar">
+        <span class="ve-toolbar-label">Editing Page:</span>
+        <select class="ve-page-select" id="ve-page-select" aria-label="Select website page to edit">
+          <option value="home">Home + About</option>
+          <option value="services">Services &amp; Products</option>
+          <option value="gallery">Gallery</option>
+          <option value="testimonials">Testimonials</option>
+          <option value="book">Book Now</option>
+          <option value="blog">Blog Index</option>
+          <option value="blog-3m-vs-llumar-kenya">Blog Article: 3M vs Llumar</option>
+          <option value="blog-ntsa-tint-regulations-kenya-2026">Blog Article: NTSA Regulations</option>
+          <option value="404">404 Page</option>
+        </select>
+        <span class="ve-status" id="ve-status">Hover over any element to edit it</span>
+      </div>
+
+      <div class="ve-workspace">
+        <div class="ve-preview-panel">
+          <div class="ve-preview-loading" id="ve-loading">
+            <div class="ve-loading-spinner"></div>
+            <p style="color:var(--light-grey);font-size:0.875rem">
+              Loading website preview...
+            </p>
+          </div>
+          <iframe
+            id="ve-preview-frame"
+            class="ve-preview-frame"
+            title="Website preview"
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            loading="eager"
+          ></iframe>
+        </div>
+
+        <div class="ve-edit-panel" id="ve-edit-panel">
+          <div class="ve-edit-prompt">
+            <div class="ve-edit-prompt-icon">✏</div>
+            <p style="font-size:0.9rem">
+              Click any highlighted element in the preview to edit it
+            </p>
+            <p style="font-size:0.78rem;color:var(--dark-grey)">
+              Text, images, prices and link labels
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/js/cms-core.js" defer></script>
+  <script src="../assets/js/cms-ui.js" defer></script>
+  <script src="../assets/js/cms-utils.js" defer></script>
+  <script src="../assets/js/visual-editor.js" defer></script>
+</body>
+</html>

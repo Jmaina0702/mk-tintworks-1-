@@ -1,0 +1,79 @@
+{
+  "section": 3,
+  "sectionTitle": "Database Schema & Seed Data",
+  "capturedOn": "2026-03-31",
+  "database": {
+    "name": "mktintworks-cms-db",
+    "binding": "DB",
+    "schemaSource": "mktintworks-cms-api/schema.sql",
+    "migrationSource": "mktintworks-cms-api/section3-legacy-to-prd.sql",
+    "remoteMigrated": true,
+    "localValidated": true
+  },
+  "notes": [
+    "The remote D1 database already contained an older CMS schema, so Section 3 was completed via a one-time non-reset migration instead of a destructive rebuild.",
+    "The migration preserved legacy rows by copying them into s3_legacy_* backup tables before recreating the PRD schema.",
+    "The migration file does not use explicit BEGIN or COMMIT because Cloudflare remote D1 file execution rejected manual SQL transactions in this environment.",
+    "The media record now points at the public R2 base URL provided for mktintworks-media."
+  ],
+  "prdTables": [
+    "pages",
+    "products",
+    "discounts",
+    "gallery",
+    "blog_posts",
+    "testimonials",
+    "promotions",
+    "media",
+    "seo_settings",
+    "clients",
+    "vehicles",
+    "invoices",
+    "warranties",
+    "analytics_events"
+  ],
+  "remoteCounts": {
+    "pages": 0,
+    "products": 10,
+    "discounts": 1,
+    "gallery": 0,
+    "blog_posts": 2,
+    "testimonials": 0,
+    "promotions": 0,
+    "media": 1,
+    "seo_settings": 6,
+    "clients": 0,
+    "vehicles": 0,
+    "invoices": 0,
+    "warranties": 0,
+    "analytics_events": 31
+  },
+  "preservedLegacyCounts": {
+    "s3_legacy_products": 10,
+    "s3_legacy_product_discounts": 1,
+    "s3_legacy_blog_posts": 2,
+    "s3_legacy_media_assets": 1,
+    "s3_legacy_analytics_events": 31
+  },
+  "verification": {
+    "products": {
+      "brandNormalization": true,
+      "tierNormalization": true,
+      "pricesVerified": true
+    },
+    "discounts": {
+      "discountedPriceCalculated": true,
+      "statusDerivedFromDate": true
+    },
+    "blogPosts": {
+      "publishedRowsPreserved": true,
+      "legacyCategoriesMappedIntoPrdSet": true
+    },
+    "media": {
+      "publicR2UrlApplied": true
+    },
+    "analytics": {
+      "legacyPageViewEventsMappedToPageview": true
+    }
+  }
+}

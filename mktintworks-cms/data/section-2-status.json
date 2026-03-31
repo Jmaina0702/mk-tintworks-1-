@@ -1,0 +1,67 @@
+{
+  "section": 2,
+  "sectionTitle": "Infrastructure Setup",
+  "capturedOn": "2026-03-31",
+  "manualStepsConfirmedByOwner": true,
+  "worker": {
+    "name": "mktintworks-cms-api",
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "deployed": true,
+    "bindingsVerified": {
+      "db": true,
+      "mediaBucket": true,
+      "documentsBucket": true,
+      "contentCache": true,
+      "sessions": true,
+      "ai": true
+    }
+  },
+  "d1": {
+    "binding": "DB",
+    "databaseName": "mktintworks-cms-db",
+    "databaseId": "3f383039-002d-4f05-8409-cce6cb2f2c41"
+  },
+  "r2": {
+    "mediaBucket": {
+      "binding": "MEDIA_BUCKET",
+      "bucketName": "mktintworks-media",
+      "publicBaseUrl": "https://pub-0252224d03e4472da062ccdc92c2482f.r2.dev"
+    },
+    "documentsBucket": {
+      "binding": "DOCUMENTS_BUCKET",
+      "bucketName": "mktintworks-documents",
+      "publicAccess": false
+    }
+  },
+  "kv": {
+    "contentCache": {
+      "binding": "CONTENT_CACHE",
+      "id": "563984b4d78f4f348f9e9dee2a439365"
+    },
+    "sessions": {
+      "binding": "SESSIONS",
+      "id": "ff770284d605469387f89836d9b11d3b"
+    }
+  },
+  "secrets": [
+    "ADMIN_EMAIL",
+    "JWT_SECRET",
+    "WEB3FORMS_KEY",
+    "DEPLOY_HOOK_URL"
+  ],
+  "pages": {
+    "websiteProjectObserved": {
+      "name": "mk-tintworks-1",
+      "domain": "mk-tintworks-1.pages.dev"
+    },
+    "cmsProjectObserved": {
+      "name": "mktintworks-cms",
+      "domain": "mktintworks-cms.pages.dev"
+    }
+  },
+  "notes": [
+    "The media bucket public base URL is now captured for later file URL generation.",
+    "The CMS Worker is live and returning all six infrastructure bindings as true.",
+    "As observed from this environment on 2026-03-31, mktintworks-cms.pages.dev still returned HTTP 404. That affects the CMS Pages app content deployment, not the Worker bindings."
+  ]
+}

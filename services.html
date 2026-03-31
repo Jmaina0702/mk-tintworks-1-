@@ -20,6 +20,12 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/animations.css">
+  <script>
+    window.CMS_PAGE_SLUG = "services";
+    window.CMS_PAGE_CONTENT = window.CMS_PAGE_CONTENT || {};
+    window.CMS_SHARED_CONTENT = window.CMS_SHARED_CONTENT || { nav: {}, footer: {} };
+    window.CMS_PRODUCTS_STATE = window.CMS_PRODUCTS_STATE || { products: [], groups: { "3m": [], llumar: [], other: [] }, generated_at: null };
+  </script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebPage","name":"Window Tinting Services & Products Nairobi | MK Tintworks","url":"https://mktintworks.com/services.html","description":"3M Crystalline, Llumar IRX, ceramic tints & more. Compare products, prices & book professional installation in Nairobi, Kenya."}
   </script>
@@ -34,8 +40,8 @@
       <div class="page-hero-overlay" aria-hidden="true"></div>
       <div class="container page-hero-content">
         <p class="eyebrow">Our Services &amp; Products</p>
-        <h1>Compare premium film options without the sales clutter.</h1>
-        <p>We present genuine 3M and Llumar film options with clear comparisons, transparent pricing guidance, and installation standards designed to reflect a premium professional service.</p>
+        <h1 data-cms-key="services:hero_heading" data-cms-type="text">Compare premium film options without the sales clutter.</h1>
+        <p data-cms-key="services:hero_subtext" data-cms-type="text">We present genuine 3M and Llumar film options with clear comparisons, transparent pricing guidance, and installation standards designed to reflect a premium professional service.</p>
       </div>
     </section>
 
@@ -62,7 +68,7 @@
         <div class="section-header">
           <p class="section-kicker">Automotive Films</p>
           <h2>Premium automotive window films with clean tier separation.</h2>
-          <p class="lead">All prices shown are for sedan installations. SUV, truck, and specialty vehicle pricing is available upon consultation — contact us directly.</p>
+          <p class="lead" data-cms-key="services:disclaimer" data-cms-type="text">All prices shown are for sedan installations. SUV, truck, and specialty vehicle pricing is available upon consultation — contact us directly.</p>
         </div>
         <div class="service-tabs" data-tab-group="films">
           <button class="tab-button" type="button" data-tab-target="3m" data-default-tab="true" aria-selected="true">3M Window Films</button>
@@ -70,7 +76,7 @@
         </div>
 
         <div class="tab-panel" data-tab-panel="films" data-tab-panel-target="3m">
-          <div class="product-stack">
+          <div class="product-stack" data-product-stack="3m">
             <article class="product-card" data-reveal>
               <div class="product-image"><img src="/assets/images/products/3m-color-stable-ir.webp" alt="3M Crystalline windshield film being installed on a premium SUV" loading="lazy" decoding="async" width="520" height="390"><span class="badge badge-premium">Premium</span></div>
               <div class="product-details">
@@ -122,7 +128,7 @@
         </div>
 
         <div class="tab-panel" data-tab-panel="films" data-tab-panel-target="llumar" hidden>
-          <div class="product-stack">
+          <div class="product-stack" data-product-stack="llumar">
             <article class="product-card" data-reveal>
               <div class="product-image"><img src="/assets/images/products/llumar-atc-grey.webp" alt="Llumar IRX ceramic tint shown on a premium SUV in a studio setting" loading="lazy" decoding="async" width="520" height="390"><span class="badge badge-premium">Premium</span></div>
               <div class="product-details">
@@ -192,16 +198,18 @@
     <section class="section" id="chameleon">
       <div class="container">
         <div class="section-header"><p class="section-kicker">Other Products</p><h2>Chameleon Color-Shifting Film</h2><p class="lead">A specialty visual statement that still delivers UV protection, glare reduction, and premium installation quality.</p></div>
-        <article class="product-card" data-reveal>
-          <div class="product-image"><img src="/assets/images/products/3m-obsidian.webp" alt="Chameleon color-shifting tint on a black sports coupe" loading="lazy" decoding="async" width="520" height="390"><span class="badge badge-specialty">Specialty</span></div>
-          <div class="product-details">
-            <h3>Chameleon Color-Shifting Window Film</h3><p class="product-tagline">Bold Style. Dynamic Color-Shifting Protection.</p>
-            <p>Make a statement on Nairobi’s roads with Chameleon window tint—a mesmerizing color-shifting film that transforms your car’s appearance with every angle and lighting change.</p>
-            <ul class="product-benefits"><li>Dynamic color-shifting effect</li><li>200+ layers of advanced optical film technology</li><li>Blocks up to 99% UV rays</li><li>Enhanced privacy and glare reduction</li><li>Unique, personalized vehicle appearance</li></ul>
-            <p class="product-price">KSh 28,800</p><p class="product-discount-note" hidden></p><p class="product-discount-timer" hidden></p><p class="product-meta">Professional installation included · Sedan</p><p class="product-warranty">Manufacturer’s warranty against fading, bubbling, and delamination</p><a href="/book.html" class="btn-primary">Book Now</a>
-            <details class="more-info"><summary>More Info <span aria-hidden="true">＋</span></summary><div class="more-info-body"><p>Chameleon tint uses advanced optical layering to create a dynamic, iridescent appearance that shifts with light and viewing angle while still preserving useful UV protection and glare control.</p><ul><li>Available in multiple color-shift combinations</li><li>Best for enthusiasts prioritizing unique aesthetics and personalized style</li><li>Front windscreen application depends on VLT and NTSA compliance requirements</li></ul></div></details>
-          </div>
-        </article>
+        <div class="product-stack" data-product-stack="other">
+          <article class="product-card" data-reveal>
+            <div class="product-image"><img src="/assets/images/products/3m-obsidian.webp" alt="Chameleon color-shifting tint on a black sports coupe" loading="lazy" decoding="async" width="520" height="390"><span class="badge badge-specialty">Specialty</span></div>
+            <div class="product-details">
+              <h3>Chameleon Color-Shifting Window Film</h3><p class="product-tagline">Bold Style. Dynamic Color-Shifting Protection.</p>
+              <p>Make a statement on Nairobi’s roads with Chameleon window tint—a mesmerizing color-shifting film that transforms your car’s appearance with every angle and lighting change.</p>
+              <ul class="product-benefits"><li>Dynamic color-shifting effect</li><li>200+ layers of advanced optical film technology</li><li>Blocks up to 99% UV rays</li><li>Enhanced privacy and glare reduction</li><li>Unique, personalized vehicle appearance</li></ul>
+              <p class="product-price">KSh 28,800</p><p class="product-discount-note" hidden></p><p class="product-discount-timer" hidden></p><p class="product-meta">Professional installation included · Sedan</p><p class="product-warranty">Manufacturer’s warranty against fading, bubbling, and delamination</p><a href="/book.html" class="btn-primary">Book Now</a>
+              <details class="more-info"><summary>More Info <span aria-hidden="true">＋</span></summary><div class="more-info-body"><p>Chameleon tint uses advanced optical layering to create a dynamic, iridescent appearance that shifts with light and viewing angle while still preserving useful UV protection and glare control.</p><ul><li>Available in multiple color-shift combinations</li><li>Best for enthusiasts prioritizing unique aesthetics and personalized style</li><li>Front windscreen application depends on VLT and NTSA compliance requirements</li></ul></div></details>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -209,11 +217,12 @@
       <div class="container">
         <div class="section-header">
           <p class="section-kicker">Residential</p>
-          <h2>Transform your home. Protect what matters.</h2>
-          <p class="lead">Living in Nairobi’s equatorial climate means dealing with intense sunlight year-round. MK Tintworks’ residential window films block harmful UV rays, reduce heat, and add privacy without sacrificing natural light or your views.</p>
+          <h2 data-cms-key="services:res_section_heading" data-cms-type="text">Transform your home. Protect what matters.</h2>
+          <p class="lead" data-cms-key="services:res_hero_body" data-cms-type="text">Living in Nairobi’s equatorial climate means dealing with intense sunlight year-round. MK Tintworks’ residential window films block harmful UV rays, reduce heat, and add privacy without sacrificing natural light or your views.</p>
         </div>
         <div class="content-split">
           <article class="content-card" data-reveal>
+            <img src="/assets/images/gallery/gallery-10.webp" alt="Residential window film installation visual by MK Tintworks" loading="lazy" decoding="async" width="600" height="450" data-cms-key="services:res_image" data-cms-type="image" style="width:100%;border-radius:16px;margin-bottom:18px;">
             <h3>Film Types</h3>
             <ul>
               <li>Solar control films for maximum heat rejection and UV protection</li>
@@ -244,11 +253,12 @@
             <span class="status-pill status-pill-large">Coming Soon</span>
             <span class="launch-meta">Planned service rollout</span>
           </div>
-          <h2>Professional workspace. Professional protection.</h2>
-          <p class="lead">Our commercial tinting service is coming soon and will focus on energy efficiency, employee comfort, privacy, security, and a cleaner exterior image for glass-heavy workspaces.</p>
+          <h2 data-cms-key="services:com_section_heading" data-cms-type="text">Professional workspace. Professional protection.</h2>
+          <p class="lead" data-cms-key="services:com_hero_body" data-cms-type="text">Our commercial tinting service is coming soon and will focus on energy efficiency, employee comfort, privacy, security, and a cleaner exterior image for glass-heavy workspaces.</p>
         </div>
         <div class="content-split">
           <article class="content-card" data-reveal>
+            <img src="/assets/images/gallery/gallery-06.webp" alt="Commercial tinting installation visual by MK Tintworks" loading="lazy" decoding="async" width="600" height="450" data-cms-key="services:com_image" data-cms-type="image" style="width:100%;border-radius:16px;margin-bottom:18px;">
             <h3>Commercial Film Roles</h3>
             <ul>
               <li>Solar control and energy-saving films for large glass facades and cooling cost reduction</li>
@@ -276,7 +286,7 @@
     <section class="section">
       <div class="container">
         <div class="compliance-box" id="ntsa">
-          <h3>NTSA Compliance Guidance</h3>
+          <h3 data-cms-key="services:ntsa_heading" data-cms-type="text">NTSA Compliance Guidance</h3>
           <div class="compliance-grid">
             <div class="compliance-row"><strong>Front Windscreen</strong><span>70–75%</span><span>Non-negotiable for NTSA compliance</span></div>
             <div class="compliance-row"><strong>Front Side Windows</strong><span>50%</span><span>Minimum for driver visibility</span></div>
@@ -305,6 +315,16 @@
   <div data-book-cta></div>
   <div data-site-footer></div>
   <script src="/assets/js/main.js" defer></script>
+  <script src="/assets/js/cms-content.js" defer></script>
+  <script src="/assets/js/services-products.js" defer></script>
+  <script>
+    if (window.location.search.includes("cms_preview=true")) {
+      var cmsPreviewScript = document.createElement("script");
+      cmsPreviewScript.src = "/cms-preview-overlay.js";
+      cmsPreviewScript.defer = true;
+      document.head.appendChild(cmsPreviewScript);
+    }
+  </script>
   <script>
     (function loadTawk() {
       const load = () => {

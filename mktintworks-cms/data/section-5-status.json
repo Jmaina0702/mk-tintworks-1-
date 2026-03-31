@@ -1,0 +1,102 @@
+{
+  "section": 5,
+  "sectionTitle": "CMS Admin Panel - UI Architecture & Design System",
+  "capturedOn": "2026-03-31",
+  "uiShell": {
+    "darkModeOnly": true,
+    "pagesCreated": [
+      "index.html",
+      "dashboard.html",
+      "pages/visual-editor.html",
+      "pages/products.html",
+      "pages/gallery.html",
+      "pages/blog.html",
+      "pages/blog-editor.html",
+      "pages/testimonials.html",
+      "pages/promotions.html",
+      "pages/media.html",
+      "pages/seo.html",
+      "pages/analytics.html",
+      "pages/invoices.html",
+      "pages/warranty.html",
+      "pages/records.html",
+      "pages/sales.html"
+    ],
+    "sidebarInjectedAcrossPages": true,
+    "topbarInjectedAcrossPages": true,
+    "mobileMenuImplemented": true,
+    "logoutImplemented": true,
+    "pendingTestimonialsBadgeHooked": true
+  },
+  "sharedAssets": {
+    "cssFiles": [
+      "assets/css/cms-variables.css",
+      "assets/css/cms-reset.css",
+      "assets/css/cms-layout.css",
+      "assets/css/cms-sidebar.css",
+      "assets/css/cms-components.css",
+      "assets/css/cms-tables.css",
+      "assets/css/cms-modals.css",
+      "assets/css/cms-toasts.css",
+      "assets/css/cms-forms.css",
+      "assets/css/cms-badges.css",
+      "assets/css/cms-animations.css"
+    ],
+    "jsFiles": [
+      "assets/js/cms-core.js",
+      "assets/js/cms-ui.js",
+      "assets/js/cms-utils.js",
+      "assets/js/auth-gateway.js",
+      "assets/js/dashboard.js",
+      "assets/js/visual-editor.js",
+      "assets/js/products.js",
+      "assets/js/gallery.js",
+      "assets/js/blog.js",
+      "assets/js/blog-editor.js",
+      "assets/js/testimonials.js",
+      "assets/js/promotions.js",
+      "assets/js/media.js",
+      "assets/js/seo.js",
+      "assets/js/analytics.js",
+      "assets/js/invoices.js",
+      "assets/js/warranty.js",
+      "assets/js/records.js",
+      "assets/js/sales.js"
+    ],
+    "imageFiles": [
+      "assets/images/cms-logo-dark.png",
+      "assets/images/mpesa-logo.png",
+      "assets/images/equity-logo.png"
+    ]
+  },
+  "designTokens": {
+    "wine": "#7A0C1E",
+    "gold": "#C9A84C",
+    "black": "#0D0D0D",
+    "charcoal": "#1A1A1A",
+    "sidebarWidth": "260px",
+    "sidebarCollapsed": "64px",
+    "contentPad": "28px",
+    "cardRadius": "12px",
+    "inputRadius": "8px",
+    "pillRadius": "999px",
+    "transitionFast": "0.25s ease",
+    "transitionSlow": "0.4s ease",
+    "fonts": [
+      "Playfair Display",
+      "Inter"
+    ]
+  },
+  "authFlow": {
+    "gatewayPage": "mktintworks-cms/index.html",
+    "workerApiBase": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "jwtStoredInLocalStorage": true,
+    "autoAuthEnabledOnProtectedPages": true,
+    "autoAuthDisabledOnGateway": true
+  },
+  "notes": [
+    "The CMS shell is intentionally UI-first. Buttons and module actions currently surface toasts or confirmation states until later PRD sections define the real CRUD behavior.",
+    "The official MK Tintworks website logo was copied into the CMS app as cms-logo-dark.png, while the M-Pesa and Equity logos were copied from the tint pictures folder as requested.",
+    "All CMS HTML pages now include noindex, nofollow metadata and the shared CSS include order defined for Section 5."
+  ]
+}

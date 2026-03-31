@@ -1,48 +1,54 @@
-# MK Tintworks CMS Bootstrap
+# MK Tintworks CMS
 
-This directory is the Section 1 bootstrap for the future `mktintworks-cms` repository.
-It lives inside the website workspace for now so the architecture, seed data, and
-scope can be locked before Cloudflare setup work begins in Section 2.
+This directory now holds the CMS implementation through PRD Section 6.
+It includes the Cloudflare-authenticated admin entry page, dashboard,
+all Phase 1 module routes, the shared design system, and the live visual
+editor that talks to the Worker-backed page-content API.
 
-## Included
+## Current structure
 
 - `index.html`
-  Static admin shell that reflects the Section 1 architecture, module scope, and
-  current-state audit.
-- `assets/css/cms.css`
-  CMS-only styling that reuses the MK Tintworks visual language instead of a generic
-  dashboard look.
-- `data/section-1-baseline.json`
-  Architecture baseline, platform choices, current-state audit, and repo split.
-- `data/modules.json`
-  The full Phase 1 module inventory from the PRD.
-- `data/products.seed.json`
-  The authoritative 10-product seed set for the future Products Manager.
-- `data/content-map.json`
-  The initial CMS-controlled page map and known current-site gaps.
+  Cloudflare Access to JWT gateway page for the CMS.
+- `dashboard.html`
+  Main admin landing page with links into every Phase 1 module.
+- `pages/`
+  All module routes, including the Section 6 visual editor workspace.
+- `assets/css/`
+  Shared design tokens, layout, sidebar, components, tables, forms, badges,
+  modals, toasts, and animation files.
+- `assets/js/`
+  Auth helper, shared UI/bootstrap utilities, auth gateway logic, dashboard,
+  one script per module page, and the visual-editor client.
+- `assets/images/`
+  CMS logo plus the copied M-Pesa and Equity logos requested for later payment
+  and document flows.
+- `data/`
+  Section baseline and status files from earlier PRD work.
 
-## Current audit highlights
+## What Section 6 adds
 
-- The public website is a static HTML/CSS/JS site.
-- Booking currently posts directly to Web3Forms from `assets/js/booking.js`.
-- `404.html` is not present in the current website repo.
-- `blog/index.html` links to two article files that are not present:
-  `blog/car-tint-maintenance-nairobi.html` and
-  `blog/ceramic-vs-regular-tint-kenya.html`.
-- `testimonials.html` still contains placeholder review copy instead of a live data source.
+- The iframe-based visual editor at `pages/visual-editor.html`.
+- Same-origin-friendly CMS auth/API bootstrapping for an Access-protected admin host.
+- A Pages Function proxy at `functions/api/[[path]].js` so CMS requests can stay on the same origin while forwarding to the Worker.
+- Public-site preview overlay messaging via `cms-preview-overlay.js`.
+- Worker-backed `GET /api/pages/content`, `POST /api/pages/update`, and image upload wiring.
+- A root-site build pipeline that injects `window.CMS_PAGE_CONTENT` and `window.CMS_SHARED_CONTENT` into the website output.
 
-## Credential handling
+## What still comes later
 
-Section 1 includes existing live identifiers and keys. This bootstrap does not duplicate
-the Web3Forms access key into a new file. It records where the live values already exist
-so Section 2 and later sections can move them into the right environment bindings without
-creating extra copies.
+- Real D1-backed listing and save flows for each module.
+- Deeper CRUD flows beyond the visual editor for products, blog, testimonials, and records.
+- PDF generation for invoices and warranties.
+- Approval workflows, richer publishing controls, and reporting depth.
 
-## What this is not
+## Deployment note
 
-- Not the final CMS repository split.
-- Not the Cloudflare Worker API.
-- Not the D1 schema.
-- Not the auth flow.
+The CMS login exchange is designed to work when the Worker is reachable through
+the same Access-protected admin origin. The local code now stops hardcoding the
+raw Worker URL in page templates, and the CMS project includes a Pages Function
+proxy for `/api/*`, so a host such as `https://admin.mktintworks.com` or the
+Pages domain can keep auth and API traffic same-origin while forwarding to the
+Worker.
 
-Those come next, once Section 2 is provided.
+For the public website build, use `npm run build` from the repo root and deploy
+the generated `dist/` directory.

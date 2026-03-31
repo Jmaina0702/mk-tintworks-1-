@@ -54,11 +54,12 @@ const navTemplate = (active) => `
         <span></span><span></span><span></span>
       </button>
       <nav id="nav-menu" class="nav" role="navigation" aria-label="Main navigation">
-        <a href="/" class="nav-link ${active === "home" ? "active" : ""}">Home</a>
-        <a href="/services.html" class="nav-link ${active === "services" ? "active" : ""}">Services</a>
-        <a href="/gallery.html" class="nav-link ${active === "gallery" ? "active" : ""}">Gallery</a>
-        <a href="/blog/" class="nav-link ${active === "blog" ? "active" : ""}">Blog</a>
-        <a href="/book.html" class="nav-link nav-cta ${active === "book" ? "active" : ""}">Book Now</a>
+        <a href="/" class="nav-link ${active === "home" ? "active" : ""}" data-cms-key="nav:home_label" data-cms-type="link">Home</a>
+        <a href="/services.html" class="nav-link ${active === "services" ? "active" : ""}" data-cms-key="nav:services_label" data-cms-type="link">Services</a>
+        <a href="/gallery.html" class="nav-link ${active === "gallery" ? "active" : ""}" data-cms-key="nav:gallery_label" data-cms-type="link">Gallery</a>
+        <a href="/testimonials.html" class="nav-link ${active === "testimonials" ? "active" : ""}" data-cms-key="nav:reviews_label" data-cms-type="link">Testimonials</a>
+        <a href="/blog/" class="nav-link ${active === "blog" ? "active" : ""}" data-cms-key="nav:blog_label" data-cms-type="link">Blog</a>
+        <a href="/book.html" class="nav-link nav-cta ${active === "book" ? "active" : ""}" data-cms-key="nav:book_label" data-cms-type="link">Book Now</a>
         <button class="theme-toggle" aria-label="Toggle dark/light mode" aria-pressed="false">
           <span class="theme-toggle-track" aria-hidden="true"><span class="theme-toggle-thumb"></span></span>
           ${sunIcon}
@@ -93,7 +94,7 @@ const footerTemplate = `
             <img src="/assets/images/logo/mk-logo-dark.png" alt="MK Tintworks" class="footer-logo logo-dark" width="120" height="38" loading="lazy" decoding="async" fetchpriority="low">
             <img src="/assets/images/logo/mk-logo-light.png" alt="MK Tintworks" class="footer-logo logo-light" width="120" height="38" loading="lazy" decoding="async" fetchpriority="low">
           </a>
-          <p class="footer-tagline">Tint with Precision, Drive with Confidence.</p>
+          <p class="footer-tagline" data-cms-key="footer:tagline" data-cms-type="text">Tint with Precision, Drive with Confidence.</p>
           <div class="social-links">
             <a href="https://facebook.com/mktintworks" target="_blank" rel="noopener noreferrer" aria-label="MK Tintworks on Facebook">${facebookIcon}</a>
             <a href="https://instagram.com/mktintworks" target="_blank" rel="noopener noreferrer" aria-label="MK Tintworks on Instagram">${instagramIcon}</a>
@@ -121,15 +122,15 @@ const footerTemplate = `
         <div class="footer-block">
           <h4>Contact</h4>
           <ul>
-            <li><a href="tel:+254703900575">+254 703 900 575</a></li>
-            <li><a href="tel:+254705567956">+254 705 567 956</a></li>
-            <li><a href="mailto:mktintworks.co@gmail.com">mktintworks.co@gmail.com</a></li>
-            <li>Serving Nairobi &amp; Surrounding Areas</li>
+            <li><a href="tel:+254703900575" data-cms-key="footer:phone_1" data-cms-type="link">+254 703 900 575</a></li>
+            <li><a href="tel:+254705567956" data-cms-key="footer:phone_2" data-cms-type="link">+254 705 567 956</a></li>
+            <li><a href="mailto:mktintworks.co@gmail.com" data-cms-key="footer:email" data-cms-type="link">mktintworks.co@gmail.com</a></li>
+            <li data-cms-key="footer:service_area" data-cms-type="text">Serving Nairobi &amp; Surrounding Areas</li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 MK Tintworks. All rights reserved.</p>
+        <p data-cms-key="footer:copyright" data-cms-type="text">&copy; 2026 MK Tintworks. All rights reserved.</p>
       </div>
     </div>
   </footer>`;
