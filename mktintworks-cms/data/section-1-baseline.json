@@ -1,0 +1,126 @@
+{
+  "project": "MK Tintworks Custom CMS",
+  "version": "1.0",
+  "section": 1,
+  "sectionTitle": "Project Overview, Goals & Architecture",
+  "lockedOn": "2026-03-31",
+  "sourceDocument": "MK_Tintworks_CMS_PRD_Section1.docx",
+  "business": {
+    "name": "MK Tintworks",
+    "type": "Mobile window tinting",
+    "serviceArea": "Nairobi and surrounding areas",
+    "publicWebsite": "mktintworks.netlify.app",
+    "targetPublicDomain": "mktintworks.com",
+    "targetAdminDomain": "admin.mktintworks.com"
+  },
+  "philosophy": [
+    "A child could use it",
+    "Premium feel",
+    "Zero monthly cost",
+    "Fast",
+    "Secure",
+    "Resilient",
+    "Mobile-capable"
+  ],
+  "architecture": {
+    "publicWebsite": {
+      "role": "Customer-facing website",
+      "currentState": "Static HTML/CSS/JS files in this repository",
+      "futureDataModel": "Reads structured content at build time and real-time dynamic content where required"
+    },
+    "cmsAdmin": {
+      "role": "Owner-facing admin panel",
+      "deploymentTarget": "Cloudflare Pages",
+      "protection": "Cloudflare Access"
+    },
+    "backendApi": {
+      "role": "Data, auth, upload, AI, PDF, analytics, and deploy-hook engine",
+      "runtime": "Cloudflare Workers",
+      "protection": "JWT on every protected API endpoint"
+    }
+  },
+  "infrastructure": [
+    "Cloudflare Pages",
+    "Cloudflare Workers",
+    "Cloudflare D1",
+    "Cloudflare R2",
+    "Cloudflare Workers KV",
+    "Cloudflare Workers AI",
+    "Cloudflare Access",
+    "GitHub",
+    "pdf-lib",
+    "Web3Forms",
+    "Tawk.to"
+  ],
+  "repositories": [
+    {
+      "name": "mktintworks-website",
+      "purpose": "Public website",
+      "status": "exists"
+    },
+    {
+      "name": "mktintworks-cms",
+      "purpose": "CMS admin panel and CMS-side application code",
+      "status": "bootstrapped locally inside current workspace"
+    }
+  ],
+  "currentStateAudit": {
+    "websiteNature": "Static marketing site with shared layout fragments rendered from assets/js/main.js",
+    "bookingFlow": "Client-side form posts directly to Web3Forms and then opens WhatsApp",
+    "missingFiles": [
+      "404.html",
+      "blog/car-tint-maintenance-nairobi.html",
+      "blog/ceramic-vs-regular-tint-kenya.html"
+    ],
+    "knownGaps": [
+      {
+        "id": "no-cms-or-api",
+        "severity": "high",
+        "description": "No admin app, Worker API, D1, R2, KV, Access, or deploy-hook integration exists yet."
+      },
+      {
+        "id": "testimonials-placeholder",
+        "severity": "medium",
+        "description": "Testimonials page is prepared for future CMS data but currently renders placeholder review copy."
+      },
+      {
+        "id": "missing-404-page",
+        "severity": "medium",
+        "description": "404.html is in PRD scope but is not present in the repo."
+      },
+      {
+        "id": "missing-blog-post-files",
+        "severity": "medium",
+        "description": "The blog listing links to two article pages that are not present in the current repository."
+      }
+    ]
+  },
+  "existingIntegrationSources": {
+    "web3formsEndpoint": {
+      "value": "https://api.web3forms.com/submit",
+      "source": "assets/js/booking.js"
+    },
+    "web3formsAccessKey": {
+      "source": "assets/js/booking.js",
+      "bindingName": "WEB3FORMS_ACCESS_KEY",
+      "note": "Exact live value already exists in the website code and PRD; do not generate a replacement."
+    },
+    "whatsAppBaseUrl": {
+      "value": "https://wa.me/254703900575",
+      "source": "assets/js/booking.js"
+    },
+    "tawkScriptSource": {
+      "value": "https://embed.tawk.to/69c1093d9f6b851c32e01e9f/1jkd0o6gd",
+      "source": "website page templates"
+    },
+    "businessEmail": {
+      "value": "mktintworks.co@gmail.com"
+    }
+  },
+  "phase1": {
+    "moduleCount": 14,
+    "productSeedCount": 10,
+    "controlledPageGroupCount": 7,
+    "costTarget": "KSh 0 monthly on free-tier infrastructure"
+  }
+}

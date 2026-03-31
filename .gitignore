@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+mktintworks-cms-api/.dev.vars
+mktintworks-cms-api/.env
+mktintworks-cms-api/.env.*

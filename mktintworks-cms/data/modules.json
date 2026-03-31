@@ -1,0 +1,100 @@
+[
+  {
+    "key": "visual-editor",
+    "name": "Visual Editor",
+    "complexity": "High",
+    "status": "planned",
+    "description": "Live website preview with direct text and image editing controls."
+  },
+  {
+    "key": "products-manager",
+    "name": "Products Manager",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Manage all 10 product records from one screen."
+  },
+  {
+    "key": "discount-system",
+    "name": "Discount System",
+    "complexity": "High",
+    "status": "planned",
+    "description": "Date-based percentage discounts with coming-soon, live, and expiry states."
+  },
+  {
+    "key": "gallery-manager",
+    "name": "Gallery Manager",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Multi-image upload, compression, captioning, reordering, and deletion."
+  },
+  {
+    "key": "blog-system",
+    "name": "Blog System",
+    "complexity": "High",
+    "status": "planned",
+    "description": "Write or import articles, generate SEO metadata, and publish or unpublish."
+  },
+  {
+    "key": "testimonials-pipeline",
+    "name": "Testimonials Pipeline",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Collect public reviews, queue them, and approve or reject before publication."
+  },
+  {
+    "key": "promotions-banner",
+    "name": "Promotions Banner",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Seasonal banner uploads, scheduling, animation controls, and rotation."
+  },
+  {
+    "key": "media-library",
+    "name": "Media Library",
+    "complexity": "Low",
+    "status": "planned",
+    "description": "Central storage for images and documents with usage tracking."
+  },
+  {
+    "key": "seo-manager",
+    "name": "SEO Manager",
+    "complexity": "Low",
+    "status": "planned",
+    "description": "Page-level title, meta description, and OG image controls."
+  },
+  {
+    "key": "analytics-dashboard",
+    "name": "Analytics Dashboard",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Views, product clicks, article reads, CTA events, and traffic sources."
+  },
+  {
+    "key": "invoice-generator",
+    "name": "Invoice Generator",
+    "complexity": "High",
+    "status": "planned",
+    "description": "VAT-aware branded PDF invoices with WhatsApp and email handoff."
+  },
+  {
+    "key": "warranty-generator",
+    "name": "Warranty Generator",
+    "complexity": "High",
+    "status": "planned",
+    "description": "Invoice-linked warranty certificate PDFs with unique certificate numbers."
+  },
+  {
+    "key": "records-system",
+    "name": "Records System",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Invoices, warranties, and clients with filters, search, and CSV export."
+  },
+  {
+    "key": "sales-dashboard",
+    "name": "Sales Dashboard",
+    "complexity": "Medium",
+    "status": "planned",
+    "description": "Revenue trends, service popularity, film popularity, and outstanding balances."
+  }
+]

@@ -1,0 +1,340 @@
+{
+  "generatedFrom": [
+    "PRD Section 1.11",
+    "Current website audit on 2026-03-31"
+  ],
+  "pageGroups": [
+    {
+      "key": "home",
+      "label": "Home + About",
+      "route": "/",
+      "sourceFile": "index.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "home.hero",
+          "type": "visual-group",
+          "currentLocation": "#hero",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "home.trustBar",
+          "type": "repeatable-copy-group",
+          "currentLocation": ".trust-grid",
+          "fields": [
+            "3 items x stat",
+            "3 items x label"
+          ]
+        },
+        {
+          "id": "home.about",
+          "type": "visual-group",
+          "currentLocation": "#about",
+          "fields": [
+            "sectionKicker",
+            "heading",
+            "lead",
+            "brandStatement",
+            "aboutHeroImage"
+          ]
+        },
+        {
+          "id": "home.serviceCards",
+          "type": "repeatable-card-group",
+          "currentLocation": ".about-services",
+          "fields": [
+            "2 cards x heading",
+            "2 cards x body",
+            "2 cards x image",
+            "2 cards x actionLabel"
+          ]
+        },
+        {
+          "id": "home.galleryPreview",
+          "type": "repeatable-card-group",
+          "currentLocation": ".mini-gallery-grid",
+          "fields": [
+            "sectionHeading",
+            "sectionLead",
+            "3 teaser cards x image",
+            "3 teaser cards x title",
+            "3 teaser cards x body"
+          ]
+        },
+        {
+          "id": "home.testimonialsTeaser",
+          "type": "planned-surface",
+          "currentLocation": "not present in current page markup",
+          "status": "missing-in-current-site",
+          "fields": [
+            "teaser selection"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "services",
+      "label": "Services and Products",
+      "route": "/services.html",
+      "sourceFile": "services.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "services.hero",
+          "type": "visual-group",
+          "currentLocation": ".page-hero-services",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "services.products",
+          "type": "collection",
+          "dataSource": "products.seed.json",
+          "fields": [
+            "name",
+            "tagline",
+            "description",
+            "benefits",
+            "price",
+            "image",
+            "warrantyText"
+          ]
+        },
+        {
+          "id": "services.residential",
+          "type": "section-group",
+          "currentLocation": "#residential",
+          "fields": [
+            "heading",
+            "lead",
+            "filmTypes",
+            "benefitsText",
+            "installationProcess"
+          ]
+        },
+        {
+          "id": "services.commercial",
+          "type": "section-group",
+          "currentLocation": "#commercial",
+          "fields": [
+            "statusLabel",
+            "heading",
+            "lead",
+            "commercialFilmRoles",
+            "roiSnapshot"
+          ]
+        },
+        {
+          "id": "services.ntsa",
+          "type": "table-like-group",
+          "currentLocation": "#ntsa",
+          "fields": [
+            "5 compliance rows x label",
+            "5 compliance rows x value",
+            "5 compliance rows x guidance"
+          ]
+        },
+        {
+          "id": "services.faq",
+          "type": "repeatable-accordion-group",
+          "currentLocation": ".faq-grid",
+          "fields": [
+            "sectionHeading",
+            "6 items x question",
+            "6 items x answer"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "gallery",
+      "label": "Gallery",
+      "route": "/gallery.html",
+      "sourceFile": "gallery.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "gallery.hero",
+          "type": "visual-group",
+          "currentLocation": ".page-hero-gallery",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "gallery.collection",
+          "type": "collection",
+          "currentLocation": "#gallery-grid",
+          "fields": [
+            "image",
+            "category",
+            "caption"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "testimonials",
+      "label": "Testimonials",
+      "route": "/testimonials.html",
+      "sourceFile": "testimonials.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "testimonials.hero",
+          "type": "visual-group",
+          "currentLocation": ".page-hero-standards",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "testimonials.approvedReviews",
+          "type": "collection",
+          "currentLocation": ".testimonials-strip",
+          "status": "placeholder-only",
+          "fields": [
+            "reviewBody",
+            "clientName",
+            "serviceType",
+            "rating"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "blog",
+      "label": "Blog",
+      "route": "/blog/",
+      "sourceFile": "blog/index.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "blog.indexHero",
+          "type": "visual-group",
+          "currentLocation": ".page-hero-blog",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "blog.indexCollection",
+          "type": "collection",
+          "currentLocation": ".blog-grid",
+          "fields": [
+            "category",
+            "title",
+            "excerpt",
+            "image",
+            "slug",
+            "publishState"
+          ]
+        },
+        {
+          "id": "blog.articleTemplate",
+          "type": "collection",
+          "currentLocation": "/blog/[slug].html",
+          "fields": [
+            "category",
+            "title",
+            "publishDate",
+            "readTime",
+            "heroImage",
+            "body",
+            "seoTitle",
+            "metaDescription",
+            "ogImage"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "book",
+      "label": "Book Now",
+      "route": "/book.html",
+      "sourceFile": "book.html",
+      "status": "present",
+      "surfaces": [
+        {
+          "id": "book.hero",
+          "type": "visual-group",
+          "currentLocation": ".page-hero-book",
+          "fields": [
+            "eyebrow",
+            "headline",
+            "body",
+            "heroImage"
+          ]
+        },
+        {
+          "id": "book.ctaBand",
+          "type": "copy-group",
+          "currentLocation": ".book-cta-band",
+          "fields": [
+            "heading",
+            "body",
+            "buttonLabel"
+          ]
+        },
+        {
+          "id": "book.contactBlocks",
+          "type": "repeatable-card-group",
+          "currentLocation": ".contact-stack",
+          "fields": [
+            "cardKicker",
+            "cardHeading",
+            "cardListItems"
+          ]
+        },
+        {
+          "id": "book.formLabels",
+          "type": "form-copy-group",
+          "currentLocation": "#booking-form",
+          "fields": [
+            "fieldLabels",
+            "fieldPlaceholders",
+            "validationCopy",
+            "submitLabel"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "error-404",
+      "label": "404 Error",
+      "route": "/404.html",
+      "sourceFile": "404.html",
+      "status": "missing-in-current-site",
+      "surfaces": [
+        {
+          "id": "error404.page",
+          "type": "planned-surface",
+          "currentLocation": "file missing",
+          "fields": [
+            "heading",
+            "message",
+            "buttonLabels"
+          ]
+        }
+      ]
+    }
+  ]
+}

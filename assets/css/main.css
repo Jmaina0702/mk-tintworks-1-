@@ -1249,6 +1249,47 @@ body.light .launch-meta {
   color: var(--wine);
 }
 
+.product-price-original,
+.product-price-current {
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.product-price-original {
+  color: var(--mid-grey);
+  font-size: 1rem;
+  text-decoration: line-through;
+}
+
+.product-discount-note,
+.product-discount-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(201, 168, 76, 0.32);
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.18), rgba(122, 12, 30, 0.1));
+  color: var(--gold);
+  font: 700 0.75rem/1 "Inter", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-discount-timer {
+  color: var(--white);
+  border-color: rgba(122, 12, 30, 0.42);
+  background: linear-gradient(135deg, rgba(122, 12, 30, 0.22), rgba(26, 26, 26, 0.38));
+}
+
 .product-meta,
 .product-warranty {
   font-size: 0.9375rem;

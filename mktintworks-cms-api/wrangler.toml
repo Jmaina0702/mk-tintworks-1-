@@ -1,0 +1,39 @@
+name = "mktintworks-cms-api"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mktintworks-cms-db"
+database_id = "3f383039-002d-4f05-8409-cce6cb2f2c41"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "mktintworks-media"
+
+[[r2_buckets]]
+binding = "DOCUMENTS_BUCKET"
+bucket_name = "mktintworks-documents"
+
+[[kv_namespaces]]
+binding = "CONTENT_CACHE"
+id = "563984b4d78f4f348f9e9dee2a439365"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "ff770284d605469387f89836d9b11d3b"
+
+[ai]
+binding = "AI"
+
+[triggers]
+crons = [ "* * * * *" ]
+
+[env.development]
+name = "mktintworks-cms-api-dev"
+
+# [env.production]
+# routes = [
+#   { pattern = "admin.mktintworks.com/api/*", zone_name = "mktintworks.com" }
+# ]
