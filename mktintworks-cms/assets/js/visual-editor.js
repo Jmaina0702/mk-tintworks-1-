@@ -1,7 +1,6 @@
 (function initVisualEditor(window, document) {
-  const DEFAULT_PREVIEW_ORIGIN = "https://0d35295b.mk-tintworks-1.pages.dev";
+  const DEFAULT_PREVIEW_ORIGIN = "https://mk-tintworks-1.pages.dev";
   const TRUSTED_PREVIEW_ORIGINS = new Set([
-    DEFAULT_PREVIEW_ORIGIN,
     "https://mk-tintworks-1.pages.dev",
     "https://mktintworks.com",
     "https://www.mktintworks.com",
@@ -56,6 +55,38 @@
     }
 
     TRUSTED_PREVIEW_ORIGINS.add(new URL(value).origin);
+  };
+
+  const canEmbedOrigin = async (origin) => {
+    if (!isAllowedPreviewOrigin(origin)) {
+      return false;
+    }
+
+    try {
+      const probeUrl = new URL("/?cms_preview=true", origin);
+      const response = await fetch(probeUrl, {
+        cache: "no-store",
+        mode: "cors",
+      });
+      const xFrameOptions = String(response.headers.get("x-frame-options") || "")
+        .trim()
+        .toUpperCase();
+      const csp = String(response.headers.get("content-security-policy") || "");
+
+      if (xFrameOptions === "DENY") {
+        return false;
+      }
+
+      if (!csp.includes("frame-ancestors")) {
+        return true;
+      }
+
+      return /frame-ancestors[^;]*(admin\.mktintworks-cms\.pages\.dev|admin\.mktintworks\.com|mktintworks-cms\.pages\.dev)/i.test(
+        csp
+      );
+    } catch {
+      return false;
+    }
   };
 
   const buildWebsitePages = (origin) => ({
@@ -134,9 +165,18 @@
   const resolvePreviewOrigin = async () => {
     const configuredOrigin = String(window.MKT_VISUAL_EDITOR_PREVIEW_ORIGIN || "").trim();
     if (isAllowedPreviewOrigin(configuredOrigin)) {
-      addTrustedPreviewOrigin(configuredOrigin);
-      return new URL(configuredOrigin).origin;
+      const configured = new URL(configuredOrigin).origin;
+      if (await canEmbedOrigin(configured)) {
+        addTrustedPreviewOrigin(configured);
+        return configured;
+      }
     }
+
+    const candidates = [
+      "https://mk-tintworks-1.pages.dev",
+      "https://mktintworks.com",
+      "https://www.mktintworks.com",
+    ];
 
     for (const source of PREVIEW_ORIGIN_SOURCES) {
       try {
@@ -146,21 +186,31 @@
         }
 
         const payload = await response.json();
-        const candidate =
-          payload?.public_site?.latest_deployment ||
-          payload?.publicWebsite?.previewDeploymentUrl ||
-          payload?.public_site?.production_host ||
-          payload?.publicWebsite?.productionPagesUrl;
-
-        if (!isAllowedPreviewOrigin(candidate)) {
-          continue;
-        }
-
-        addTrustedPreviewOrigin(candidate);
-        return new URL(candidate).origin;
+        [
+          payload?.public_site?.production_host,
+          payload?.publicWebsite?.productionPagesUrl,
+          payload?.public_site?.latest_deployment,
+          payload?.publicWebsite?.previewDeploymentUrl,
+        ]
+          .filter(Boolean)
+          .forEach((candidate) => candidates.push(candidate));
       } catch {
         // Fall through to the next source or default preview origin.
       }
+    }
+
+    for (const candidate of candidates) {
+      if (!isAllowedPreviewOrigin(candidate)) {
+        continue;
+      }
+
+      const normalized = new URL(candidate).origin;
+      if (!(await canEmbedOrigin(normalized))) {
+        continue;
+      }
+
+      addTrustedPreviewOrigin(normalized);
+      return normalized;
     }
 
     addTrustedPreviewOrigin(DEFAULT_PREVIEW_ORIGIN);
