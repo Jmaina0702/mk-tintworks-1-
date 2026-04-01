@@ -87,7 +87,7 @@
     "key": "records-system",
     "name": "Records System",
     "complexity": "Medium",
-    "status": "planned",
+    "status": "live",
     "description": "Invoices, warranties, and clients with filters, search, and CSV export."
   },
   {

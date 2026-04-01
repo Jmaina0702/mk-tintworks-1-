@@ -268,8 +268,68 @@ export const generateWarranty = async (request, env) => {
   }
 };
 
+const downloadWarrantyPdf = async (request, env, certificateNumber) => {
+  const authError = await requireAuth(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const normalizedCertificateNumber = sanitizeText(
+    decodeURIComponent(certificateNumber || ""),
+    20
+  ).toUpperCase();
+
+  const warranty = await env.DB.prepare(
+    `
+      SELECT certificate_number, pdf_r2_key
+      FROM warranties
+      WHERE certificate_number = ?
+      LIMIT 1
+    `
+  )
+    .bind(normalizedCertificateNumber)
+    .first();
+
+  if (!warranty?.pdf_r2_key) {
+    return json(
+      { error: "Warranty PDF not found." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  const pdfObject = await env.DOCUMENTS_BUCKET.get(warranty.pdf_r2_key);
+  if (!pdfObject) {
+    return json(
+      { error: "Warranty PDF is missing from storage." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  const response = new Response(pdfObject.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="MK-Warranty-${warranty.certificate_number}.pdf"`,
+      "Cache-Control": "no-store",
+    },
+  });
+
+  return withCommonHeaders(response, request);
+};
+
 export const handleWarrantiesRequest = async (request, env) => {
   const { pathname } = new URL(request.url);
+
+  const warrantyPdfMatch = pathname.match(/^\/api\/warranties\/pdf\/([^/]+)$/);
+  if (warrantyPdfMatch) {
+    if (request.method !== "GET") {
+      return methodNotAllowed(request, ["GET"]);
+    }
+
+    return downloadWarrantyPdf(request, env, warrantyPdfMatch[1]);
+  }
 
   if (pathname === "/api/warranties/generate") {
     if (request.method !== "POST") {

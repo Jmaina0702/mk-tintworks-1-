@@ -20,14 +20,114 @@
   <link rel="stylesheet" href="../assets/css/cms-forms.css">
   <link rel="stylesheet" href="../assets/css/cms-badges.css">
   <link rel="stylesheet" href="../assets/css/cms-animations.css">
+  <link rel="stylesheet" href="../assets/css/cms-records.css">
 </head>
-<body data-page-title="Records System" data-page-description="Keep clients, vehicles, and installation history traceable across documents and follow-up.">
+<body data-page-title="Records System" data-page-description="Search, filter, export, and re-download the permanent archive of invoices, warranties, and clients.">
   <div id="cms-app">
     <aside id="cms-sidebar" class="cms-sidebar"></aside>
     <div class="cms-main">
       <header id="cms-topbar" class="cms-topbar"></header>
       <main class="cms-content">
-        <div class="page-shell" data-module-shell></div>
+        <div class="page-shell records-page">
+          <section class="hero-banner records-hero">
+            <div class="content-cluster">
+              <span class="eyebrow">Section 17</span>
+              <h2>Open the business archive and answer invoice, warranty, and client questions fast.</h2>
+              <p>
+                The records system is the permanent archive for MK Tintworks operations. Search across invoices,
+                warranty certificates, and clients, filter the billing history by status and date, export CSV snapshots,
+                and re-download stored PDFs at any time.
+              </p>
+            </div>
+            <div class="panel-card records-hero-card">
+              <span class="eyebrow">Archive Rules</span>
+              <ul class="checklist">
+                <li>Invoices can be deleted only with strong confirmation because the action is permanent.</li>
+                <li>Warranty certificates are permanent records and are never deletable from this archive.</li>
+                <li>Client records are created automatically from invoicing workflows and stay tied to spend history.</li>
+              </ul>
+              <p class="records-status-message" id="records-status" aria-live="polite">Loading the records archive…</p>
+            </div>
+          </section>
+
+          <section class="records-tabs" aria-label="Records tabs">
+            <button class="btn btn-secondary records-tab-btn is-active" id="tab-btn-invoices" data-tab="invoices" type="button">
+              Invoices
+              <span class="sidebar-badge" id="invoice-count" hidden>0</span>
+            </button>
+            <button class="btn btn-ghost records-tab-btn" id="tab-btn-warranties" data-tab="warranties" type="button">
+              Warranties
+            </button>
+            <button class="btn btn-ghost records-tab-btn" id="tab-btn-clients" data-tab="clients" type="button">
+              Clients
+            </button>
+          </section>
+
+          <section class="summary-grid records-summary" id="revenue-summary">
+            <article class="metric-card" data-tone="success">
+              <span class="metric-label">Collected (Paid)</span>
+              <strong id="sum-collected">KSh 0</strong>
+              <p>Sum of fully paid invoices in the archive.</p>
+            </article>
+            <article class="metric-card" data-tone="danger">
+              <span class="metric-label">Outstanding (Unpaid)</span>
+              <strong id="sum-outstanding">KSh 0</strong>
+              <p>Total value of invoices still marked unpaid.</p>
+            </article>
+            <article class="metric-card" data-tone="gold">
+              <span class="metric-label">Total Jobs</span>
+              <strong id="sum-jobs">0</strong>
+              <p>All invoiced jobs currently stored in D1.</p>
+            </article>
+          </section>
+
+          <section class="panel-card records-toolbar-card">
+            <div class="panel-heading-copy">
+              <span class="eyebrow">Filters</span>
+              <h3>Search, narrow, and export the archive</h3>
+              <p>The search box adapts per tab. Payment status applies only to the invoices tab.</p>
+            </div>
+            <div class="records-toolbar-grid">
+              <div class="field records-toolbar-search">
+                <label for="records-search">Search</label>
+                <input type="search" id="records-search" placeholder="Search by name, number, registration, or film">
+              </div>
+              <div class="field">
+                <label for="filter-status">Status</label>
+                <select id="filter-status">
+                  <option value="">All statuses</option>
+                  <option value="paid">Paid</option>
+                  <option value="unpaid">Unpaid</option>
+                  <option value="partial">Partial</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="filter-from">From</label>
+                <input type="date" id="filter-from">
+              </div>
+              <div class="field">
+                <label for="filter-to">To</label>
+                <input type="date" id="filter-to">
+              </div>
+              <div class="records-toolbar-actions">
+                <button class="btn btn-ghost btn-sm" id="export-csv-btn" type="button">Export CSV</button>
+                <button class="btn btn-secondary btn-sm" id="clear-filters-btn" type="button">Clear</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card records-results-panel">
+            <div class="records-tab-panel" id="tab-invoices">
+              <div id="invoices-wrap"></div>
+            </div>
+            <div class="records-tab-panel" id="tab-warranties" hidden>
+              <div id="warranties-wrap"></div>
+            </div>
+            <div class="records-tab-panel" id="tab-clients" hidden>
+              <div id="clients-wrap"></div>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   </div>

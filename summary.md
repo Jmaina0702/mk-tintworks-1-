@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 16 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 17 on top of the original static marketing site.
 
 ## Current system
 
@@ -49,6 +49,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The invoice generator was implemented, including Worker-issued invoice numbering, VAT-aware totals, branded pdf-lib PDF output, D1 plus R2 persistence, client and vehicle auto-upserts, and WhatsApp/email handoff from the CMS.
 - Section 16:
   The warranty certificate generator was implemented, including unique MK certificate numbering, invoice-prefill support, branded pdf-lib warranty PDFs, D1 plus R2 persistence, invoice-to-warranty linking, and WhatsApp/email handoff from the CMS.
+- Section 17:
+  The records system was implemented, including protected invoice, warranty, and client archive endpoints; searchable CMS tabs; invoice revenue summaries; CSV export; PDF re-download for stored documents; and invoice deletion with strong confirmation.
 
 ## Architecture
 
@@ -619,6 +621,65 @@ Section 16 adds a branded warranty certificate generated directly inside the Clo
 - structured client, vehicle, film, invoice-reference, installation-date, and issue-date presentation
 - separate coverage and exclusion panels plus optional notes and signature/footer copy
 
+## Section 17 details
+
+### CMS records archive
+
+- Page:
+  [`mktintworks-cms/pages/records.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/records.html)
+- Client:
+  [`mktintworks-cms/assets/js/records.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/records.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-records.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-records.css)
+
+Implemented behavior:
+
+- Three-tab archive browser for invoices, warranties, and clients
+- Shared search box, date filters, clear action, and CSV export across the archive
+- Revenue summary cards for collected paid revenue, unpaid outstanding revenue, and total jobs
+- Invoice tab actions for stored-PDF re-download, warranty-form handoff, and invoice deletion with strong confirmation
+- Warranty tab actions for stored certificate re-download with no delete option
+- Client tab aggregation showing vehicles, job count, total spend, and first-service date
+- Revenue summary automatically hidden on non-invoice tabs while invoice-only status filtering is disabled outside the invoice view
+
+### Worker records API
+
+- Route:
+  [`mktintworks-cms-api/src/routes/records.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/records.js)
+
+Endpoints:
+
+- `GET /api/records/invoices`
+  Protected invoice archive listing
+- `GET /api/records/warranties`
+  Protected warranty archive listing
+- `GET /api/records/clients`
+  Protected client archive listing plus invoice-form autocomplete data
+
+Important implementation details:
+
+- Client records now return both archive aggregates and the `vehicles` array used by the invoice generator autocomplete, so the records archive and invoice form stay on one source of truth.
+- Client archive aggregates are derived from invoice totals and service dates, while registrations are assembled from linked vehicle rows without duplicating vehicle plates in the display string.
+- Invoice archive rows expose payment status, totals, registration number, and stored document key so the UI can filter, summarize, export, and re-download without extra round trips.
+
+### Invoice and warranty document endpoints
+
+- Invoice routes:
+  [`mktintworks-cms-api/src/routes/invoices.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/invoices.js)
+- Warranty routes:
+  [`mktintworks-cms-api/src/routes/warranties.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/warranties.js)
+
+Section 17 extends the existing document routes with archive operations:
+
+- `GET /api/invoices/pdf/:invoice_number`
+  Protected re-download of stored invoice PDFs from `DOCUMENTS_BUCKET`
+- `GET /api/warranties/pdf/:certificate_number`
+  Protected re-download of stored warranty PDFs from `DOCUMENTS_BUCKET`
+- `DELETE /api/invoices/:id`
+  Protected invoice deletion plus best-effort PDF cleanup from the documents bucket
+
+The deletion flow intentionally applies only to invoices. Warranty certificates remain permanent archive records and the CMS does not expose any delete path for them.
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -634,7 +695,7 @@ Section 16 adds a branded warranty certificate generated directly inside the Clo
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 16
+## Current repo shape after Section 17
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -662,10 +723,20 @@ Section 16 adds a branded warranty certificate generated directly inside the Clo
   Served from `GET /api/invoices/next-number`
 - Protected invoice lookup for warranty prefill:
   Served from `GET /api/invoices/:id`
+- Protected invoice PDF re-download:
+  Served from `GET /api/invoices/pdf/:invoice_number`
 - Protected invoice PDF generation:
   Served from `POST /api/invoices/generate`
+- Protected invoice deletion:
+  Served from `DELETE /api/invoices/:id`
 - Protected warranty PDF generation:
   Served from `POST /api/warranties/generate`
+- Protected warranty PDF re-download:
+  Served from `GET /api/warranties/pdf/:certificate_number`
+- Protected invoice records archive:
+  Served from `GET /api/records/invoices`
+- Protected warranty records archive:
+  Served from `GET /api/records/warranties`
 - Protected client lookup for invoice autocomplete:
   Served from `GET /api/records/clients`
 - Published blog pages:
@@ -679,13 +750,14 @@ Section 16 adds a branded warranty certificate generated directly inside the Clo
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-16 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, and warranty certificate generation.
+- The public site still keeps static fallback patterns where useful, but Sections 6-17 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, and the searchable business archive inside the CMS.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
 - Invoice PDFs are intentionally generated inside the Worker and stored in the documents bucket, so the commercial document output stays branded, reproducible, and independent of browser-only rendering.
 - Warranty PDFs are intentionally generated inside the Worker and stored in the documents bucket, so claim documents stay branded, uniquely identifiable, and linked back to invoice history where applicable.
+- The records system is intentionally CMS-only and protected by Access plus JWT, so PDF re-downloads, invoice deletion, and customer history lookups stay inside the administrative surface.
 
 ## Next section
 
-The next PRD milestone is Section 17.
+The next PRD milestone is Section 18.

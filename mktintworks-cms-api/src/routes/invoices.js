@@ -593,6 +593,76 @@ const getInvoiceById = async (request, env, invoiceId) => {
   return json({ invoice }, { headers: FRESH_HEADERS }, request);
 };
 
+const downloadInvoicePdf = async (request, env, invoiceNumber) => {
+  const authError = await requireAuth(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const invoice = await findInvoiceRecordByNumber(env, decodeURIComponent(invoiceNumber));
+  if (!invoice?.pdf_r2_key) {
+    return json(
+      { error: "Invoice PDF not found." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  const pdfObject = await env.DOCUMENTS_BUCKET.get(invoice.pdf_r2_key);
+  if (!pdfObject) {
+    return json(
+      { error: "Invoice PDF is missing from storage." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  const response = new Response(pdfObject.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="MKT-Invoice-${invoice.invoice_number}.pdf"`,
+      "Cache-Control": "no-store",
+    },
+  });
+
+  return withCommonHeaders(response, request);
+};
+
+const deleteInvoiceById = async (request, env, invoiceId) => {
+  const authError = await requireAuth(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const invoice = await findInvoiceRecordById(env, invoiceId);
+  if (!invoice) {
+    return json(
+      { error: "Invoice not found." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  if (invoice.pdf_r2_key) {
+    await env.DOCUMENTS_BUCKET.delete(invoice.pdf_r2_key).catch(() => {});
+  }
+
+  await env.DB.prepare("DELETE FROM invoices WHERE id = ?")
+    .bind(invoice.id)
+    .run();
+
+  return json(
+    {
+      success: true,
+      deleted_id: invoice.id,
+      invoice_number: invoice.invoice_number,
+    },
+    { headers: FRESH_HEADERS },
+    request
+  );
+};
+
 const generateInvoice = async (request, env) => {
   const authError = await requireAuth(request, env);
   if (authError) {
@@ -669,13 +739,26 @@ const generateInvoice = async (request, env) => {
 export const handleInvoicesRequest = async (request, env) => {
   const { pathname } = new URL(request.url);
 
-  const invoiceMatch = pathname.match(/^\/api\/invoices\/(\d+)$/);
-  if (invoiceMatch) {
+  const invoicePdfMatch = pathname.match(/^\/api\/invoices\/pdf\/([^/]+)$/);
+  if (invoicePdfMatch) {
     if (request.method !== "GET") {
       return methodNotAllowed(request, ["GET"]);
     }
 
-    return getInvoiceById(request, env, invoiceMatch[1]);
+    return downloadInvoicePdf(request, env, invoicePdfMatch[1]);
+  }
+
+  const invoiceMatch = pathname.match(/^\/api\/invoices\/(\d+)$/);
+  if (invoiceMatch) {
+    if (request.method === "GET") {
+      return getInvoiceById(request, env, invoiceMatch[1]);
+    }
+
+    if (request.method === "DELETE") {
+      return deleteInvoiceById(request, env, invoiceMatch[1]);
+    }
+
+    return methodNotAllowed(request, ["GET", "DELETE"]);
   }
 
   if (pathname === "/api/invoices/next-number") {
@@ -750,12 +833,31 @@ export const searchClientsForRecords = async (request, env) => {
       email: sanitizeText(row?.email || "", 120),
       created_at: row?.created_at || null,
       updated_at: row?.updated_at || null,
+      job_count: 0,
+      total_spent: 0,
+      first_service: null,
+      registrations: "",
       vehicles: [],
     }));
 
     const clientIds = clients.map((client) => client.id).filter(Boolean);
     if (clientIds.length) {
       const placeholders = clientIds.map(() => "?").join(", ");
+      const invoiceStatsResult = await env.DB.prepare(
+        `
+          SELECT
+            client_id,
+            COUNT(*) AS job_count,
+            COALESCE(SUM(total_amount), 0) AS total_spent,
+            MIN(service_date) AS first_service
+          FROM invoices
+          WHERE client_id IN (${placeholders})
+          GROUP BY client_id
+        `
+      )
+        .bind(...clientIds)
+        .all();
+
       const vehicleResult = await env.DB.prepare(
         `
           SELECT
@@ -773,6 +875,15 @@ export const searchClientsForRecords = async (request, env) => {
       )
         .bind(...clientIds)
         .all();
+
+      const invoiceStatsByClient = new Map();
+      for (const row of invoiceStatsResult.results || []) {
+        invoiceStatsByClient.set(Number(row?.client_id || 0), {
+          job_count: Number(row?.job_count || 0),
+          total_spent: roundCurrency(row?.total_spent),
+          first_service: row?.first_service || null,
+        });
+      }
 
       const vehiclesByClient = new Map();
       for (const row of vehicleResult.results || []) {
@@ -793,8 +904,33 @@ export const searchClientsForRecords = async (request, env) => {
 
       clients.forEach((client) => {
         client.vehicles = vehiclesByClient.get(client.id) || [];
+        const stats = invoiceStatsByClient.get(client.id);
+        if (stats) {
+          client.job_count = stats.job_count;
+          client.total_spent = stats.total_spent;
+          client.first_service = stats.first_service;
+        }
+
+        const registrations = client.vehicles
+          .map((vehicle) => vehicle.registration_no)
+          .filter(Boolean);
+        client.registrations = Array.from(new Set(registrations)).join(", ");
       });
     }
+
+    clients.sort((left, right) => {
+      if (right.total_spent !== left.total_spent) {
+        return right.total_spent - left.total_spent;
+      }
+
+      const leftUpdated = new Date(left.updated_at || left.created_at || 0).getTime() || 0;
+      const rightUpdated = new Date(right.updated_at || right.created_at || 0).getTime() || 0;
+      if (rightUpdated !== leftUpdated) {
+        return rightUpdated - leftUpdated;
+      }
+
+      return left.full_name.localeCompare(right.full_name);
+    });
 
     return json(
       {
