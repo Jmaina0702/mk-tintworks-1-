@@ -1,0 +1,68 @@
+{
+  "section": 15,
+  "title": "Invoice Generator",
+  "completed_at": "2026-04-01T15:28:28.8568547+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "3f405f42-c18f-417a-bb3b-b1b281468a44",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "protected_next_number_returns_401_without_jwt": true,
+      "protected_generate_returns_401_without_jwt": true,
+      "client_lookup_returns_401_without_jwt": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://576709d4.mktintworks-cms.pages.dev",
+    "verified": {
+      "invoice_generator_page_built": true,
+      "invoice_css_loaded": true,
+      "invoice_js_loaded": true,
+      "autocomplete_datalist_present": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://af7579c9.mk-tintworks-1.pages.dev",
+    "verified": {
+      "production_host_responds": true,
+      "public_redeploy_not_required_for_section_15": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build",
+    "worker_bundle_dry_run_passed": true,
+    "worker_bundle_dry_run_command": "npm run check",
+    "node_check_passed_for_worker_routes": true,
+    "node_check_passed_for_pdf_generator": true,
+    "node_check_passed_for_cms_invoice_client": true,
+    "sample_pdf_generation_passed": true
+  },
+  "live_verification": {
+    "worker_health_200": true,
+    "next_number_401_without_jwt": true,
+    "generate_401_without_jwt": true,
+    "records_clients_401_without_jwt": true,
+    "cms_preview_invoice_page_200": true,
+    "cms_invoice_js_200": true
+  },
+  "features": {
+    "worker_issued_invoice_numbering": true,
+    "server_side_vat_locking": true,
+    "pdf_lib_invoice_generation": true,
+    "documents_bucket_storage": true,
+    "client_auto_create_or_update": true,
+    "vehicle_auto_link_or_create": true,
+    "film_price_auto_fill": true,
+    "whatsapp_and_email_handoff": true
+  },
+  "notes": [
+    "Section 15 is a CMS and Worker feature set only. No public website code changed, so the public Pages project did not require a new deployment.",
+    "The Access-protected CMS production hostname returns the Cloudflare Access sign-in page from this environment, so page-level verification was performed against the latest CMS preview deployment.",
+    "The prototype folder `Receipt Generator` was used as reference material only and was left out of the tracked Section 15 implementation changes."
+  ]
+}

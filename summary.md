@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 14 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 15 on top of the original static marketing site.
 
 ## Current system
 
@@ -45,6 +45,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The SEO Manager was implemented, including per-page search metadata editing for the six main website pages, OG image upload, live Google and social previews, protected SEO CRUD routes, a public SEO feed, and build-time injection of saved metadata into generated public page source.
 - Section 14:
   The analytics dashboard was implemented, including first-party website event tracking, a protected summary endpoint, Chart.js-backed CMS reporting, product-click and CTA tracking, and country/referrer aggregation without cookies or personal data.
+- Section 15:
+  The invoice generator was implemented, including Worker-issued invoice numbering, VAT-aware totals, branded pdf-lib PDF output, D1 plus R2 persistence, client and vehicle auto-upserts, and WhatsApp/email handoff from the CMS.
 
 ## Architecture
 
@@ -486,6 +488,58 @@ Section 14 adds first-party website tracking without Google Analytics or cookies
 - `blog_read` fires once a visitor scrolls at least 50% through a generated blog article page
 - legacy static blog-page fallback copies also receive the tracker during the build, so analytics does not disappear if article generation ever falls back
 
+## Section 15 details
+
+### CMS invoice generator
+
+- Page:
+  [`mktintworks-cms/pages/invoices.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/invoices.html)
+- Client:
+  [`mktintworks-cms/assets/js/invoices.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/invoices.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-invoices.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-invoices.css)
+
+Implemented behavior:
+
+- Worker-issued next invoice number shown on page load using the `MKT-YYYY-NNN` format
+- Service date defaults to today, registration numbers auto-uppercase, and payment-method buttons behave as a true segmented control
+- Film dropdown pulls the 10 live product rows from D1 and auto-fills the unit price from each product's base price
+- Subtotal, VAT at 16%, and grand total recalculate live as the operator changes units or price
+- Existing clients load into a datalist and can backfill saved phone, email, and most recent vehicle details when selected
+- Generate action requests the PDF from the Worker, then reveals WhatsApp, email, and direct-download handoff controls once the blob is returned
+
+### Worker invoice API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/invoices.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/invoices.js)
+
+Endpoints:
+
+- `GET /api/invoices/next-number`
+  Protected next-number preview for the CMS
+- `POST /api/invoices/generate`
+  Protected PDF-generation and invoice-save endpoint
+- `GET /api/records/clients`
+  Protected client lookup endpoint used by the invoice form autocomplete
+
+Important implementation details:
+
+- Invoice totals and VAT are recalculated server-side before save, so the Worker stays the commercial source of truth instead of trusting browser math.
+- Historical VAT is stored per invoice in the `invoices` table using `vat_rate`, `vat_amount`, and `total_amount`, so later rate changes do not affect old documents.
+- Invoice numbering is generated from existing D1 invoice rows at request time and retried on insert conflict, which avoids reusing stale form numbers if two sessions collide.
+- The Worker creates or updates the `clients` row, links or inserts the `vehicles` row by registration number, writes the invoice row, uploads the PDF to `DOCUMENTS_BUCKET`, and then stores the `pdf_r2_key`.
+
+### Worker PDF generator
+
+- Generator:
+  [`mktintworks-cms-api/src/pdf/invoice-generator.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/pdf/invoice-generator.js)
+
+Section 15 adds a branded invoice document generated directly inside the Cloudflare Worker with `pdf-lib`:
+
+- A4 layout with MK Tintworks wine-and-gold header, footer, totals block, payment block, and notes section
+- No third-party PDF API dependency; document rendering stays fully under repo control
+- Binary PDF response is streamed straight back to the CMS so the admin can download or hand it off immediately after save
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -501,7 +555,7 @@ Section 14 adds first-party website tracking without Google Analytics or cookies
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 14
+## Current repo shape after Section 15
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -525,6 +579,12 @@ Section 14 adds first-party website tracking without Google Analytics or cookies
   Served from `GET /api/media`
 - Protected analytics summary:
   Served from `GET /api/analytics/summary?days=...`
+- Protected invoice numbering:
+  Served from `GET /api/invoices/next-number`
+- Protected invoice PDF generation:
+  Served from `POST /api/invoices/generate`
+- Protected client lookup for invoice autocomplete:
+  Served from `GET /api/records/clients`
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -536,11 +596,12 @@ Section 14 adds first-party website tracking without Google Analytics or cookies
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-14 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, and first-party analytics event storage.
+- The public site still keeps static fallback patterns where useful, but Sections 6-15 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, and invoice document generation.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
+- Invoice PDFs are intentionally generated inside the Worker and stored in the documents bucket, so the commercial document output stays branded, reproducible, and independent of browser-only rendering.
 
 ## Next section
 
-The next PRD milestone is Section 15.
+The next PRD milestone is Section 16.

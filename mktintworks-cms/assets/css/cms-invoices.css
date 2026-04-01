@@ -1,0 +1,251 @@
+.invoice-page {
+  display: grid;
+  gap: 24px;
+}
+
+.invoice-hero {
+  align-items: stretch;
+}
+
+.invoice-hero-card {
+  align-content: start;
+  gap: 16px;
+}
+
+.invoice-rail-list {
+  display: grid;
+  gap: 14px;
+}
+
+.invoice-rail-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border-weak);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.invoice-rail-item img {
+  width: auto;
+  max-width: 68px;
+  max-height: 32px;
+}
+
+.invoice-rail-item p {
+  margin: 3px 0 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.invoice-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.62fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.invoice-form-column {
+  display: grid;
+  gap: 18px;
+}
+
+.invoice-section {
+  align-content: start;
+}
+
+.invoice-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.invoice-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.invoice-grid-span-2 {
+  grid-column: 1 / -1;
+}
+
+.invoice-sidebar {
+  position: sticky;
+  top: 108px;
+  display: grid;
+  gap: 18px;
+}
+
+.invoice-required {
+  color: var(--gold-soft);
+}
+
+#invoice-number {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.28);
+  color: var(--gold-soft);
+  font-weight: 700;
+}
+
+.payment-method-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.payment-btn {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border-weak);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+  font-weight: 600;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.payment-btn:hover,
+.payment-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  outline: none;
+}
+
+.payment-btn.is-active {
+  background: linear-gradient(135deg, rgba(122, 12, 30, 0.98), rgba(158, 21, 48, 0.92));
+  border-color: rgba(201, 168, 76, 0.34);
+  color: #fff5f0;
+  box-shadow: 0 18px 34px rgba(122, 12, 30, 0.16);
+}
+
+.invoice-totals-card,
+.invoice-actions-card {
+  align-content: start;
+}
+
+.totals-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--text-soft);
+}
+
+.totals-row strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.totals-row + .totals-row {
+  margin-top: 10px;
+}
+
+.totals-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.3), rgba(255, 255, 255, 0.06));
+}
+
+.totals-row-total {
+  align-items: end;
+  padding: 18px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(122, 12, 30, 0.96), rgba(158, 21, 48, 0.88)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.totals-row-total span,
+.totals-row-total strong {
+  color: #fff5f0;
+}
+
+.totals-row-total span {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.82rem;
+}
+
+.totals-row-total strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  line-height: 1;
+}
+
+.invoice-meta-note {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-weak);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.invoice-meta-note strong {
+  color: var(--gold-soft);
+}
+
+.invoice-meta-note span,
+.invoice-status-message {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.invoice-generate-btn {
+  width: 100%;
+}
+
+.invoice-send-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(57, 194, 121, 0.2);
+  border-radius: 16px;
+  background: rgba(57, 194, 121, 0.08);
+}
+
+.invoice-send-card[hidden] {
+  display: none;
+}
+
+.invoice-send-title {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.invoice-send-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.invoice-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 1220px) {
+  .invoice-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .invoice-grid-2,
+  .payment-method-group {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-grid-span-2 {
+    grid-column: auto;
+  }
+}

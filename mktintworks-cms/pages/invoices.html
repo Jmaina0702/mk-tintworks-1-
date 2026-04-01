@@ -20,14 +20,248 @@
   <link rel="stylesheet" href="../assets/css/cms-forms.css">
   <link rel="stylesheet" href="../assets/css/cms-badges.css">
   <link rel="stylesheet" href="../assets/css/cms-animations.css">
+  <link rel="stylesheet" href="../assets/css/cms-invoices.css">
 </head>
-<body data-page-title="Invoice Generator" data-page-description="Prepare branded invoices with payment instructions and clean operational handoff.">
+<body data-page-title="Invoice Generator" data-page-description="Create VAT-aware branded invoices, generate the PDF in the Worker, and save every job into the records database.">
   <div id="cms-app">
     <aside id="cms-sidebar" class="cms-sidebar"></aside>
     <div class="cms-main">
       <header id="cms-topbar" class="cms-topbar"></header>
       <main class="cms-content">
-        <div class="page-shell" data-module-shell></div>
+        <div class="page-shell invoice-page">
+          <section class="hero-banner invoice-hero">
+            <div class="content-cluster">
+              <span class="eyebrow">Section 15</span>
+              <h2>Build the invoice, lock the VAT, and hand the client a branded PDF in one pass.</h2>
+              <p>
+                This form generates the invoice number in the Worker, stores VAT at the time of issue,
+                saves the invoice into D1, uploads the PDF to the documents bucket, and updates the client
+                and vehicle records automatically.
+              </p>
+            </div>
+            <div class="panel-card invoice-hero-card">
+              <span class="eyebrow">Delivery Rails</span>
+              <div class="invoice-rail-list">
+                <div class="invoice-rail-item">
+                  <img src="../assets/images/mpesa-logo.png" alt="M-Pesa logo">
+                  <div>
+                    <strong>WhatsApp handoff</strong>
+                    <p>Download first, then open WhatsApp with the invoice context ready.</p>
+                  </div>
+                </div>
+                <div class="invoice-rail-item">
+                  <img src="../assets/images/equity-logo.png" alt="Equity Bank logo">
+                  <div>
+                    <strong>Email handoff</strong>
+                    <p>Open the email client with a prefilled subject after the PDF is generated.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="invoice-shell">
+            <form id="invoice-form" class="invoice-form-column" novalidate>
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Invoice Meta</span>
+                  <h3>Issue details</h3>
+                  <p>The Worker owns the invoice number. The form only displays the next available value.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="invoice-number">Invoice Number</label>
+                    <input type="text" id="invoice-number" readonly>
+                  </div>
+                  <div class="field">
+                    <label for="service-date">Service Date <span class="invoice-required">*</span></label>
+                    <input type="date" id="service-date">
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Client Details</span>
+                  <h3>Who is being billed</h3>
+                  <p>Select an existing client to reuse their details or type a new one to create the record on save.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="client-name">Client Name <span class="invoice-required">*</span></label>
+                    <input type="text" id="client-name" placeholder="Full name" list="client-suggestions" autocomplete="off">
+                    <datalist id="client-suggestions"></datalist>
+                    <span class="field-hint">Exact matches reuse the saved phone, email, and most recent vehicle details.</span>
+                  </div>
+                  <div class="field">
+                    <label for="client-phone">Phone Number</label>
+                    <input type="tel" id="client-phone" placeholder="+254 700 000 000" inputmode="tel">
+                  </div>
+                  <div class="field invoice-grid-span-2">
+                    <label for="client-email">Email</label>
+                    <input type="email" id="client-email" placeholder="client@email.com">
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Vehicle Details</span>
+                  <h3>Installation context</h3>
+                  <p>Vehicle fields stay optional, but when supplied they become part of the client history automatically.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="vehicle-make">Make</label>
+                    <input type="text" id="vehicle-make" placeholder="Toyota">
+                  </div>
+                  <div class="field">
+                    <label for="vehicle-model">Model</label>
+                    <input type="text" id="vehicle-model" placeholder="Land Cruiser">
+                  </div>
+                  <div class="field">
+                    <label for="vehicle-reg">Registration Number</label>
+                    <input type="text" id="vehicle-reg" placeholder="KDD 123A" autocomplete="off">
+                  </div>
+                  <div class="field">
+                    <label for="vehicle-type">Vehicle Type</label>
+                    <select id="vehicle-type">
+                      <option value="">Select vehicle type</option>
+                      <option value="sedan">Sedan</option>
+                      <option value="suv">SUV</option>
+                      <option value="truck">Truck / Pick-up</option>
+                      <option value="specialty">Specialty</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Service Details</span>
+                  <h3>What was installed</h3>
+                  <p>Film pricing defaults from the Products Manager, but the operator can still override the unit price when needed.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="service-type">Service Type <span class="invoice-required">*</span></label>
+                    <select id="service-type">
+                      <option value="automotive">Automotive</option>
+                      <option value="residential">Residential</option>
+                      <option value="commercial">Commercial</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="film-used">Film Used</label>
+                    <select id="film-used">
+                      <option value="">Select film...</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="windows-count">Windows / Units</label>
+                    <input type="number" id="windows-count" min="1" step="1" value="1">
+                  </div>
+                  <div class="field">
+                    <label for="unit-price">Unit Price (KSh) <span class="invoice-required">*</span></label>
+                    <input type="number" id="unit-price" min="0" step="0.01" placeholder="Auto-fills from selected film">
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Payment</span>
+                  <h3>Settlement status</h3>
+                  <p>Record how the client paid so the invoice and later records stay commercially consistent.</p>
+                </div>
+                <div class="field">
+                  <label>Payment Method</label>
+                  <div class="payment-method-group" id="payment-method-group">
+                    <button class="payment-btn is-active" data-method="mpesa" type="button">M-Pesa</button>
+                    <button class="payment-btn" data-method="bank" type="button">Bank Transfer</button>
+                    <button class="payment-btn" data-method="cash" type="button">Cash</button>
+                  </div>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="payment-reference">Payment Reference</label>
+                    <input type="text" id="payment-reference" placeholder="QAB12345CD">
+                  </div>
+                  <div class="field">
+                    <label for="payment-status">Payment Status</label>
+                    <select id="payment-status">
+                      <option value="paid">Paid</option>
+                      <option value="unpaid">Unpaid</option>
+                      <option value="partial">Partial</option>
+                    </select>
+                  </div>
+                  <div class="field invoice-grid-span-2">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="4" placeholder="Warranty terms, discounts, or special conditions..."></textarea>
+                  </div>
+                </div>
+              </section>
+            </form>
+
+            <aside class="invoice-sidebar">
+              <section class="panel-card invoice-totals-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Invoice Total</span>
+                  <h3>Live commercial breakdown</h3>
+                </div>
+                <div class="totals-row">
+                  <span>Subtotal</span>
+                  <strong id="display-subtotal">KSh 0.00</strong>
+                </div>
+                <div class="totals-row">
+                  <span>VAT (16%)</span>
+                  <strong id="display-vat">KSh 0.00</strong>
+                </div>
+                <div class="totals-divider"></div>
+                <div class="totals-row totals-row-total">
+                  <span>Total</span>
+                  <strong id="display-total">KSh 0.00</strong>
+                </div>
+                <div class="invoice-meta-note">
+                  <strong id="summary-invoice-number">Awaiting invoice number…</strong>
+                  <span>VAT is stored with the invoice at creation time and never recalculated later.</span>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-actions-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Generate PDF</span>
+                  <h3>Issue the document</h3>
+                  <p>The Worker creates the branded PDF, saves it to R2, and writes the invoice record into D1.</p>
+                </div>
+                <button class="btn btn-primary btn-lg invoice-generate-btn" id="generate-btn" type="button">Generate Invoice PDF</button>
+                <p class="invoice-status-message" id="invoice-status" aria-live="polite">Load the form, confirm the pricing, then generate the PDF.</p>
+
+                <div class="invoice-send-card" id="send-options" hidden>
+                  <p class="invoice-send-title">PDF ready. Choose the handoff route.</p>
+                  <div class="invoice-send-actions">
+                    <button class="btn btn-success" id="send-wa-btn" type="button">Send via WhatsApp</button>
+                    <button class="btn btn-secondary" id="send-email-btn" type="button">Send via Email</button>
+                    <button class="btn btn-ghost" id="download-btn" type="button">Download PDF</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">What Happens On Save</span>
+                  <h3>Automatic record updates</h3>
+                </div>
+                <ul class="checklist invoice-checklist">
+                  <li>The invoice row is saved into D1 with the VAT rate and computed totals.</li>
+                  <li>The client is created or updated automatically from the contact details entered here.</li>
+                  <li>The vehicle registration is attached to that client when vehicle details are provided.</li>
+                  <li>The PDF is stored in the documents bucket with the invoice number in its filename.</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+        </div>
       </main>
     </div>
   </div>
