@@ -18,7 +18,7 @@ import {
 
 const VAT_RATE = 0.16;
 const MAX_INVOICE_INSERT_RETRIES = 5;
-const FRESH_HEADERS = {
+export const FRESH_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
   Pragma: "no-cache",
   Expires: "0",
@@ -35,7 +35,7 @@ const clampPositiveInt = (value, fallback = 1) => {
   return parsed;
 };
 
-const isIsoDate = (value) => {
+export const isIsoDate = (value) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))) {
     return false;
   }
@@ -47,7 +47,7 @@ const isIsoDate = (value) => {
 const formatInvoiceNumber = (year, sequence) =>
   `MKT-${year}-${String(sequence).padStart(3, "0")}`;
 
-const formatPhoneForPdf = (value) => {
+export const formatPhoneForPdf = (value) => {
   const digits = String(value || "").replace(/\D/g, "");
   if (!digits) {
     return "";
@@ -255,7 +255,7 @@ const findExistingClient = async (env, payload) => {
     .first();
 };
 
-const resolveClient = async (env, payload) => {
+export const resolveClient = async (env, payload) => {
   const existing = await findExistingClient(env, payload);
 
   if (existing) {
@@ -303,7 +303,7 @@ const resolveClient = async (env, payload) => {
   return Number(insert.meta?.last_row_id || 0);
 };
 
-const resolveVehicle = async (env, clientId, payload) => {
+export const resolveVehicle = async (env, clientId, payload) => {
   if (!clientId || !payload.registration_no) {
     return null;
   }
@@ -455,6 +455,144 @@ const deleteInvoiceRow = async (env, invoiceId) => {
   }
 };
 
+const mapInvoiceRecord = (row) => {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row?.id || 0),
+    invoice_number: sanitizeText(row?.invoice_number || "", 40),
+    client_id: row?.client_id ? Number(row.client_id) : null,
+    vehicle_id: row?.vehicle_id ? Number(row.vehicle_id) : null,
+    warranty_id: row?.warranty_id ? Number(row.warranty_id) : null,
+    client_name: sanitizeText(row?.client_name || "", 120),
+    client_phone: sanitizeText(row?.client_phone || "", 40),
+    client_phone_display: formatPhoneForPdf(row?.client_phone || ""),
+    client_email: sanitizeText(row?.client_email || "", 120),
+    vehicle_make: sanitizeText(row?.vehicle_make || "", 100),
+    vehicle_model: sanitizeText(row?.vehicle_model || "", 100),
+    registration_no: sanitizeText(row?.registration_no || "", 40).toUpperCase(),
+    vehicle_type: sanitizeText(row?.vehicle_type || "", 30).toLowerCase(),
+    service_type: sanitizeText(row?.service_type || "", 30).toLowerCase(),
+    film_used: sanitizeText(row?.film_used || "", 200),
+    windows_count: Number(row?.windows_count || 0),
+    unit_price: roundCurrency(row?.unit_price),
+    subtotal: roundCurrency(row?.subtotal),
+    vat_rate: Number(row?.vat_rate || 0),
+    vat_amount: roundCurrency(row?.vat_amount),
+    total_amount: roundCurrency(row?.total_amount),
+    payment_method: sanitizeText(row?.payment_method || "", 20).toLowerCase(),
+    payment_reference: sanitizeText(row?.payment_reference || "", 100),
+    payment_status: sanitizeText(row?.payment_status || "", 20).toLowerCase(),
+    notes: sanitizeText(row?.notes || "", 1000),
+    service_date: sanitizeText(row?.service_date || "", 20),
+    pdf_r2_key: sanitizeText(row?.pdf_r2_key || "", 255),
+    created_at: row?.created_at || null,
+  };
+};
+
+export const findInvoiceRecordById = async (env, invoiceId) => {
+  const numericInvoiceId = Number.parseInt(String(invoiceId || ""), 10);
+  if (!Number.isInteger(numericInvoiceId) || numericInvoiceId <= 0) {
+    return null;
+  }
+
+  const row = await env.DB.prepare(
+    `
+      SELECT
+        i.id,
+        i.invoice_number,
+        i.client_id,
+        i.vehicle_id,
+        i.service_type,
+        i.film_used,
+        i.vehicle_type,
+        i.windows_count,
+        i.unit_price,
+        i.subtotal,
+        i.vat_rate,
+        i.vat_amount,
+        i.total_amount,
+        i.payment_method,
+        i.payment_reference,
+        i.payment_status,
+        i.notes,
+        i.service_date,
+        i.pdf_r2_key,
+        i.warranty_id,
+        i.created_at,
+        c.full_name AS client_name,
+        c.phone AS client_phone,
+        c.email AS client_email,
+        v.make AS vehicle_make,
+        v.model AS vehicle_model,
+        v.registration_no,
+        v.vehicle_type AS vehicle_vehicle_type
+      FROM invoices i
+      LEFT JOIN clients c
+        ON c.id = i.client_id
+      LEFT JOIN vehicles v
+        ON v.id = i.vehicle_id
+      WHERE i.id = ?
+      LIMIT 1
+    `
+  )
+    .bind(numericInvoiceId)
+    .first();
+
+  if (!row) {
+    return null;
+  }
+
+  return mapInvoiceRecord({
+    ...row,
+    vehicle_type: row?.vehicle_vehicle_type || row?.vehicle_type,
+  });
+};
+
+export const findInvoiceRecordByNumber = async (env, invoiceNumber) => {
+  const normalizedInvoiceNumber = sanitizeText(invoiceNumber || "", 40);
+  if (!normalizedInvoiceNumber) {
+    return null;
+  }
+
+  const row = await env.DB.prepare(
+    `
+      SELECT id
+      FROM invoices
+      WHERE invoice_number = ?
+      LIMIT 1
+    `
+  )
+    .bind(normalizedInvoiceNumber)
+    .first();
+
+  if (!row?.id) {
+    return null;
+  }
+
+  return findInvoiceRecordById(env, row.id);
+};
+
+const getInvoiceById = async (request, env, invoiceId) => {
+  const authError = await requireAuth(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const invoice = await findInvoiceRecordById(env, invoiceId);
+  if (!invoice) {
+    return json(
+      { error: "Invoice not found." },
+      { status: 404, headers: FRESH_HEADERS },
+      request
+    );
+  }
+
+  return json({ invoice }, { headers: FRESH_HEADERS }, request);
+};
+
 const generateInvoice = async (request, env) => {
   const authError = await requireAuth(request, env);
   if (authError) {
@@ -511,6 +649,7 @@ const generateInvoice = async (request, env) => {
         "Content-Disposition": `attachment; filename="MKT-Invoice-${payload.invoice_number}.pdf"`,
         "Cache-Control": "no-store",
         "X-MKT-Invoice-Number": payload.invoice_number,
+        "X-MKT-Invoice-Id": String(invoiceId),
       },
     });
 
@@ -529,6 +668,15 @@ const generateInvoice = async (request, env) => {
 
 export const handleInvoicesRequest = async (request, env) => {
   const { pathname } = new URL(request.url);
+
+  const invoiceMatch = pathname.match(/^\/api\/invoices\/(\d+)$/);
+  if (invoiceMatch) {
+    if (request.method !== "GET") {
+      return methodNotAllowed(request, ["GET"]);
+    }
+
+    return getInvoiceById(request, env, invoiceMatch[1]);
+  }
 
   if (pathname === "/api/invoices/next-number") {
     if (request.method !== "GET") {

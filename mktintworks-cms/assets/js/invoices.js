@@ -14,6 +14,7 @@
     clientsByName: new Map(),
     productsByName: new Map(),
     currentPdfBlob: null,
+    currentInvoiceId: "",
     currentInvoiceNumber: "",
     selectedPaymentMethod: "mpesa",
   };
@@ -43,6 +44,7 @@
     generateButton: document.getElementById("generate-btn"),
     status: document.getElementById("invoice-status"),
     sendOptions: document.getElementById("send-options"),
+    openWarranty: document.getElementById("open-warranty-btn"),
     sendWhatsapp: document.getElementById("send-wa-btn"),
     sendEmail: document.getElementById("send-email-btn"),
     download: document.getElementById("download-btn"),
@@ -100,6 +102,7 @@
     }
 
     state.currentPdfBlob = null;
+    state.currentInvoiceId = "";
     elements.sendOptions.hidden = true;
     setStatus("Draft changed. Generate the PDF again to save the latest invoice.", "warning");
   };
@@ -286,6 +289,7 @@
 
     return {
       blob: await response.blob(),
+      invoiceId: response.headers.get("X-MKT-Invoice-Id") || "",
       invoiceNumber:
         response.headers.get("X-MKT-Invoice-Number") || payload.invoice_number,
     };
@@ -385,6 +389,7 @@
       try {
         const result = await requestInvoicePdf(payload);
         state.currentPdfBlob = result.blob;
+        state.currentInvoiceId = String(result.invoiceId || "");
         setInvoiceNumber(result.invoiceNumber);
         elements.sendOptions.hidden = false;
         setStatus(
@@ -414,6 +419,15 @@
     `MKT-Invoice-${state.currentInvoiceNumber || elements.invoiceNumber.value || "draft"}.pdf`;
 
   const bindDownloadActions = () => {
+    elements.openWarranty?.addEventListener("click", () => {
+      if (!state.currentInvoiceId) {
+        window.showToast("Generate the invoice first so it can pre-fill the warranty form.", "warning");
+        return;
+      }
+
+      window.location.assign(`/pages/warranty.html?invoice_id=${encodeURIComponent(state.currentInvoiceId)}`);
+    });
+
     elements.download.addEventListener("click", () => {
       if (!ensurePdfReady()) {
         return;

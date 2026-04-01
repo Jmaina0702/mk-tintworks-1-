@@ -80,7 +80,7 @@
     "key": "warranty-generator",
     "name": "Warranty Generator",
     "complexity": "High",
-    "status": "planned",
+    "status": "live",
     "description": "Invoice-linked warranty certificate PDFs with unique certificate numbers."
   },
   {

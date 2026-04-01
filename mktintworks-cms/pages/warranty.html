@@ -20,14 +20,184 @@
   <link rel="stylesheet" href="../assets/css/cms-forms.css">
   <link rel="stylesheet" href="../assets/css/cms-badges.css">
   <link rel="stylesheet" href="../assets/css/cms-animations.css">
+  <link rel="stylesheet" href="../assets/css/cms-invoices.css">
+  <link rel="stylesheet" href="../assets/css/cms-warranty.css">
 </head>
-<body data-page-title="Warranty Generator" data-page-description="Issue clean warranty documents with traceable coverage rules and vehicle details.">
+<body data-page-title="Warranty Generator" data-page-description="Issue a formal warranty certificate with a globally unique certificate number and branded PDF output.">
   <div id="cms-app">
     <aside id="cms-sidebar" class="cms-sidebar"></aside>
     <div class="cms-main">
       <header id="cms-topbar" class="cms-topbar"></header>
       <main class="cms-content">
-        <div class="page-shell" data-module-shell></div>
+        <div class="page-shell invoice-page warranty-page">
+          <section class="hero-banner invoice-hero">
+            <div class="content-cluster">
+              <span class="eyebrow">Section 16</span>
+              <h2>Create the warranty certificate, lock the certificate number, and hand off the branded PDF in one flow.</h2>
+              <p>
+                This form can be used as a standalone warranty generator or pre-filled from an existing invoice.
+                The Worker issues a unique certificate number, saves the record into D1, uploads the PDF to the
+                documents bucket, and links the invoice when one is provided.
+              </p>
+            </div>
+            <div class="panel-card invoice-hero-card">
+              <span class="eyebrow">What This Protects</span>
+              <div class="invoice-rail-list">
+                <div class="invoice-rail-item warranty-rail-item">
+                  <div class="warranty-rail-glyph">MK</div>
+                  <div>
+                    <strong>Unique certificate identity</strong>
+                    <p>Every warranty gets an MK-prefixed safe-character number checked against D1 before issue.</p>
+                  </div>
+                </div>
+                <div class="invoice-rail-item warranty-rail-item">
+                  <div class="warranty-rail-glyph">PDF</div>
+                  <div>
+                    <strong>Premium legal-looking document</strong>
+                    <p>Gold border, wine header, clear coverage terms, and a certificate number that stays easy to read aloud.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card warranty-prefill-notice" id="prefill-notice" hidden aria-live="polite"></section>
+
+          <div class="invoice-shell">
+            <form id="warranty-form" class="invoice-form-column" novalidate>
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Client and Vehicle</span>
+                  <h3>Who the certificate belongs to</h3>
+                  <p>These fields anchor the warranty to the right client and installation context.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="w-client-name">Client Name <span class="invoice-required">*</span></label>
+                    <input type="text" id="w-client-name" placeholder="Full name" autocomplete="off">
+                  </div>
+                  <div class="field">
+                    <label for="w-client-phone">Phone</label>
+                    <input type="tel" id="w-client-phone" placeholder="+254 700 000 000" inputmode="tel">
+                  </div>
+                  <div class="field">
+                    <label for="w-client-email">Email</label>
+                    <input type="email" id="w-client-email" placeholder="client@email.com">
+                  </div>
+                  <div class="field">
+                    <label for="w-vehicle-reg">Registration Number</label>
+                    <input type="text" id="w-vehicle-reg" placeholder="KDD 123A" autocomplete="off">
+                  </div>
+                  <div class="field">
+                    <label for="w-vehicle-make">Vehicle Make</label>
+                    <input type="text" id="w-vehicle-make" placeholder="Toyota">
+                  </div>
+                  <div class="field">
+                    <label for="w-vehicle-model">Vehicle Model</label>
+                    <input type="text" id="w-vehicle-model" placeholder="Land Cruiser">
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Installation Details</span>
+                  <h3>What was installed and when</h3>
+                  <p>When opened from an invoice, these shared fields are pre-filled automatically.</p>
+                </div>
+                <div class="invoice-grid invoice-grid-2">
+                  <div class="field">
+                    <label for="w-film">Film Installed <span class="invoice-required">*</span></label>
+                    <input type="text" id="w-film" placeholder="3M Crystalline">
+                  </div>
+                  <div class="field">
+                    <label for="w-install-date">Installation Date <span class="invoice-required">*</span></label>
+                    <input type="date" id="w-install-date">
+                  </div>
+                  <div class="field">
+                    <label for="w-invoice-ref">Invoice Reference</label>
+                    <input type="text" id="w-invoice-ref" placeholder="MKT-2026-001">
+                  </div>
+                  <div class="field">
+                    <label for="w-issue-date">Issue Date <span class="invoice-required">*</span></label>
+                    <input type="date" id="w-issue-date">
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card invoice-section">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Warranty Terms</span>
+                  <h3>Define the coverage clearly</h3>
+                  <p>The document should stay readable to the client and defensible during any future claim.</p>
+                </div>
+                <div class="invoice-grid">
+                  <div class="field">
+                    <label for="w-period">Warranty Period <span class="invoice-required">*</span></label>
+                    <input type="text" id="w-period" placeholder="Lifetime, 5 Years, or 3 Years from installation">
+                  </div>
+                  <div class="field">
+                    <label for="w-covered">What Is Covered <span class="invoice-required">*</span></label>
+                    <textarea id="w-covered" rows="5" placeholder="Film delamination, bubbling, peeling, color fading, or purpling under normal use and proper care."></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="w-not-covered">What Is Not Covered <span class="invoice-required">*</span></label>
+                    <textarea id="w-not-covered" rows="5" placeholder="Physical damage, scratches, improper cleaning, accidents, abuse, or post-installation modifications."></textarea>
+                  </div>
+                  <div class="field">
+                    <label for="w-notes">Additional Notes</label>
+                    <textarea id="w-notes" rows="3" placeholder="Any extra warranty limitations, customer-specific notes, or claim instructions..."></textarea>
+                  </div>
+                </div>
+              </section>
+            </form>
+
+            <aside class="invoice-sidebar">
+              <section class="panel-card warranty-cert-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Certificate Number</span>
+                  <h3>Generated by the Worker</h3>
+                </div>
+                <p class="warranty-cert-display" id="cert-number-display">Auto-generated</p>
+                <p class="invoice-status-message">
+                  Format: MK + 8 safe characters. The Worker checks D1 for uniqueness before issuing the number.
+                </p>
+              </section>
+
+              <section class="panel-card invoice-actions-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">Generate PDF</span>
+                  <h3>Issue the certificate</h3>
+                  <p>The Worker creates the PDF, saves it to R2, and stores the warranty record in D1.</p>
+                </div>
+                <button class="btn btn-primary btn-lg invoice-generate-btn" id="generate-warranty-btn" type="button">Generate Certificate PDF</button>
+                <p class="invoice-status-message" id="warranty-status" aria-live="polite">Set the client, installation details, and coverage terms before generating the certificate.</p>
+
+                <div class="invoice-send-card" id="warranty-send-options" hidden>
+                  <p class="invoice-send-title">Certificate ready. Choose the handoff route.</p>
+                  <div class="invoice-send-actions">
+                    <button class="btn btn-success" id="w-send-wa" type="button">Send via WhatsApp</button>
+                    <button class="btn btn-secondary" id="w-send-email" type="button">Send via Email</button>
+                    <button class="btn btn-ghost" id="w-download" type="button">Download PDF</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel-card">
+                <div class="panel-heading-copy">
+                  <span class="eyebrow">What Happens On Save</span>
+                  <h3>Record and document updates</h3>
+                </div>
+                <ul class="checklist invoice-checklist">
+                  <li>A unique certificate number is generated using the MK safe-character format.</li>
+                  <li>The warranty row is written into D1 and linked to the invoice when a matching invoice context is resolved.</li>
+                  <li>The branded PDF is uploaded into the documents bucket using the certificate number in the filename.</li>
+                  <li>The same certificate PDF can then be downloaded for WhatsApp or attached through email.</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+        </div>
       </main>
     </div>
   </div>

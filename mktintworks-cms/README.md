@@ -1,12 +1,13 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 15.
+This directory now holds the CMS implementation through PRD Section 16.
 It contains the Access-protected admin shell, shared CMS design system,
 Worker-backed module clients, the live visual editor, the products manager,
 the gallery manager with client-side image compression, and the new blog
 listing/editor workflow with Workers AI SEO generation plus the testimonials
 moderation pipeline, promotions banner manager, central media library,
-page-level SEO manager, analytics dashboard, and invoice generator.
+page-level SEO manager, analytics dashboard, invoice generator, and warranty
+certificate generator.
 
 ## Current structure
 
@@ -27,7 +28,7 @@ page-level SEO manager, analytics dashboard, and invoice generator.
 - `data/`
   Section baseline and status files used by the visual editor and delivery tracking.
 
-## What Sections 6-15 add
+## What Sections 6-16 add
 
 - Section 6:
   Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
@@ -49,13 +50,15 @@ page-level SEO manager, analytics dashboard, and invoice generator.
   Analytics dashboard with Chart.js, protected summary aggregation, first-party event capture on the website, CTA/product/blog engagement tracking, and privacy-first reporting without cookies or third-party trackers.
 - Section 15:
   Invoice generator UI, Worker-issued sequential invoice numbers, server-side VAT locking, branded pdf-lib invoice output, client and vehicle auto-upserts, and R2-backed invoice PDF storage with WhatsApp/email handoff.
+- Section 16:
+  Warranty generator UI, unique MK certificate numbering, invoice-prefill lookup, branded pdf-lib warranty output, D1 plus R2 persistence, invoice-to-warranty linking, and WhatsApp/email handoff.
 
 ## Runtime model
 
 - CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
 - CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
 - The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
-- The public website is still a static site, but Sections 6-15 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, and generate branded invoice PDFs from the Worker for CMS billing workflows.
+- The public website is still a static site, but Sections 6-16 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, and generate branded invoice and warranty PDFs from the Worker for CMS billing and after-sales workflows.
 
 ## Deployment note
 

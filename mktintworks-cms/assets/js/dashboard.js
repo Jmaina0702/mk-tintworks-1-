@@ -33,7 +33,7 @@ window.MKT_CMS_UI.mountDashboardPage({
     { href: "/pages/seo.html", label: "SEO", summary: "Metadata coverage and snippet quality.", status: "Live" },
     { href: "/pages/analytics.html", label: "Analytics", summary: "Traffic and conversion questions.", status: "Live" },
     { href: "/pages/invoices.html", label: "Invoices", summary: "Commercial billing document flow.", status: "Live" },
-    { href: "/pages/warranty.html", label: "Warranty", summary: "Coverage records and issue flows.", status: "Queued" },
+    { href: "/pages/warranty.html", label: "Warranty", summary: "Certificate issuance with invoice prefill and PDF output.", status: "Live" },
     { href: "/pages/records.html", label: "Records", summary: "Client, vehicle, and install history.", status: "Queued" },
     { href: "/pages/sales.html", label: "Sales", summary: "Lead pipeline and close momentum.", status: "Queued" },
   ],
@@ -64,6 +64,7 @@ window.MKT_CMS_UI.mountDashboardPage({
     { title: "Section 2 infra remains live", meta: "Worker, D1, KV, R2, and secrets are already in place." },
     { title: "Section 3 migration preserved data", meta: "Products, blog rows, media, and analytics were kept intact." },
     { title: "Section 4 auth stays active", meta: "Cloudflare Access plus worker JWT exchange gate the CMS routes." },
+    { title: "Section 16 warranty generator landed", meta: "Certificate numbering, invoice prefill, and branded PDF generation are now live in the CMS." },
   ],
   quickLinks: [
     { href: "/pages/products.html", label: "Review pricing", summary: "Start with the 10 seed products and their tier positioning." },

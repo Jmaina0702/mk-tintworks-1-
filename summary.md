@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 15 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 16 on top of the original static marketing site.
 
 ## Current system
 
@@ -47,6 +47,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The analytics dashboard was implemented, including first-party website event tracking, a protected summary endpoint, Chart.js-backed CMS reporting, product-click and CTA tracking, and country/referrer aggregation without cookies or personal data.
 - Section 15:
   The invoice generator was implemented, including Worker-issued invoice numbering, VAT-aware totals, branded pdf-lib PDF output, D1 plus R2 persistence, client and vehicle auto-upserts, and WhatsApp/email handoff from the CMS.
+- Section 16:
+  The warranty certificate generator was implemented, including unique MK certificate numbering, invoice-prefill support, branded pdf-lib warranty PDFs, D1 plus R2 persistence, invoice-to-warranty linking, and WhatsApp/email handoff from the CMS.
 
 ## Architecture
 
@@ -540,6 +542,83 @@ Section 15 adds a branded invoice document generated directly inside the Cloudfl
 - No third-party PDF API dependency; document rendering stays fully under repo control
 - Binary PDF response is streamed straight back to the CMS so the admin can download or hand it off immediately after save
 
+## Section 16 details
+
+### CMS warranty generator
+
+- Page:
+  [`mktintworks-cms/pages/warranty.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/warranty.html)
+- Client:
+  [`mktintworks-cms/assets/js/warranty.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/warranty.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-warranty.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-warranty.css)
+
+Implemented behavior:
+
+- Standalone warranty form accessible from the CMS sidebar
+- `issue_date` defaults to today on page load
+- Optional invoice-prefill flow through `?invoice_id=...` using a protected invoice lookup endpoint
+- Pre-fill notice rendered when the page is opened from an invoice context
+- Registration input auto-uppercasing in the browser
+- Required-field validation for client, film, install date, issue date, warranty period, coverage, and exclusions
+- Certificate-number display updated from the Worker response header after successful generation
+- Send-via-WhatsApp, send-via-email, and direct-download handoff after the PDF is generated
+
+### Invoice-to-warranty bridge
+
+- Invoice page:
+  [`mktintworks-cms/pages/invoices.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/invoices.html)
+- Invoice client:
+  [`mktintworks-cms/assets/js/invoices.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/invoices.js)
+
+Section 16 also adds a direct bridge from the invoice generator into the warranty generator:
+
+- the invoice Worker response now returns `X-MKT-Invoice-Id`
+- the invoice send-actions card now includes an `Open Warranty Form` action
+- that action opens the warranty generator with `invoice_id` in the query string so the shared customer, vehicle, film, service date, and invoice reference fields can be pre-filled immediately
+
+### Worker warranty API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/warranties.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/warranties.js)
+
+Endpoints:
+
+- `POST /api/warranties/generate`
+  Protected PDF-generation and warranty-save endpoint
+- `GET /api/invoices/:id`
+  Protected single-invoice lookup used for warranty prefill
+
+Important implementation details:
+
+- Certificate numbers are generated with the safe charset `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, prefixed with `MK`, and checked against D1 for uniqueness before issue.
+- Warranty generation reuses the client and vehicle upsert logic from the invoice workflow so standalone warranty creation still stays traceable in records.
+- When a linked invoice already has a `warranty_id`, the Worker rejects duplicate issuance instead of silently generating a second legal document for the same invoice.
+- Warranty PDFs are uploaded to `DOCUMENTS_BUCKET` under `documents/warranty-MKxxxxxxxx.pdf`, and the final `pdf_r2_key` is written back into the `warranties` table.
+- If generation fails after the warranty row is inserted, the Worker performs best-effort cleanup of the D1 row and invoice link so the certificate store does not accumulate partial records.
+
+### Certificate number utility
+
+- Utility:
+  [`mktintworks-cms-api/src/utils/cert-number.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/cert-number.js)
+
+Section 16 adds a dedicated certificate-number generator that:
+
+- uses secure random bytes instead of `Math.random()`
+- produces `MK` plus 8 safe characters
+- retries uniqueness checks up to 20 times before failing hard
+
+### Worker warranty PDF generator
+
+- Generator:
+  [`mktintworks-cms-api/src/pdf/warranty-generator.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/pdf/warranty-generator.js)
+
+Section 16 adds a branded warranty certificate generated directly inside the Cloudflare Worker with `pdf-lib`:
+
+- A4 layout with gold outer border, wine inner border, branded header, centered title, and prominent certificate number
+- structured client, vehicle, film, invoice-reference, installation-date, and issue-date presentation
+- separate coverage and exclusion panels plus optional notes and signature/footer copy
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -555,7 +634,7 @@ Section 15 adds a branded invoice document generated directly inside the Cloudfl
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 15
+## Current repo shape after Section 16
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -581,8 +660,12 @@ Section 15 adds a branded invoice document generated directly inside the Cloudfl
   Served from `GET /api/analytics/summary?days=...`
 - Protected invoice numbering:
   Served from `GET /api/invoices/next-number`
+- Protected invoice lookup for warranty prefill:
+  Served from `GET /api/invoices/:id`
 - Protected invoice PDF generation:
   Served from `POST /api/invoices/generate`
+- Protected warranty PDF generation:
+  Served from `POST /api/warranties/generate`
 - Protected client lookup for invoice autocomplete:
   Served from `GET /api/records/clients`
 - Published blog pages:
@@ -596,12 +679,13 @@ Section 15 adds a branded invoice document generated directly inside the Cloudfl
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-15 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, and invoice document generation.
+- The public site still keeps static fallback patterns where useful, but Sections 6-16 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, and warranty certificate generation.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
 - Invoice PDFs are intentionally generated inside the Worker and stored in the documents bucket, so the commercial document output stays branded, reproducible, and independent of browser-only rendering.
+- Warranty PDFs are intentionally generated inside the Worker and stored in the documents bucket, so claim documents stay branded, uniquely identifiable, and linked back to invoice history where applicable.
 
 ## Next section
 
-The next PRD milestone is Section 16.
+The next PRD milestone is Section 17.
