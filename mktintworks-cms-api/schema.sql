@@ -276,6 +276,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   page        TEXT,
   referrer    TEXT,
   product_key TEXT,
+  label       TEXT,
   country     TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );

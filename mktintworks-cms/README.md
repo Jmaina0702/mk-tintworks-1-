@@ -1,12 +1,12 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 13.
+This directory now holds the CMS implementation through PRD Section 14.
 It contains the Access-protected admin shell, shared CMS design system,
 Worker-backed module clients, the live visual editor, the products manager,
 the gallery manager with client-side image compression, and the new blog
 listing/editor workflow with Workers AI SEO generation plus the testimonials
-moderation pipeline, promotions banner manager, central media library, and
-page-level SEO manager.
+moderation pipeline, promotions banner manager, central media library,
+page-level SEO manager, and analytics dashboard.
 
 ## Current structure
 
@@ -27,7 +27,7 @@ page-level SEO manager.
 - `data/`
   Section baseline and status files used by the visual editor and delivery tracking.
 
-## What Sections 6-13 add
+## What Sections 6-14 add
 
 - Section 6:
   Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
@@ -45,13 +45,15 @@ page-level SEO manager.
   Media library inventory in the CMS, protected listing and deletion routes, live usage detection across implemented modules, storage tracking, filename search, and orphan cleanup workflows.
 - Section 13:
   SEO manager UI for the six main pages, live Google and social previews, OG image upload flow, Worker-backed SEO CRUD, a public SEO feed, and build-time injection of saved metadata into public page source.
+- Section 14:
+  Analytics dashboard with Chart.js, protected summary aggregation, first-party event capture on the website, CTA/product/blog engagement tracking, and privacy-first reporting without cookies or third-party trackers.
 
 ## Runtime model
 
 - CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
 - CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
 - The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
-- The public website is still a static site, but Sections 6-13 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, and now write saved SEO metadata directly into generated HTML for the six core pages.
+- The public website is still a static site, but Sections 6-14 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, and post first-party analytics events back to the Worker for dashboard reporting.
 
 ## Deployment note
 

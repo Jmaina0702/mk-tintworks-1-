@@ -10,6 +10,8 @@ const buildStamp = String(Date.now());
 const publicSiteBase =
   process.env.PUBLIC_SITE_BASE || "https://mk-tintworks-1.pages.dev";
 const productionSiteBase = "https://mktintworks.com";
+const analyticsTrackerScriptTag =
+  '  <script src="/assets/js/analytics-tracker.js" defer></script>';
 const seoPagePaths = {
   home: "/",
   services: "/services.html",
@@ -60,11 +62,10 @@ const copyLegacyBlogPages = async () => {
       continue;
     }
 
-    await cp(
-      path.join(sourceDir, entry.name),
-      path.join(targetDir, entry.name),
-      { force: true }
-    );
+    const sourcePath = path.join(sourceDir, entry.name);
+    const targetPath = path.join(targetDir, entry.name);
+    const html = await readFile(sourcePath, "utf8");
+    await writeFile(targetPath, ensureAnalyticsTrackerScript(html));
   }
 };
 
@@ -207,6 +208,17 @@ const upsertCanonicalLink = (html, href) => {
   }
 
   return html.replace("</head>", `  ${replacement}\n</head>`);
+};
+
+const ensureAnalyticsTrackerScript = (html) => {
+  if (String(html || "").includes("/assets/js/analytics-tracker.js")) {
+    return html;
+  }
+
+  return String(html || "").replace(
+    "</body>",
+    `${analyticsTrackerScriptTag}\n</body>`
+  );
 };
 
 const applySeoSettingsToHtml = (html, slug, seoSettings) => {
@@ -733,6 +745,8 @@ for (const page of htmlPages) {
     );
   }
 
+  nextHtml = ensureAnalyticsTrackerScript(nextHtml);
+
   await writeFile(filePath, nextHtml);
 }
 
@@ -748,14 +762,16 @@ if (!blogStateLoaded) {
       console.warn(`Page content fetch failed for blog-${article.slug}.`, error.message);
     }
 
-    const articleHtml = renderBlogArticlePage(
-      article,
-      articlePageContent,
-      {
-        nav: navContent,
-        footer: footerContent,
-      },
-      pickRelatedArticles(blogState.articles, article)
+    const articleHtml = ensureAnalyticsTrackerScript(
+      renderBlogArticlePage(
+        article,
+        articlePageContent,
+        {
+          nav: navContent,
+          footer: footerContent,
+        },
+        pickRelatedArticles(blogState.articles, article)
+      )
     );
 
     await writeFile(

@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 13 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 14 on top of the original static marketing site.
 
 ## Current system
 
@@ -43,6 +43,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The media library was implemented, including protected inventory listing, storage usage reporting, live usage detection, copy URL actions, orphan filtering, and best-effort media deletion from R2 plus D1.
 - Section 13:
   The SEO Manager was implemented, including per-page search metadata editing for the six main website pages, OG image upload, live Google and social previews, protected SEO CRUD routes, a public SEO feed, and build-time injection of saved metadata into generated public page source.
+- Section 14:
+  The analytics dashboard was implemented, including first-party website event tracking, a protected summary endpoint, Chart.js-backed CMS reporting, product-click and CTA tracking, and country/referrer aggregation without cookies or personal data.
 
 ## Architecture
 
@@ -64,6 +66,7 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js), and [`assets/js/main.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/main.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
 6. The shared public header runtime now fetches `GET /api/promotions/active` and renders a dismissible rotating banner above the navigation when any scheduled promotion is currently live.
 7. The build also now fetches `GET /api/seo/public` so saved page-level titles, descriptions, canonical URLs, OG tags, and Twitter card tags are written into the generated HTML for the six core pages.
+8. The built public site now also injects a first-party analytics tracker script into every deployed page so page views, product interest, CTA clicks, and blog reads can be posted to `POST /api/analytics/event`.
 
 ### 3. Storage model
 
@@ -423,6 +426,66 @@ Section 13 changes the public metadata flow from manually maintained static tags
 - saved SEO values overwrite the generated `<title>`, `meta name="description"`, canonical URL, Open Graph tags, and Twitter card tags in `dist/`
 - if the SEO endpoint is unavailable during a build, the script preserves the existing static fallback tags instead of breaking the page output
 
+## Section 14 details
+
+### CMS analytics dashboard
+
+- Page:
+  [`mktintworks-cms/pages/analytics.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/analytics.html)
+- Client:
+  [`mktintworks-cms/assets/js/analytics.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/analytics.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-analytics.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-analytics.css)
+
+Implemented behavior:
+
+- Protected analytics dashboard with a 7/30/90-day period selector
+- Summary cards for page views, product clicks, booking-intent clicks, and article reads
+- Chart.js visualizations for daily page views, traffic sources, top pages, and most-clicked products
+- Country breakdown table sourced from Cloudflare country headers on pageview events
+- Empty-state handling so low-data periods do not break chart rendering
+- Privacy-first reporting copy that makes the no-cookie, no-personal-data scope explicit inside the CMS
+
+### Worker analytics API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/analytics.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/analytics.js)
+
+Endpoints:
+
+- `POST /api/analytics/event`
+  Public event-ingest endpoint for the live website
+- `GET /api/analytics/summary?days=7|30|90`
+  Protected aggregated dashboard endpoint for the CMS
+
+Important implementation details:
+
+- Event ingestion remains public and intentionally silent on malformed payloads so analytics never creates user-visible website errors.
+- Protected summary reads still require JWT auth and return `401` without a valid CMS session.
+- The analytics table now stores CTA `label` values in addition to event type, page path, referrer, product key, country, and timestamp.
+- Summary aggregation uses D1 directly for totals, top pages, sources, products, and top countries over the selected period.
+- Daily page-view output is gap-filled so the dashboard line chart can show every day in the selected window, even when some days had zero events.
+
+### Public analytics tracker
+
+- Tracker script:
+  [`assets/js/analytics-tracker.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/analytics-tracker.js)
+- Product card runtime:
+  [`assets/js/services-products.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services-products.js)
+- Booking flow hook:
+  [`assets/js/booking.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/booking.js)
+- Build pipeline:
+  [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs)
+
+Section 14 adds first-party website tracking without Google Analytics or cookies:
+
+- every built public HTML page now includes the shared analytics tracker before `</body>`
+- `pageview` fires on page load
+- `product_click` fires when a visitor opens a services-page More Info panel for a product card
+- `cta_click` fires for booking-oriented CTAs and the booking-form submission flow, while WhatsApp CTA clicks are labeled separately
+- `blog_read` fires once a visitor scrolls at least 50% through a generated blog article page
+- legacy static blog-page fallback copies also receive the tracker during the build, so analytics does not disappear if article generation ever falls back
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -438,7 +501,7 @@ Section 13 changes the public metadata flow from manually maintained static tags
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 13
+## Current repo shape after Section 14
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -454,10 +517,14 @@ Section 13 changes the public metadata flow from manually maintained static tags
   Served from `GET /api/testimonials/public`
 - Public promotions data:
   Served from `GET /api/promotions/active`
+- Public analytics ingest:
+  Served from `POST /api/analytics/event`
 - Public SEO data:
   Served from `GET /api/seo/public`
 - Protected media library data:
   Served from `GET /api/media`
+- Protected analytics summary:
+  Served from `GET /api/analytics/summary?days=...`
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -469,10 +536,11 @@ Section 13 changes the public metadata flow from manually maintained static tags
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-13 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, and uploaded media records.
+- The public site still keeps static fallback patterns where useful, but Sections 6-14 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, and first-party analytics event storage.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
+- Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
 
 ## Next section
 
-The next PRD milestone is Section 14.
+The next PRD milestone is Section 15.

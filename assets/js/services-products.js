@@ -144,7 +144,10 @@
         : "";
 
     return `
-      <article class="product-card ${index % 2 === 1 ? "reverse" : ""} is-visible">
+      <article
+        class="product-card ${index % 2 === 1 ? "reverse" : ""} is-visible"
+        data-product-key="${escapeHtml(product.product_key)}"
+      >
         <div class="product-image">
           <img
             src="${escapeHtml(product.image_url)}"

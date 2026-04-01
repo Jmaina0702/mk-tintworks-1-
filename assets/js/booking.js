@@ -135,6 +135,10 @@ if (bookingForm) {
       ].join("\n")
     );
 
+    if (typeof window.MKT_TRACK_EVENT === "function") {
+      window.MKT_TRACK_EVENT("cta_click", { label: "book_now" });
+    }
+
     const emailOk = await sendForm({
       access_key: WEB3_ACCESS_KEY,
       subject: "New Booking – MK Tintworks",

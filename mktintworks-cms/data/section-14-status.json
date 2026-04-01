@@ -1,0 +1,66 @@
+{
+  "section": 14,
+  "title": "Analytics Dashboard",
+  "completed_at": "2026-04-01T14:36:29.4658268+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "667815db-b5e4-4b27-9cc8-244e82ec2bf2",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "public_event_ingest_returns_200": true,
+      "protected_summary_returns_401_without_jwt": true,
+      "country_and_label_capture_verified_in_d1": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://c17f2bc0.mktintworks-cms.pages.dev",
+    "verified": {
+      "analytics_dashboard_page_built": true,
+      "chartjs_loaded": true,
+      "period_selector_and_refresh_wired": true,
+      "country_table_and_summary_cards_render": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://0afd95db.mk-tintworks-1.pages.dev",
+    "verified": {
+      "production_host_responds": true,
+      "analytics_tracker_script_served": true,
+      "analytics_tracker_injected_into_built_pages": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build",
+    "node_check_passed_for_worker_route": true,
+    "node_check_passed_for_tracker": true,
+    "node_check_passed_for_cms_dashboard": true,
+    "node_check_passed_for_build_script": true
+  },
+  "live_verification": {
+    "worker_health_200": true,
+    "analytics_summary_401_without_jwt": true,
+    "analytics_event_ingest_200": true,
+    "public_tracker_asset_200": true,
+    "cms_preview_analytics_page_200": true
+  },
+  "features": {
+    "first_party_tracking": true,
+    "pageview_tracking": true,
+    "product_click_tracking": true,
+    "cta_click_tracking": true,
+    "blog_read_tracking": true,
+    "privacy_first_reporting": true,
+    "traffic_source_aggregation": true,
+    "country_breakdown": true
+  },
+  "notes": [
+    "Section 14 keeps analytics first-party and lightweight, without cookies or personal data storage.",
+    "The Access-protected CMS production hostname returns the Cloudflare Access sign-in page from this environment, so asset-level verification was performed against the latest CMS preview deployment.",
+    "A one-time remote D1 migration added the analytics_events.label column before the Worker deployment went live."
+  ]
+}
