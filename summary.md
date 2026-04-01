@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 12 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 13 on top of the original static marketing site.
 
 ## Current system
 
@@ -41,6 +41,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The promotions and announcements banner system was implemented, including the CMS banner manager, Worker-backed scheduling and image upload routes, and the public sitewide rotating banner rendered above the main navigation.
 - Section 12:
   The media library was implemented, including protected inventory listing, storage usage reporting, live usage detection, copy URL actions, orphan filtering, and best-effort media deletion from R2 plus D1.
+- Section 13:
+  The SEO Manager was implemented, including per-page search metadata editing for the six main website pages, OG image upload, live Google and social previews, protected SEO CRUD routes, a public SEO feed, and build-time injection of saved metadata into generated public page source.
 
 ## Architecture
 
@@ -61,6 +63,7 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 4. The build now also generates the public blog index and each published blog article from Worker-backed blog data.
 5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js), and [`assets/js/main.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/main.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
 6. The shared public header runtime now fetches `GET /api/promotions/active` and renders a dismissible rotating banner above the navigation when any scheduled promotion is currently live.
+7. The build also now fetches `GET /api/seo/public` so saved page-level titles, descriptions, canonical URLs, OG tags, and Twitter card tags are written into the generated HTML for the six core pages.
 
 ### 3. Storage model
 
@@ -364,6 +367,62 @@ Important implementation details:
 - Stored `used_in` values still act as fallback labels for future modules that may write into the media table before their own Section PRDs are implemented.
 - Section 12 does not add a new public website runtime. It is a protected CMS operations surface only.
 
+## Section 13 details
+
+### CMS SEO manager
+
+- Page:
+  [`mktintworks-cms/pages/seo.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/seo.html)
+- Client:
+  [`mktintworks-cms/assets/js/seo.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/seo.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-seo.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-seo.css)
+
+Implemented behavior:
+
+- Page selector for the six PRD-defined public routes: home, services, gallery, testimonials, blog, and book
+- Editable meta title and meta description with live character counters
+- Editable OG title and OG description with fallback-to-search-field behavior when left blank
+- OG image upload with immediate local preview before save
+- Live Google-style search preview and WhatsApp/Facebook-style share card preview
+- Save flow that uploads a compressed OG image when needed, stores SEO settings, and surfaces rebuild status feedback inside the CMS
+- Metrics cards showing coverage across the six controlled pages
+
+### Worker SEO API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/seo.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/seo.js)
+
+Endpoints:
+
+- `GET /api/seo/:slug`
+  Protected single-page SEO load for the CMS
+- `POST /api/seo/save`
+  Protected create/update for page SEO settings with deploy-hook trigger
+- `POST /api/seo/upload-og-image`
+  Protected OG image upload to R2 plus `media` table insert
+- `GET /api/seo/public`
+  Public feed returning all six page SEO rows for the static build
+
+Important implementation details:
+
+- Protected SEO routes still require JWT auth, while the public site only consumes the read-only `/api/seo/public` endpoint.
+- The Worker restricts SEO edits to the six approved page slugs from the PRD instead of allowing arbitrary page names.
+- Public SEO responses always return all six page keys, even if a row is missing, so the build pipeline has deterministic coverage.
+- OG image uploads are recorded in the shared `media` table with `used_in = ["seo"]`, which keeps the Media Library usage view accurate.
+- Saving SEO settings triggers the public-site deploy hook so the next Pages build can publish the updated page source.
+
+### Public SEO build injection
+
+- Build pipeline:
+  [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs)
+
+Section 13 changes the public metadata flow from manually maintained static tags to Worker-backed build output for the six main pages:
+
+- `index.html`, `services.html`, `gallery.html`, `testimonials.html`, `book.html`, and `blog/index.html` now pull their SEO settings from the Worker during `npm run build`
+- saved SEO values overwrite the generated `<title>`, `meta name="description"`, canonical URL, Open Graph tags, and Twitter card tags in `dist/`
+- if the SEO endpoint is unavailable during a build, the script preserves the existing static fallback tags instead of breaking the page output
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -379,7 +438,7 @@ Important implementation details:
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 12
+## Current repo shape after Section 13
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -395,6 +454,8 @@ Important implementation details:
   Served from `GET /api/testimonials/public`
 - Public promotions data:
   Served from `GET /api/promotions/active`
+- Public SEO data:
+  Served from `GET /api/seo/public`
 - Protected media library data:
   Served from `GET /api/media`
 - Published blog pages:
@@ -408,9 +469,10 @@ Important implementation details:
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-12 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, and uploaded media records.
+- The public site still keeps static fallback patterns where useful, but Sections 6-13 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, and uploaded media records.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
+- SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 
 ## Next section
 
-The next PRD milestone is Section 13.
+The next PRD milestone is Section 14.

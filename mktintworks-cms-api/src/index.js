@@ -83,6 +83,7 @@ const health = (request, env) =>
         "GET /api/pages/content?slug=...",
         "GET /api/promotions/active",
         "GET /api/products/site-data",
+        "GET /api/seo/public",
         "GET /api/testimonials/public",
         "POST /api/testimonials/submit",
       ],

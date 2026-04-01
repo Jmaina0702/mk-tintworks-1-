@@ -1,0 +1,64 @@
+{
+  "section": 13,
+  "title": "SEO Manager",
+  "completed_at": "2026-04-01T13:58:36.2753322+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "906e0e97-d710-4453-992b-261ec1ed5aea",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "public_seo_feed_returns_200": true,
+      "public_seo_feed_returns_all_six_pages": true,
+      "protected_single_page_seo_returns_401_without_jwt": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://8505c25c.mktintworks-cms.pages.dev",
+    "verified": {
+      "seo_manager_page_200": true,
+      "live_preview_ui_built": true,
+      "og_image_upload_flow_wired": true,
+      "same_origin_api_proxy_preserved": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://ef365824.mk-tintworks-1.pages.dev",
+    "verified": {
+      "production_host_responds": true,
+      "home_page_title_updated_in_source": true,
+      "blog_index_title_updated_in_source": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build",
+    "node_check_passed_for_worker_route": true,
+    "node_check_passed_for_build_script": true,
+    "node_check_passed_for_cms_seo_client": true
+  },
+  "live_verification": {
+    "worker_health_200": true,
+    "public_seo_feed_200": true,
+    "cms_seo_page_200": true,
+    "public_home_source_contains_seo_title": true
+  },
+  "features": {
+    "page_level_meta_title_control": true,
+    "page_level_meta_description_control": true,
+    "og_image_upload": true,
+    "og_title_and_description_overrides": true,
+    "live_google_preview": true,
+    "live_whatsapp_facebook_preview": true,
+    "build_time_head_tag_injection": true,
+    "deploy_hook_trigger_on_save": true
+  },
+  "notes": [
+    "Section 13 covers the six main website pages only: home, services, gallery, testimonials, blog, and book.",
+    "Saved SEO settings now flow into generated page source during the static build instead of relying on runtime-only metadata.",
+    "The custom domain mktintworks.com did not resolve from this environment at verification time, so live checks were performed against the production Pages hosts."
+  ]
+}

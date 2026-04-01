@@ -1,11 +1,12 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 12.
+This directory now holds the CMS implementation through PRD Section 13.
 It contains the Access-protected admin shell, shared CMS design system,
 Worker-backed module clients, the live visual editor, the products manager,
 the gallery manager with client-side image compression, and the new blog
 listing/editor workflow with Workers AI SEO generation plus the testimonials
-moderation pipeline, promotions banner manager, and central media library.
+moderation pipeline, promotions banner manager, central media library, and
+page-level SEO manager.
 
 ## Current structure
 
@@ -24,9 +25,9 @@ moderation pipeline, promotions banner manager, and central media library.
 - `assets/images/`
   CMS logo and supporting brand assets used by later operations modules.
 - `data/`
-  Section baseline and status files, now including Section 12 delivery state.
+  Section baseline and status files used by the visual editor and delivery tracking.
 
-## What Sections 6-12 add
+## What Sections 6-13 add
 
 - Section 6:
   Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
@@ -42,13 +43,15 @@ moderation pipeline, promotions banner manager, and central media library.
   Promotions banner CRUD in the CMS, Worker-backed schedule validation and image uploads, a public active-banner API, and the rotating dismissible sitewide header banner on the website.
 - Section 12:
   Media library inventory in the CMS, protected listing and deletion routes, live usage detection across implemented modules, storage tracking, filename search, and orphan cleanup workflows.
+- Section 13:
+  SEO manager UI for the six main pages, live Google and social previews, OG image upload flow, Worker-backed SEO CRUD, a public SEO feed, and build-time injection of saved metadata into public page source.
 
 ## Runtime model
 
 - CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
 - CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
 - The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
-- The public website is still a static site, but Sections 6-12 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, and expose a protected media inventory for CMS operations.
+- The public website is still a static site, but Sections 6-13 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, and now write saved SEO metadata directly into generated HTML for the six core pages.
 
 ## Deployment note
 

@@ -9,6 +9,15 @@ const apiBase =
 const buildStamp = String(Date.now());
 const publicSiteBase =
   process.env.PUBLIC_SITE_BASE || "https://mk-tintworks-1.pages.dev";
+const productionSiteBase = "https://mktintworks.com";
+const seoPagePaths = {
+  home: "/",
+  services: "/services.html",
+  gallery: "/gallery.html",
+  testimonials: "/testimonials.html",
+  blog: "/blog/",
+  book: "/book.html",
+};
 
 const displayDateFormatter = new Intl.DateTimeFormat("en-KE", {
   day: "numeric",
@@ -68,6 +77,8 @@ const escapeHtml = (value) =>
     .replace(/'/g, "&#39;");
 
 const escapeAttribute = (value) => escapeHtml(value).replace(/`/g, "&#96;");
+const escapeRegex = (value) =>
+  String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const stripHtml = (value) =>
   String(value || "")
@@ -149,6 +160,99 @@ const normalizeBlogArticle = (article) => ({
   created_at: article?.created_at || null,
 });
 
+const readTitleTag = (html) => {
+  const match = String(html || "").match(/<title>([\s\S]*?)<\/title>/i);
+  return String(match?.[1] || "").trim();
+};
+
+const readMetaContent = (html, attrName, attrValue) => {
+  const pattern = new RegExp(
+    `<meta\\s+${attrName}="${escapeRegex(attrValue)}"\\s+content="([^"]*)"\\s*\\/?>`,
+    "i"
+  );
+  const match = String(html || "").match(pattern);
+  return String(match?.[1] || "").trim();
+};
+
+const upsertMetaTag = (html, attrName, attrValue, content) => {
+  if (!content) {
+    return html;
+  }
+
+  const replacement = `<meta ${attrName}="${attrValue}" content="${escapeAttribute(
+    content
+  )}">`;
+  const pattern = new RegExp(
+    `<meta\\s+${attrName}="${escapeRegex(attrValue)}"\\s+content="[^"]*"\\s*\\/?>`,
+    "i"
+  );
+
+  if (pattern.test(html)) {
+    return html.replace(pattern, replacement);
+  }
+
+  return html.replace("</head>", `  ${replacement}\n</head>`);
+};
+
+const upsertCanonicalLink = (html, href) => {
+  if (!href) {
+    return html;
+  }
+
+  const replacement = `<link rel="canonical" href="${escapeAttribute(href)}">`;
+  const pattern = /<link rel="canonical" href="[^"]*"\s*\/?>/i;
+
+  if (pattern.test(html)) {
+    return html.replace(pattern, replacement);
+  }
+
+  return html.replace("</head>", `  ${replacement}\n</head>`);
+};
+
+const applySeoSettingsToHtml = (html, slug, seoSettings) => {
+  if (!slug || !seoPagePaths[slug] || !seoSettings) {
+    return html;
+  }
+
+  const fallbackTitle = readTitleTag(html);
+  const fallbackDescription = readMetaContent(html, "name", "description");
+  const fallbackOgImage = readMetaContent(html, "property", "og:image");
+  const title = String(seoSettings.meta_title || fallbackTitle).trim();
+  const description = String(
+    seoSettings.meta_description || fallbackDescription
+  ).trim();
+  const ogTitle = String(seoSettings.og_title || title).trim();
+  const ogDescription = String(
+    seoSettings.og_description || description
+  ).trim();
+  const ogImage = String(seoSettings.og_image_url || fallbackOgImage).trim();
+  const canonical = `${productionSiteBase}${seoPagePaths[slug]}`;
+
+  let nextHtml = html;
+
+  if (title) {
+    nextHtml = nextHtml.replace(
+      /<title>[\s\S]*?<\/title>/i,
+      `<title>${escapeHtml(title)}</title>`
+    );
+  }
+
+  nextHtml = upsertMetaTag(nextHtml, "name", "description", description);
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:title", ogTitle);
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:description", ogDescription);
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:image", ogImage);
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:url", canonical);
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:type", "website");
+  nextHtml = upsertMetaTag(nextHtml, "property", "og:site_name", "MK Tintworks");
+  nextHtml = upsertMetaTag(nextHtml, "name", "twitter:card", "summary_large_image");
+  nextHtml = upsertMetaTag(nextHtml, "name", "twitter:title", ogTitle);
+  nextHtml = upsertMetaTag(nextHtml, "name", "twitter:description", ogDescription);
+  nextHtml = upsertMetaTag(nextHtml, "name", "twitter:image", ogImage);
+  nextHtml = upsertCanonicalLink(nextHtml, canonical);
+
+  return nextHtml;
+};
+
 const fetchContent = async (slug) => {
   const url = new URL(`${apiBase}/api/pages/content`);
   url.searchParams.set("slug", slug);
@@ -218,6 +322,23 @@ const fetchTestimonialsState = async () => {
   return {
     testimonials: Array.isArray(payload?.testimonials) ? payload.testimonials : [],
     generated_at: new Date().toISOString(),
+  };
+};
+
+const fetchSeoState = async () => {
+  const url = new URL(`${apiBase}/api/seo/public`);
+  url.searchParams.set("_build", buildStamp);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch seo: ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return {
+    settings:
+      payload?.settings && typeof payload.settings === "object"
+        ? payload.settings
+        : {},
   };
 };
 
@@ -520,6 +641,9 @@ let testimonialsState = {
   testimonials: [],
   generated_at: null,
 };
+let seoState = {
+  settings: {},
+};
 let blogStateLoaded = false;
 
 try {
@@ -559,6 +683,12 @@ try {
   );
 }
 
+try {
+  seoState = await fetchSeoState();
+} catch (error) {
+  console.warn("SEO state fetch failed. Static page metadata will remain.", error.message);
+}
+
 for (const page of htmlPages) {
   let sourcePath = path.join(root, page.file);
   if (page.file === "blog/index.html") {
@@ -593,6 +723,14 @@ for (const page of htmlPages) {
 
   if (page.file === "blog/index.html" && blogStateLoaded) {
     nextHtml = replaceBlogGrid(nextHtml, renderBlogCards(blogState.articles));
+  }
+
+  if (seoPagePaths[page.slug]) {
+    nextHtml = applySeoSettingsToHtml(
+      nextHtml,
+      page.slug,
+      seoState.settings?.[page.slug]
+    );
   }
 
   await writeFile(filePath, nextHtml);
