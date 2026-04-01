@@ -1,7 +1,7 @@
 {
   "section": 15,
   "title": "Invoice Generator",
-  "completed_at": "2026-04-01T15:28:28.8568547+03:00",
+  "completed_at": "2026-04-01T15:30:50.7287345+03:00",
   "worker": {
     "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
     "version_id": "3f405f42-c18f-417a-bb3b-b1b281468a44",
@@ -15,7 +15,7 @@
   "cms": {
     "project": "mktintworks-cms",
     "production_host": "https://mktintworks-cms.pages.dev",
-    "latest_deployment": "https://576709d4.mktintworks-cms.pages.dev",
+    "latest_deployment": "https://782e6c86.mktintworks-cms.pages.dev",
     "verified": {
       "invoice_generator_page_built": true,
       "invoice_css_loaded": true,
