@@ -18,7 +18,7 @@
   "cms": {
     "project": "mktintworks-cms",
     "production_host": "https://mktintworks-cms.pages.dev",
-    "latest_deployment": "https://be77a383.mktintworks-cms.pages.dev",
+    "latest_deployment": "https://b91aeee0.mktintworks-cms.pages.dev",
     "verified": {
       "warranty_generator_page_built": true,
       "warranty_css_loaded_in_source": true,
@@ -54,7 +54,8 @@
     "warranty_generate_401_without_jwt": true,
     "invoice_lookup_401_without_jwt": true,
     "cms_preview_warranty_page_200": true,
-    "cms_preview_warranty_js_200": true
+    "cms_preview_warranty_js_200": true,
+    "cms_production_host_redirects_to_access": true
   },
   "features": {
     "unique_certificate_numbering": true,
