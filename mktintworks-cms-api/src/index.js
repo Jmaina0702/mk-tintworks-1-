@@ -1,4 +1,4 @@
-import { login } from "./routes/auth.js";
+import { login, verifyAuth } from "./routes/auth.js";
 import {
   handleAnalyticsRequest,
   submitAnalyticsEvent,
@@ -31,6 +31,7 @@ import {
 
 const EXACT_ROUTES = new Map([
   ["/api/auth/login", login],
+  ["/api/auth/verify", verifyAuth],
   ["/api/analytics/event", submitAnalyticsEvent],
   ["/api/testimonials/submit", submitTestimonial],
 ]);
@@ -77,7 +78,11 @@ const health = (request, env) =>
       cache_bound: !!env.CONTENT_CACHE,
       sessions_bound: !!env.SESSIONS,
       ai_bound: !!env.AI,
+      deploy_hook_configured: !!env.DEPLOY_HOOK_URL,
+      public_site_base_url:
+        String(env.PUBLIC_SITE_BASE_URL || "https://mktintworks.com").replace(/\/$/, ""),
       public_endpoints: [
+        "GET /api/health",
         "POST /api/auth/login",
         "POST /api/analytics/event",
         "GET /api/blog/public?category=...&full=1",

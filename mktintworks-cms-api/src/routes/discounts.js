@@ -1,6 +1,8 @@
 import { requireAuth } from "../middleware/auth.js";
 import {
   fetchProductDetails,
+  primeActiveDiscountsCache,
+  primeProductCaches,
   syncProductCurrentPrices,
   triggerDeploy,
 } from "../utils/catalog.js";
@@ -133,6 +135,7 @@ const createDiscount = async (request, env) => {
       .run();
 
     await syncProductCurrentPrices(env);
+    await Promise.all([primeProductCaches(env), primeActiveDiscountsCache(env)]);
     const nextDetail = await fetchProductDetails(env, productId);
     await triggerDeploy(env);
 
@@ -217,6 +220,7 @@ const removeDiscount = async (request, env) => {
     }
 
     await syncProductCurrentPrices(env);
+    await Promise.all([primeProductCaches(env), primeActiveDiscountsCache(env)]);
     const detail = await fetchProductDetails(env, resolvedProductId);
     await triggerDeploy(env);
 
@@ -282,9 +286,11 @@ export const checkDiscountTimers = async (env) => {
     if (changedRows > 0) {
       shouldDeploy = true;
       await syncProductCurrentPrices(env);
+      await Promise.all([primeProductCaches(env), primeActiveDiscountsCache(env)]);
       await triggerDeploy(env);
     } else {
       await syncProductCurrentPrices(env);
+      await Promise.all([primeProductCaches(env), primeActiveDiscountsCache(env)]);
     }
 
     return {

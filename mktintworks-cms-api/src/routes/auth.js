@@ -1,3 +1,4 @@
+import { requireAuth } from "../middleware/auth.js";
 import { json, methodNotAllowed } from "../utils/http.js";
 import { decodeJwtPayloadSegment, generateJWT } from "../utils/jwt.js";
 
@@ -44,6 +45,31 @@ export const login = async (request, env) => {
       success: true,
       token,
       expires,
+    },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+    request
+  );
+};
+
+export const verifyAuth = async (request, env) => {
+  if (request.method !== "GET") {
+    return methodNotAllowed(request, ["GET"]);
+  }
+
+  const authError = await requireAuth(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  return json(
+    {
+      valid: true,
+      verified_at: new Date().toISOString(),
     },
     {
       status: 200,

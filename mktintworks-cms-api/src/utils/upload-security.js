@@ -1,3 +1,5 @@
+const SAFE_EXTENSIONS = /^[a-z0-9]+$/i;
+
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -53,11 +55,34 @@ export const validatePdfUpload = (file) => {
 
 export const generateSecureFilename = (prefix = "file", extension = "webp") => {
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 10);
-  return `${prefix}-${timestamp}-${random}.${extension}`;
+  const safePrefix = String(prefix || "file")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "") || "file";
+  const safeExtension = SAFE_EXTENSIONS.test(String(extension || ""))
+    ? String(extension).toLowerCase()
+    : "bin";
+  const random = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("")
+    .substring(0, 8);
+
+  return `${safePrefix}-${timestamp}-${random}.${safeExtension}`;
 };
 
 export const buildR2Key = (bucketFolder, filename) => {
-  const safeFolder = String(bucketFolder || "").replace(/[^a-z0-9-]/g, "");
-  return `${safeFolder}/${filename}`;
+  const safeFolder = String(bucketFolder || "uploads")
+    .split("/")
+    .map((segment) =>
+      String(segment || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "")
+    )
+    .filter(Boolean)
+    .join("/");
+
+  return `${safeFolder || "uploads"}/${filename}`;
 };

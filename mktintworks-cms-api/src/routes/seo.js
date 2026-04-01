@@ -2,8 +2,14 @@ import { requireAuth } from "../middleware/auth.js";
 import {
   resolveMediaPublicBaseUrl,
   resolvePublicSiteBaseUrl,
-  triggerDeploy,
 } from "../utils/catalog.js";
+import {
+  buildSeoCacheKey,
+  CACHE_TTLS,
+  readCacheJson,
+  triggerDeployHook,
+  writeCacheJson,
+} from "../utils/cache.js";
 import {
   invalidJson,
   json,
@@ -118,6 +124,21 @@ const buildDefaultSeoRow = (slug, env) =>
     env
   );
 
+const primeSeoCache = async (env, slug, row = null) => {
+  const normalized = row
+    ? normalizeSeoRow(row, env)
+    : buildDefaultSeoRow(slug, env);
+
+  await writeCacheJson(
+    env,
+    buildSeoCacheKey(slug),
+    normalized,
+    CACHE_TTLS.seo
+  );
+
+  return normalized;
+};
+
 const getSEOSettings = async (request, env, slug) => {
   const authError = await requireAuth(request, env);
   if (authError) {
@@ -129,6 +150,18 @@ const getSEOSettings = async (request, env, slug) => {
   }
 
   try {
+    const cached = await readCacheJson(env, buildSeoCacheKey(slug));
+    if (cached) {
+      return json(
+        {
+          settings: cached,
+          source: "cache",
+        },
+        { headers: FRESH_SEO_HEADERS },
+        request
+      );
+    }
+
     const row = await env.DB.prepare(
       `
         SELECT
@@ -148,7 +181,20 @@ const getSEOSettings = async (request, env, slug) => {
 
     return json(
       {
-        settings: row ? normalizeSeoRow(row, env) : buildDefaultSeoRow(slug, env),
+        settings: await primeSeoCache(
+          env,
+          slug,
+          row || {
+            page_slug: slug,
+            meta_title: "",
+            meta_description: "",
+            og_image_url: "",
+            og_title: "",
+            og_description: "",
+            updated_at: null,
+          }
+        ),
+        source: "database",
       },
       { headers: FRESH_SEO_HEADERS },
       request
@@ -245,7 +291,25 @@ const saveSEOSettings = async (request, env) => {
       )
       .run();
 
-    await triggerDeploy(env);
+    const savedRow = await env.DB.prepare(
+      `
+        SELECT
+          page_slug,
+          meta_title,
+          meta_description,
+          og_image_url,
+          og_title,
+          og_description,
+          updated_at
+        FROM seo_settings
+        WHERE page_slug = ?
+      `
+    )
+      .bind(pageSlug)
+      .first();
+
+    await primeSeoCache(env, pageSlug, savedRow);
+    await triggerDeployHook(env);
 
     return json(
       {
@@ -301,7 +365,7 @@ const uploadOGImage = async (request, env) => {
 
   const extension = extensionFromType(file.type);
   const filename = generateSecureFilename(`og-${pageSlug}`, extension);
-  const r2Key = buildR2Key("seo-og-images", filename);
+  const r2Key = buildR2Key("seo/og-images", filename);
   const cdnUrl = `${resolveMediaPublicBaseUrl(env)}/${r2Key}`;
   const fileSizeKb = Math.max(1, Math.round(file.size / 1024));
 
@@ -357,35 +421,55 @@ const uploadOGImage = async (request, env) => {
 
 const getAllSEOSettings = async (request, env) => {
   try {
-    const result = await env.DB.prepare(
-      `
-        SELECT
-          page_slug,
-          meta_title,
-          meta_description,
-          og_image_url,
-          og_title,
-          og_description,
-          updated_at
-        FROM seo_settings
-        WHERE page_slug IN (${SEO_ALLOWED_SLUGS.map(() => "?").join(", ")})
-        ORDER BY page_slug ASC
-      `
-    )
-      .bind(...SEO_ALLOWED_SLUGS)
-      .all();
-
     const settings = {};
-    for (const row of result.results || []) {
-      const normalized = normalizeSeoRow(row, env);
-      if (normalized.page_slug) {
-        settings[normalized.page_slug] = normalized;
+    const missingSlugs = [];
+
+    for (const slug of SEO_ALLOWED_SLUGS) {
+      const cached = await readCacheJson(env, buildSeoCacheKey(slug));
+      if (cached) {
+        settings[slug] = cached;
+      } else {
+        missingSlugs.push(slug);
       }
     }
 
-    for (const slug of SEO_ALLOWED_SLUGS) {
-      if (!settings[slug]) {
-        settings[slug] = buildDefaultSeoRow(slug, env);
+    if (missingSlugs.length) {
+      const result = await env.DB.prepare(
+        `
+          SELECT
+            page_slug,
+            meta_title,
+            meta_description,
+            og_image_url,
+            og_title,
+            og_description,
+            updated_at
+          FROM seo_settings
+          WHERE page_slug IN (${missingSlugs.map(() => "?").join(", ")})
+          ORDER BY page_slug ASC
+        `
+      )
+        .bind(...missingSlugs)
+        .all();
+
+      const rowsBySlug = new Map(
+        (result.results || []).map((row) => [String(row?.page_slug || "").trim(), row])
+      );
+
+      for (const slug of missingSlugs) {
+        settings[slug] = await primeSeoCache(
+          env,
+          slug,
+          rowsBySlug.get(slug) || {
+            page_slug: slug,
+            meta_title: "",
+            meta_description: "",
+            og_image_url: "",
+            og_title: "",
+            og_description: "",
+            updated_at: null,
+          }
+        );
       }
     }
 

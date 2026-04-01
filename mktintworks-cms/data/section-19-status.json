@@ -1,0 +1,100 @@
+{
+  "section": 19,
+  "title": "Real-Time Sync Architecture",
+  "completed_at": "2026-04-02T00:06:39.8929404+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "726d2245-51cb-4f64-9fa3-d49daecc8905",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "allowed_origin_options_preflight_returns_204": true,
+      "disallowed_origin_options_preflight_returns_403": true,
+      "public_pages_content_returns_cache": true,
+      "public_products_site_data_returns_cache": true,
+      "public_blog_returns_200_without_jwt": true,
+      "public_seo_returns_200_without_jwt": true,
+      "public_promotions_returns_200_without_jwt": true,
+      "protected_auth_verify_returns_401_without_jwt": true,
+      "protected_products_returns_401_without_jwt": true,
+      "protected_analytics_summary_returns_401_without_jwt": true,
+      "protected_records_invoices_returns_401_without_jwt": true,
+      "protected_sales_summary_returns_401_without_jwt": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://15256e6f.mktintworks-cms.pages.dev",
+    "verified": {
+      "dashboard_preview_page_200": true,
+      "cms_ui_asset_200": true,
+      "cms_production_host_redirects_to_access": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://af7579c9.mk-tintworks-1.pages.dev",
+    "verified": {
+      "public_redeploy_not_required_for_section_19": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build",
+    "worker_bundle_dry_run_passed": true,
+    "worker_bundle_dry_run_command": "npm run check",
+    "worker_import_check_passed": true,
+    "worker_secret_list_contains_required_secrets": true,
+    "node_check_passed_for_cors_middleware": true,
+    "node_check_passed_for_cache_utils": true,
+    "node_check_passed_for_catalog_utils": true,
+    "node_check_passed_for_pages_route": true,
+    "node_check_passed_for_products_route": true,
+    "node_check_passed_for_discounts_route": true,
+    "node_check_passed_for_promotions_route": true,
+    "node_check_passed_for_blog_route": true,
+    "node_check_passed_for_seo_route": true,
+    "node_check_passed_for_auth_route": true,
+    "node_check_passed_for_worker_index": true,
+    "node_check_passed_for_upload_security": true
+  },
+  "live_verification": {
+    "deployed_from_this_workspace": true,
+    "worker_health_200": true,
+    "cors_allowed_origin_preflight_204": true,
+    "cors_blocked_origin_preflight_403": true,
+    "pages_content_source_cache": true,
+    "products_site_data_source_cache": true,
+    "blog_public_200": true,
+    "seo_public_200": true,
+    "promotions_active_200": true,
+    "auth_verify_401_without_jwt": true,
+    "products_401_without_jwt": true,
+    "analytics_summary_401_without_jwt": true,
+    "records_invoices_401_without_jwt": true,
+    "sales_summary_401_without_jwt": true,
+    "cms_preview_dashboard_200": true,
+    "cms_preview_cms_ui_js_200": true,
+    "cms_production_host_redirects_to_access": true
+  },
+  "features": {
+    "centralized_cors_middleware": true,
+    "auth_verify_route": true,
+    "page_cache_key_convention": true,
+    "product_cache_key_convention": true,
+    "blog_published_cache_key": true,
+    "seo_cache_key_convention": true,
+    "active_promotions_cache_key": true,
+    "active_discounts_cache_key": true,
+    "shared_deploy_hook_trigger": true,
+    "normalized_r2_key_builder": true,
+    "finalized_worker_configuration": true
+  },
+  "notes": [
+    "Section 19 is primarily a Worker architecture milestone. The public website code did not change, so the public Pages project did not require a new deployment.",
+    "The Worker and CMS Pages app were deployed from this workspace between April 1 and April 2, 2026, and the preview deployment URL recorded above was verified after publish.",
+    "Public page-content and product-site reads are now verified as KV-backed on the live Worker, with both endpoints returning source cache during verification.",
+    "Allowed-origin preflight now returns 204 for the admin origin, while a third-party origin receives 403 with no CORS access grant."
+  ]
+}

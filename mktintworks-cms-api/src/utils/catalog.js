@@ -1,6 +1,15 @@
+import {
+  buildProductCacheKey,
+  CACHE_KEYS,
+  CACHE_TTLS,
+  readCacheJson,
+  triggerDeployHook,
+  writeCacheJson,
+} from "./cache.js";
+
 const DEFAULT_MEDIA_PUBLIC_BASE_URL =
   "https://pub-0252224d03e4472da062ccdc92c2482f.r2.dev";
-const DEFAULT_PUBLIC_SITE_BASE_URL = "https://mk-tintworks-1.pages.dev";
+const DEFAULT_PUBLIC_SITE_BASE_URL = "https://mktintworks.com";
 
 const BRAND_GROUPS = ["3m", "llumar", "other"];
 
@@ -343,6 +352,43 @@ export const groupProductsByBrand = (products) => {
   return grouped;
 };
 
+export const buildProductsSiteData = async (env) => {
+  const products = await fetchProductsWithDiscounts(env, { activeOnly: true });
+  return {
+    generated_at: new Date().toISOString(),
+    server_time: new Date().toISOString(),
+    groups: groupProductsByBrand(products),
+    products,
+  };
+};
+
+export const readProductSiteCache = async (env) =>
+  readCacheJson(env, CACHE_KEYS.productsSiteData);
+
+export const primeProductCaches = async (env, siteData = null) => {
+  const payload = siteData || (await buildProductsSiteData(env));
+
+  await writeCacheJson(
+    env,
+    CACHE_KEYS.productsSiteData,
+    payload,
+    CACHE_TTLS.products
+  );
+
+  await Promise.all(
+    (payload.products || []).map((product) =>
+      writeCacheJson(
+        env,
+        buildProductCacheKey(product.product_key),
+        product,
+        CACHE_TTLS.products
+      )
+    )
+  );
+
+  return payload;
+};
+
 export const syncProductCurrentPrices = async (env) => {
   await env.DB.prepare(
     `
@@ -372,12 +418,39 @@ export const syncProductCurrentPrices = async (env) => {
   ).run();
 };
 
-export const triggerDeploy = async (env) => {
-  if (!env.DEPLOY_HOOK_URL) {
-    return;
-  }
+export const primeActiveDiscountsCache = async (env) => {
+  const result = await env.DB.prepare(
+    `
+      SELECT
+        d.*,
+        p.base_price,
+        p.product_key
+      FROM discounts d
+      INNER JOIN products p
+        ON p.id = d.product_id
+      WHERE d.status = 'active'
+      ORDER BY d.start_datetime ASC, d.id ASC
+    `
+  ).all();
 
-  await fetch(env.DEPLOY_HOOK_URL, {
-    method: "POST",
-  }).catch(() => {});
+  const discounts = (result.results || []).map((row) => ({
+    ...normalizeDiscountRow(row),
+    product_key: normalizeText(row?.product_key),
+  }));
+
+  const payload = {
+    generated_at: new Date().toISOString(),
+    discounts,
+  };
+
+  await writeCacheJson(
+    env,
+    CACHE_KEYS.activeDiscounts,
+    payload,
+    CACHE_TTLS.activeDiscounts
+  );
+
+  return payload;
 };
+
+export const triggerDeploy = triggerDeployHook;

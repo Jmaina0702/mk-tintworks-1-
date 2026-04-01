@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 18 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 19 on top of the original static marketing site.
 
 ## Current system
 
@@ -53,6 +53,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The records system was implemented, including protected invoice, warranty, and client archive endpoints; searchable CMS tabs; invoice revenue summaries; CSV export; PDF re-download for stored documents; and invoice deletion with strong confirmation.
 - Section 18:
   The sales dashboard was implemented, including a protected invoice-backed summary endpoint, Chart.js CMS reporting, collected versus outstanding revenue tracking, film revenue ranking, payment and service mix charts, outstanding invoice visibility, and top-client spend ranking.
+- Section 19:
+  The real-time sync architecture was implemented, including centralized CORS middleware, shared KV cache-key conventions, Worker-side cache priming for pages/products/blog/SEO/promotions/discounts, shared deploy-hook triggering, finalized Worker configuration, and normalized upload-security utilities for the D1 to KV to Pages content pipeline.
 
 ## Architecture
 
@@ -722,6 +724,64 @@ Important implementation details:
 - Outstanding invoices remain all-time so overdue work stays visible even when the selected reporting period is narrow.
 - The endpoint is protected by the same Access plus JWT flow as the rest of the CMS business surfaces and returns `401` without a valid token.
 
+## Section 19 details
+
+### Worker sync architecture
+
+- Entry point:
+  [`mktintworks-cms-api/src/index.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/index.js)
+- CORS middleware:
+  [`mktintworks-cms-api/src/middleware/cors.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/middleware/cors.js)
+- Shared cache and deploy helpers:
+  [`mktintworks-cms-api/src/utils/cache.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/cache.js)
+- Shared HTTP wrapper:
+  [`mktintworks-cms-api/src/utils/http.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/http.js)
+- Final Worker config:
+  [`mktintworks-cms-api/wrangler.toml`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/wrangler.toml)
+
+Implemented behavior:
+
+- Section 19 centralizes CORS handling in middleware instead of scattering origin logic inside response helpers.
+- Allowed origins now explicitly cover the production admin and website domains, local development hosts, and project-specific Pages preview hosts.
+- The Worker now exposes a protected `GET /api/auth/verify` endpoint so JWT session validity can be checked cleanly.
+- Shared cache helpers now define the KV key convention for `page:{slug}`, `product:{key}`, `blog:published`, `seo:{slug}`, `active_promotions`, and `active_discounts`.
+- Shared deploy-hook triggering is now centralized so save operations can update D1, prime KV, and trigger Pages rebuilds through one reusable helper.
+
+### KV-first read paths
+
+- Page cache:
+  [`mktintworks-cms-api/src/routes/pages.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/pages.js)
+- Product and discount cache priming:
+  [`mktintworks-cms-api/src/utils/catalog.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/catalog.js)
+  [`mktintworks-cms-api/src/routes/products.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/products.js)
+  [`mktintworks-cms-api/src/routes/discounts.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/discounts.js)
+- Published blog cache:
+  [`mktintworks-cms-api/src/routes/blog.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/blog.js)
+- SEO cache:
+  [`mktintworks-cms-api/src/routes/seo.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/seo.js)
+- Promotions cache:
+  [`mktintworks-cms-api/src/routes/promotions.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/promotions.js)
+
+Important implementation details:
+
+- `GET /api/pages/content` remains KV-first and still reports `source: "cache"` on a cache hit, which is the main Section 19 checklist signal for the content pipeline.
+- Public product site data now uses a cached aggregate payload plus per-product KV entries so discount and pricing changes do not need to hit D1 every time.
+- Discount writes and the scheduled discount cron now prime both product cache and the short-lived `active_discounts` cache after status changes.
+- Published blog reads now use a cached published-article snapshot before falling through to D1, and publish/unpublish operations refresh that cache.
+- SEO reads now cache per-page metadata rows under `seo:{slug}` and the public aggregate feed rebuilds from those cached entries when available.
+- Active promotions now use the `active_promotions` key with a 60-second TTL while still invalidating the legacy `promotions:active` key during the transition.
+
+### Shared upload security
+
+- Utility:
+  [`mktintworks-cms-api/src/utils/upload-security.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/upload-security.js)
+
+Section 19 also tightens the shared upload helper:
+
+- Secure filenames now normalize prefixes and use stronger random bytes instead of plain `Math.random()` output.
+- R2 key generation now preserves nested folders such as `seo/og-images` while sanitizing each path segment.
+- Existing upload routes for products, gallery, promotions, SEO, and CMS media continue to use one centralized helper pair for filename and key generation.
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -737,7 +797,7 @@ Important implementation details:
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 18
+## Current repo shape after Section 19
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -757,6 +817,8 @@ Important implementation details:
   Served from `POST /api/analytics/event`
 - Public SEO data:
   Served from `GET /api/seo/public`
+- Protected auth verification:
+  Served from `GET /api/auth/verify`
 - Protected media library data:
   Served from `GET /api/media`
 - Protected analytics summary:
@@ -783,6 +845,10 @@ Important implementation details:
   Served from `GET /api/records/clients`
 - Protected sales summary:
   Served from `GET /api/sales/summary?period=30|90|365|all`
+- Shared CORS middleware:
+  Applied by [`mktintworks-cms-api/src/middleware/cors.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/middleware/cors.js)
+- Shared KV key convention:
+  Implemented by [`mktintworks-cms-api/src/utils/cache.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/cache.js)
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -794,14 +860,15 @@ Important implementation details:
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-18 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, the searchable business archive inside the CMS, and invoice-backed sales reporting for financial visibility.
+- The public site still keeps static fallback patterns where useful, but Sections 6-19 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, the searchable business archive inside the CMS, invoice-backed sales reporting for financial visibility, and the D1 to KV to deploy-hook sync path that moves CMS saves onto the live website.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
 - Invoice PDFs are intentionally generated inside the Worker and stored in the documents bucket, so the commercial document output stays branded, reproducible, and independent of browser-only rendering.
 - Warranty PDFs are intentionally generated inside the Worker and stored in the documents bucket, so claim documents stay branded, uniquely identifiable, and linked back to invoice history where applicable.
 - The records system is intentionally CMS-only and protected by Access plus JWT, so PDF re-downloads, invoice deletion, and customer history lookups stay inside the administrative surface.
+- The sync architecture is intentionally layered: D1 remains the permanent source of truth, KV absorbs hot reads between writes and rebuilds, and the deploy hook keeps the public static build aligned without making save operations depend on a successful Pages rebuild.
 
 ## Next section
 
-The next PRD milestone is Section 19.
+The next PRD milestone is Section 20.

@@ -1,3 +1,5 @@
+import { corsHeaders, handleCORS } from "../middleware/cors.js";
+
 const SECURITY_HEADERS = {
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
@@ -7,60 +9,6 @@ const SECURITY_HEADERS = {
     "max-age=31536000; includeSubDomains; preload",
   "Content-Security-Policy":
     "default-src 'self'; script-src 'self' 'unsafe-inline' https://embed.tawk.to https://va.tawk.to https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.web3forms.com https://va.tawk.to https://mktintworks-cms-api.workers.dev; frame-src https://tawk.to; object-src 'none'; base-uri 'self'; form-action 'self' https://api.web3forms.com; upgrade-insecure-requests;",
-};
-
-const CMS_ORIGINS = new Set([
-  "https://admin.mktintworks-cms.pages.dev",
-  "https://admin.mktintworks.com",
-  "https://mktintworks-cms.pages.dev",
-]);
-
-const PUBLIC_SITE_ORIGINS = new Set([
-  "https://mktintworks.com",
-  "https://www.mktintworks.com",
-  "https://mk-tintworks-1.pages.dev",
-]);
-
-const PUBLIC_ENDPOINTS = new Set([
-  "/api/analytics/event",
-  "/api/blog/public",
-  "/api/gallery/public",
-  "/api/pages/content",
-  "/api/promotions/active",
-  "/api/products/site-data",
-  "/api/seo/public",
-  "/api/testimonials/public",
-  "/api/testimonials/submit",
-]);
-
-const buildCorsHeaders = (request) => {
-  if (!request) {
-    return {};
-  }
-
-  const origin = request.headers.get("Origin");
-  if (!origin) {
-    return {};
-  }
-
-  const pathname = new URL(request.url).pathname;
-  const isAllowedCmsOrigin = CMS_ORIGINS.has(origin);
-  const isAllowedPublicOrigin =
-    PUBLIC_SITE_ORIGINS.has(origin) && PUBLIC_ENDPOINTS.has(pathname);
-
-  if (!isAllowedCmsOrigin && !isAllowedPublicOrigin) {
-    return {};
-  }
-
-  return {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, Cache-Control",
-    "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
 };
 
 export const withCommonHeaders = (
@@ -75,7 +23,7 @@ export const withCommonHeaders = (
   });
 
   if (includeCors) {
-    Object.entries(buildCorsHeaders(request)).forEach(([key, value]) => {
+    Object.entries(corsHeaders(request)).forEach(([key, value]) => {
       headers.set(key, value);
     });
   }
@@ -128,12 +76,7 @@ export const serverError = (request) =>
   );
 
 export const handlePreflight = (request) => {
-  const corsHeaders = buildCorsHeaders(request);
-  if (!corsHeaders["Access-Control-Allow-Origin"]) {
-    return withCommonHeaders(new Response(null, { status: 403 }), request, {
-      includeCors: false,
-    });
-  }
-
-  return withCommonHeaders(new Response(null, { status: 204 }), request);
+  return withCommonHeaders(handleCORS(request), request, {
+    includeCors: false,
+  });
 };

@@ -1,9 +1,15 @@
 import { requireAuth } from "../middleware/auth.js";
 import {
-  triggerDeploy,
   resolveMediaPublicBaseUrl,
   resolvePublicSiteBaseUrl,
 } from "../utils/catalog.js";
+import {
+  CACHE_KEYS,
+  CACHE_TTLS,
+  readCacheJson,
+  triggerDeployHook,
+  writeCacheJson,
+} from "../utils/cache.js";
 import {
   invalidJson,
   json,
@@ -148,6 +154,36 @@ const findArticleBySlug = async (env, slug) =>
   env.DB.prepare("SELECT id, slug FROM blog_posts WHERE slug = ?")
     .bind(slug)
     .first();
+
+const fetchPublishedArticleRows = async (env) => {
+  const result = await env.DB.prepare(
+    `
+      SELECT *
+      FROM blog_posts
+      WHERE status = 'published'
+      ORDER BY published_at DESC, created_at DESC, id DESC
+    `
+  ).all();
+
+  return result.results || [];
+};
+
+const primePublishedArticlesCache = async (env, articles = null) => {
+  const nextArticles =
+    articles ||
+    (await fetchPublishedArticleRows(env)).map((row) =>
+      normalizeArticleRow(row, env, { includeContent: true })
+    );
+
+  await writeCacheJson(
+    env,
+    CACHE_KEYS.blogPublished,
+    nextArticles,
+    CACHE_TTLS.blogPublished
+  );
+
+  return nextArticles;
+};
 
 const normalizeIncomingSlug = (value) => {
   const raw = sanitizeText(value || "", 140).toLowerCase();
@@ -538,7 +574,8 @@ const saveArticle = async (request, env) => {
     }
 
     if (status === "published" || existing?.status === "published") {
-      await triggerDeploy(env);
+      await primePublishedArticlesCache(env);
+      await triggerDeployHook(env);
     }
 
     return json(
@@ -582,7 +619,8 @@ const deleteArticle = async (request, env, articleId) => {
     await env.DB.prepare("DELETE FROM blog_posts WHERE id = ?").bind(id).run();
 
     if (sanitizeText(existing.status || "", 20).toLowerCase() === "published") {
-      await triggerDeploy(env);
+      await primePublishedArticlesCache(env);
+      await triggerDeployHook(env);
     }
 
     return json({ success: true }, { headers: FRESH_BLOG_HEADERS }, request);
@@ -610,75 +648,33 @@ const getPublishedArticles = async (request, env) => {
   }
 
   try {
-    if (slug) {
-      const row = await env.DB.prepare(
-        `
-          SELECT *
-          FROM blog_posts
-          WHERE slug = ? AND status = 'published'
-          LIMIT 1
-        `
-      )
-        .bind(slug)
-        .first();
+    let publishedArticles = await readCacheJson(env, CACHE_KEYS.blogPublished);
+    let source = "cache";
+    if (!Array.isArray(publishedArticles)) {
+      source = "database";
+      publishedArticles = await primePublishedArticlesCache(env);
+    }
 
-      if (!row) {
+    if (slug) {
+      const article = publishedArticles.find((item) => item.slug === slug);
+      if (!article) {
         return json({ error: "Article not found." }, { status: 404 }, request);
       }
 
       return json(
-        { article: normalizeArticleRow(row, env, { includeContent: true }) },
+        { article, source },
         { headers: FRESH_BLOG_HEADERS },
         request
       );
     }
-
-    const clauses = ["status = 'published'"];
-    const bindings = [];
-    if (category) {
-      clauses.push("category = ?");
-      bindings.push(category);
-    }
-
-    const selectFields = includeContent
-      ? "*"
-      : `
-          id,
-          slug,
-          title,
-          ai_title,
-          meta_description,
-          summary,
-          keywords,
-          featured_image_url,
-          featured_image_alt,
-          category,
-          read_time_minutes,
-          status,
-          source_type,
-          published_at,
-          created_at,
-          content
-        `;
-
-    const statement = env.DB.prepare(
-      `
-        SELECT ${selectFields}
-        FROM blog_posts
-        WHERE ${clauses.join(" AND ")}
-        ORDER BY published_at DESC, created_at DESC, id DESC
-      `
-    );
-
-    const result =
-      bindings.length > 0 ? await statement.bind(...bindings).all() : await statement.all();
-
-    const articles = (result.results || []).map((row) =>
-      normalizeArticleRow(row, env, { includeContent })
-    );
+    const articles = publishedArticles
+      .filter((article) => !category || article.category === category)
+      .map((article) =>
+        includeContent ? article : { ...article, content: undefined }
+      );
 
     return json(
-      { articles },
+      { articles, source },
       { headers: FRESH_BLOG_HEADERS },
       request
     );

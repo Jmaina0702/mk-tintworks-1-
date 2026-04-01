@@ -1,13 +1,14 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 18.
+This directory now holds the CMS implementation through PRD Section 19.
 It contains the Access-protected admin shell, shared CMS design system,
 Worker-backed module clients, the live visual editor, the products manager,
 the gallery manager with client-side image compression, and the new blog
 listing/editor workflow with Workers AI SEO generation plus the testimonials
 moderation pipeline, promotions banner manager, central media library,
 page-level SEO manager, analytics dashboard, invoice generator, warranty
-certificate generator, searchable records archive, and the sales dashboard.
+certificate generator, searchable records archive, sales dashboard, and the
+Section 19 sync architecture metadata used to track the live pipeline.
 
 ## Current structure
 
@@ -28,7 +29,7 @@ certificate generator, searchable records archive, and the sales dashboard.
 - `data/`
   Section baseline and status files used by the visual editor and delivery tracking.
 
-## What Sections 6-18 add
+## What Sections 6-19 add
 
 - Section 6:
   Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
@@ -56,13 +57,15 @@ certificate generator, searchable records archive, and the sales dashboard.
   Records archive UI with invoice, warranty, and client tabs; protected invoice and warranty archive endpoints; PDF re-download; invoice deletion with strong confirmation; search, filters, CSV export, and revenue summary cards.
 - Section 18:
   Sales dashboard UI with Chart.js, protected invoice-backed financial aggregation, collected versus outstanding revenue stats, six-month monthly trend, product ranking, payment and service splits, outstanding invoice tracking, and top-client spend ranking.
+- Section 19:
+  Centralized Worker sync architecture with explicit CORS middleware, KV cache-key conventions for pages/products/blog/SEO/promotions/discounts, shared deploy-hook triggering, stronger upload-key normalization, and final Worker configuration for the live D1 + KV + R2 + Pages pipeline.
 
 ## Runtime model
 
 - CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
 - CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
 - The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
-- The public website is still a static site, but Sections 6-18 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, generate branded invoice and warranty PDFs from the Worker for CMS billing and after-sales workflows, expose the protected searchable records archive for business history lookups, and aggregate invoice history into a CMS-only sales reporting dashboard.
+- The public website is still a static site, but Sections 6-19 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, generate branded invoice and warranty PDFs from the Worker for CMS billing and after-sales workflows, expose the protected searchable records archive for business history lookups, aggregate invoice history into a CMS-only sales reporting dashboard, and keep the D1 to KV to deploy-hook content pipeline explicit and reusable across modules.
 
 ## Deployment note
 

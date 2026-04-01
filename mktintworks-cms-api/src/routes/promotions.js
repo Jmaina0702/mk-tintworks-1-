@@ -1,5 +1,13 @@
 import { requireAuth } from "../middleware/auth.js";
 import {
+  CACHE_KEYS,
+  CACHE_TTLS,
+  deleteCacheKey,
+  readCacheJson,
+  triggerDeployHook,
+  writeCacheJson,
+} from "../utils/cache.js";
+import {
   resolveMediaPublicBaseUrl,
   resolvePublicSiteBaseUrl,
 } from "../utils/catalog.js";
@@ -14,9 +22,15 @@ import {
   generateSecureFilename,
   validateImageUpload,
 } from "../utils/upload-security.js";
-import { ALLOWED, sanitizeText, validateDateRange, validateEnum } from "../utils/validate.js";
+import {
+  ALLOWED,
+  sanitizeText,
+  validateDateRange,
+  validateEnum,
+} from "../utils/validate.js";
 
-const ACTIVE_PROMOTIONS_CACHE_KEY = "promotions:active";
+const ACTIVE_PROMOTIONS_CACHE_KEY = CACHE_KEYS.activePromotions;
+const ACTIVE_PROMOTIONS_LEGACY_CACHE_KEY = "promotions:active";
 const MAX_PROMOTION_UPLOAD_BYTES = 800 * 1024;
 const FRESH_PROMOTIONS_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -228,11 +242,10 @@ const getNextDisplayOrder = async (env) => {
 };
 
 const invalidateActivePromotionsCache = async (env) => {
-  if (!env.CONTENT_CACHE || typeof env.CONTENT_CACHE.delete !== "function") {
-    return;
-  }
-
-  await env.CONTENT_CACHE.delete(ACTIVE_PROMOTIONS_CACHE_KEY).catch(() => {});
+  await Promise.all([
+    deleteCacheKey(env, ACTIVE_PROMOTIONS_CACHE_KEY),
+    deleteCacheKey(env, ACTIVE_PROMOTIONS_LEGACY_CACHE_KEY),
+  ]);
 };
 
 const getPromotions = async (request, env) => {
@@ -452,6 +465,7 @@ const savePromotion = async (request, env) => {
     }
 
     await invalidateActivePromotionsCache(env);
+    await triggerDeployHook(env);
     return json({ success: true }, { headers: FRESH_PROMOTIONS_HEADERS }, request);
   } catch (error) {
     console.error("Failed to save promotion", id || "new", error?.message);
@@ -568,6 +582,7 @@ const deletePromotion = async (request, env, promotionId) => {
 
     await env.DB.prepare("DELETE FROM promotions WHERE id = ?").bind(id).run();
     await invalidateActivePromotionsCache(env);
+    await triggerDeployHook(env);
 
     return json({ success: true }, { headers: FRESH_PROMOTIONS_HEADERS }, request);
   } catch (error) {
@@ -578,19 +593,16 @@ const deletePromotion = async (request, env, promotionId) => {
 
 const getActivePromotions = async (request, env) => {
   try {
-    if (env.CONTENT_CACHE && typeof env.CONTENT_CACHE.get === "function") {
-      const cached = await env.CONTENT_CACHE.get(
-        ACTIVE_PROMOTIONS_CACHE_KEY,
-        "json"
-      );
+    const cached =
+      (await readCacheJson(env, ACTIVE_PROMOTIONS_CACHE_KEY)) ||
+      (await readCacheJson(env, ACTIVE_PROMOTIONS_LEGACY_CACHE_KEY));
 
-      if (Array.isArray(cached)) {
-        return json(
-          { promotions: cached },
-          { headers: FRESH_PROMOTIONS_HEADERS },
-          request
-        );
-      }
+    if (Array.isArray(cached)) {
+      return json(
+        { promotions: cached },
+        { headers: FRESH_PROMOTIONS_HEADERS },
+        request
+      );
     }
 
     const now = new Date().toISOString();
@@ -624,13 +636,12 @@ const getActivePromotions = async (request, env) => {
       .map((row) => normalizePromotionRow(row, env))
       .filter((promotion) => promotion.image_url);
 
-    if (env.CONTENT_CACHE && typeof env.CONTENT_CACHE.put === "function") {
-      await env.CONTENT_CACHE.put(
-        ACTIVE_PROMOTIONS_CACHE_KEY,
-        JSON.stringify(promotions),
-        { expirationTtl: 60 }
-      ).catch(() => {});
-    }
+    await writeCacheJson(
+      env,
+      ACTIVE_PROMOTIONS_CACHE_KEY,
+      promotions,
+      CACHE_TTLS.activePromotions
+    );
 
     return json(
       { promotions },

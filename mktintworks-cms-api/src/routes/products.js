@@ -1,8 +1,11 @@
 import { requireAuth } from "../middleware/auth.js";
 import {
+  buildProductsSiteData,
   fetchProductDetails,
   fetchProductsWithDiscounts,
   groupProductsByBrand,
+  primeProductCaches,
+  readProductSiteCache,
   resolveMediaPublicBaseUrl,
   syncProductCurrentPrices,
   triggerDeploy,
@@ -262,6 +265,7 @@ const updateProduct = async (request, env) => {
     }
 
     await syncProductCurrentPrices(env);
+    await primeProductCaches(env);
     const detail = await fetchProductDetails(env, productId);
     await triggerDeploy(env);
 
@@ -355,14 +359,25 @@ const uploadProductImage = async (request, env) => {
 
 const getProductsSiteData = async (request, env) => {
   try {
-    const products = await fetchProductsWithDiscounts(env, { activeOnly: true });
+    const cached = await readProductSiteCache(env);
+    if (cached) {
+      return json(
+        {
+          ...cached,
+          source: "cache",
+        },
+        {},
+        request
+      );
+    }
+
+    const payload = await buildProductsSiteData(env);
+    await primeProductCaches(env, payload);
 
     return json(
       {
-        generated_at: new Date().toISOString(),
-        server_time: new Date().toISOString(),
-        groups: groupProductsByBrand(products),
-        products,
+        ...payload,
+        source: "database",
       },
       {},
       request

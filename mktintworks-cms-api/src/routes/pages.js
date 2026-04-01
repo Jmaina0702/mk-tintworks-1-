@@ -1,5 +1,12 @@
 import { requireAuth } from "../middleware/auth.js";
 import {
+  buildPageCacheKey,
+  CACHE_TTLS,
+  readCacheJson,
+  triggerDeployHook,
+  writeCacheJson,
+} from "../utils/cache.js";
+import {
   invalidJson,
   json,
   methodNotAllowed,
@@ -17,8 +24,6 @@ const FRESH_CONTENT_HEADERS = {
   Pragma: "no-cache",
   Expires: "0",
 };
-
-const buildPageCacheKey = (pageSlug) => `page:${pageSlug}`;
 
 const isSafeImageUrl = (value) => {
   try {
@@ -56,14 +61,6 @@ const sanitizeContentValue = (type, value) => {
   }
 };
 
-const triggerDeploy = async (env) => {
-  if (!env.DEPLOY_HOOK_URL) {
-    return;
-  }
-
-  await fetch(env.DEPLOY_HOOK_URL, { method: "POST" }).catch(() => {});
-};
-
 const cachePageContent = async (env, pageSlug) => {
   const rows = await env.DB.prepare(
     `
@@ -81,9 +78,11 @@ const cachePageContent = async (env, pageSlug) => {
     content[row.section_key] = row.content;
   }
 
-  await env.CONTENT_CACHE.put(
+  await writeCacheJson(
+    env,
     buildPageCacheKey(pageSlug),
-    JSON.stringify(content)
+    content,
+    CACHE_TTLS.pages
   );
 
   return content;
@@ -158,7 +157,7 @@ export const updatePageContent = async (request, env) => {
       .run();
 
     await cachePageContent(env, pageSlug);
-    await triggerDeploy(env);
+    await triggerDeployHook(env);
 
     return json(
       { success: true, key, type, value: sanitized },
@@ -180,7 +179,7 @@ export const getPageContent = async (request, env) => {
   }
 
   try {
-    const cached = await env.CONTENT_CACHE.get(buildPageCacheKey(slug), "json");
+    const cached = await readCacheJson(env, buildPageCacheKey(slug));
     if (cached) {
       return json(
         { content: cached, source: "cache" },

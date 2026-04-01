@@ -67,6 +67,7 @@ window.MKT_CMS_UI.mountDashboardPage({
     { title: "Section 16 warranty generator landed", meta: "Certificate numbering, invoice prefill, and branded PDF generation are now live in the CMS." },
     { title: "Section 17 records archive landed", meta: "Invoices, warranties, and clients can now be searched, filtered, exported, and re-downloaded from one screen." },
     { title: "Section 18 sales dashboard landed", meta: "Revenue, payment mix, service split, product performance, and top-client ranking now render from invoice data." },
+    { title: "Section 19 sync architecture landed", meta: "KV-first reads, centralized CORS, deploy-hook glue, and cache-key conventions now back the live Worker pipeline." },
   ],
   quickLinks: [
     { href: "/pages/products.html", label: "Review pricing", summary: "Start with the 10 seed products and their tier positioning." },
