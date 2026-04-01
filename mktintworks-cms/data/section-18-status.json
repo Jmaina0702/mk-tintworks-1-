@@ -1,0 +1,73 @@
+{
+  "section": 18,
+  "title": "Sales Dashboard",
+  "completed_at": "2026-04-01T23:43:03.2847615+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "a55d7377-4bbe-4e0a-9611-e04c697ce785",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "protected_sales_summary_returns_401_without_jwt": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://13fabbd1.mktintworks-cms.pages.dev",
+    "verified": {
+      "sales_page_built": true,
+      "sales_css_loaded_in_source": true,
+      "sales_js_loaded_in_source": true,
+      "sales_preview_page_200": true,
+      "sales_preview_js_200": true,
+      "sales_preview_css_200": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://af7579c9.mk-tintworks-1.pages.dev",
+    "verified": {
+      "public_redeploy_not_required_for_section_18": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build",
+    "worker_bundle_dry_run_passed": true,
+    "worker_bundle_dry_run_command": "npm run check",
+    "node_check_passed_for_cms_sales_client": true,
+    "node_check_passed_for_worker_sales_route": true,
+    "node_check_passed_for_worker_index": true,
+    "node_check_passed_for_cms_dashboard": true,
+    "node_check_passed_for_cms_shell": true,
+    "module_import_check_passed": true
+  },
+  "live_verification": {
+    "deployed_from_this_workspace": true,
+    "worker_health_200": true,
+    "sales_summary_401_without_jwt": true,
+    "cms_preview_sales_page_200": true,
+    "cms_preview_sales_js_200": true,
+    "cms_preview_sales_css_200": true,
+    "cms_production_host_redirects_to_access": true
+  },
+  "features": {
+    "collected_revenue_stat": true,
+    "outstanding_revenue_stat": true,
+    "average_job_value_stat": true,
+    "total_jobs_stat": true,
+    "six_month_revenue_trend": true,
+    "product_performance_chart": true,
+    "payment_method_split_chart": true,
+    "service_type_split_chart": true,
+    "outstanding_invoice_table": true,
+    "top_clients_ranking": true
+  },
+  "notes": [
+    "Section 18 is a CMS and Worker feature set only. No public website code changed, so the public Pages project did not require a new deployment.",
+    "The Worker and CMS Pages app were deployed from this workspace on April 1, 2026, and the preview deployment URL recorded above was verified after publish.",
+    "The sales dashboard reads directly from the existing invoices table. No new financial-tracking table was introduced for this section.",
+    "The monthly trend intentionally stays fixed to the last six calendar months even when the period selector is narrowed."
+  ]
+}

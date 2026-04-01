@@ -1,0 +1,285 @@
+.sales-dashboard {
+  display: grid;
+  gap: 24px;
+}
+
+.sales-hero {
+  align-items: stretch;
+}
+
+.sales-hero-card {
+  align-content: start;
+}
+
+.sales-note-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sales-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.sales-status[data-tone="error"] {
+  color: var(--danger);
+}
+
+.sales-status[data-tone="success"] {
+  color: var(--success);
+}
+
+.sales-toolbar-card {
+  align-content: start;
+}
+
+.sales-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.sales-period-field {
+  min-width: 180px;
+}
+
+.sales-period-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-faint);
+  font-size: 0.84rem;
+}
+
+.sales-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sales-stat-card {
+  align-content: start;
+}
+
+.sales-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.sales-chart-card {
+  align-content: start;
+}
+
+.sales-canvas-wrap {
+  position: relative;
+  min-height: 320px;
+}
+
+.sales-canvas-wrap canvas {
+  width: 100%;
+  height: 320px;
+}
+
+.sales-empty {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  padding: 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.sales-table-panel,
+.sales-clients-panel {
+  align-content: start;
+}
+
+.sales-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sales-table-wrap {
+  overflow-x: auto;
+}
+
+.sales-table {
+  min-width: 840px;
+}
+
+.sales-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sales-sort-btn span {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.sales-mono {
+  color: var(--gold-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.sales-client-cell,
+.sales-amount-due {
+  font-weight: 600;
+}
+
+.sales-amount-due {
+  color: var(--wine-soft);
+}
+
+.sales-overdue {
+  font-weight: 700;
+}
+
+.sales-overdue.is-neutral {
+  color: var(--text-faint);
+}
+
+.sales-overdue.is-warning {
+  color: var(--warning);
+}
+
+.sales-overdue.is-critical {
+  color: var(--danger);
+}
+
+.sales-inline-empty {
+  padding: 34px 18px;
+  text-align: center;
+}
+
+.sales-client-list {
+  display: grid;
+  gap: 14px;
+}
+
+.sales-client-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-weak);
+}
+
+.sales-client-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.sales-client-rank {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(122, 12, 30, 0.2);
+  color: var(--wine-soft);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sales-client-body {
+  display: grid;
+  gap: 8px;
+}
+
+.sales-client-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.sales-client-topline strong {
+  display: block;
+}
+
+.sales-client-topline p,
+.sales-client-meta {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.sales-client-total {
+  color: var(--gold-soft);
+  font-weight: 700;
+}
+
+.sales-client-bar-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sales-client-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(122, 12, 30, 0.9), rgba(201, 168, 76, 0.92));
+}
+
+@media (max-width: 1260px) {
+  .sales-summary,
+  .sales-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .sales-summary,
+  .sales-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sales-period-field,
+  .sales-toolbar .btn {
+    width: 100%;
+  }
+
+  .sales-canvas-wrap,
+  .sales-canvas-wrap canvas,
+  .sales-empty {
+    min-height: 280px;
+    height: 280px;
+  }
+
+  .sales-client-item {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-client-rank {
+    width: 38px;
+    height: 38px;
+  }
+
+  .sales-client-topline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -94,7 +94,7 @@
     "key": "sales-dashboard",
     "name": "Sales Dashboard",
     "complexity": "Medium",
-    "status": "planned",
+    "status": "live",
     "description": "Revenue trends, service popularity, film popularity, and outstanding balances."
   }
 ]

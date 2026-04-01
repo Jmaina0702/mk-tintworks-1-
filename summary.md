@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 17 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 18 on top of the original static marketing site.
 
 ## Current system
 
@@ -51,6 +51,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The warranty certificate generator was implemented, including unique MK certificate numbering, invoice-prefill support, branded pdf-lib warranty PDFs, D1 plus R2 persistence, invoice-to-warranty linking, and WhatsApp/email handoff from the CMS.
 - Section 17:
   The records system was implemented, including protected invoice, warranty, and client archive endpoints; searchable CMS tabs; invoice revenue summaries; CSV export; PDF re-download for stored documents; and invoice deletion with strong confirmation.
+- Section 18:
+  The sales dashboard was implemented, including a protected invoice-backed summary endpoint, Chart.js CMS reporting, collected versus outstanding revenue tracking, film revenue ranking, payment and service mix charts, outstanding invoice visibility, and top-client spend ranking.
 
 ## Architecture
 
@@ -680,6 +682,46 @@ Section 17 extends the existing document routes with archive operations:
 
 The deletion flow intentionally applies only to invoices. Warranty certificates remain permanent archive records and the CMS does not expose any delete path for them.
 
+## Section 18 details
+
+### CMS sales dashboard
+
+- Page:
+  [`mktintworks-cms/pages/sales.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/sales.html)
+- Client:
+  [`mktintworks-cms/assets/js/sales.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/sales.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-sales.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-sales.css)
+
+Implemented behavior:
+
+- Section 18 replaces the old placeholder Sales shell with a live financial dashboard inside the CMS.
+- Period selector supports `Last 30 days`, `Last 90 days`, `This Year`, and `All Time`.
+- Summary cards now show collected revenue, outstanding revenue, average job value, and total jobs from invoice data.
+- Chart.js visualizations now render a six-month monthly revenue trend, film revenue ranking, payment method split, and service type split.
+- The monthly trend intentionally stays fixed to the last six calendar months even when the period selector changes.
+- Outstanding invoices render in a sortable table with client names, amounts due, payment status, service date, and overdue-day highlighting.
+- Top clients now render as a ranked spend list with visible contribution bars.
+
+### Worker sales API
+
+- Route:
+  [`mktintworks-cms-api/src/routes/sales.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/sales.js)
+
+Endpoint:
+
+- `GET /api/sales/summary?period=30|90|365|all`
+  Protected invoice-backed sales summary for the CMS dashboard
+
+Important implementation details:
+
+- The sales dashboard reads from the existing `invoices` table only. No separate financial-tracking table was introduced.
+- Collected revenue sums invoices marked `paid`, while outstanding revenue sums invoices marked `unpaid` or `partial`.
+- The Worker zero-fills the last six calendar months so the monthly trend always renders a stable six-point series.
+- Product performance ranks by total invoice revenue per `film_used`, while payment and service splits count invoices in the selected period.
+- Outstanding invoices remain all-time so overdue work stays visible even when the selected reporting period is narrow.
+- The endpoint is protected by the same Access plus JWT flow as the rest of the CMS business surfaces and returns `401` without a valid token.
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -695,7 +737,7 @@ The deletion flow intentionally applies only to invoices. Warranty certificates 
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 17
+## Current repo shape after Section 18
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -739,6 +781,8 @@ The deletion flow intentionally applies only to invoices. Warranty certificates 
   Served from `GET /api/records/warranties`
 - Protected client lookup for invoice autocomplete:
   Served from `GET /api/records/clients`
+- Protected sales summary:
+  Served from `GET /api/sales/summary?period=30|90|365|all`
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -750,7 +794,7 @@ The deletion flow intentionally applies only to invoices. Warranty certificates 
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-17 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, and the searchable business archive inside the CMS.
+- The public site still keeps static fallback patterns where useful, but Sections 6-18 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, the searchable business archive inside the CMS, and invoice-backed sales reporting for financial visibility.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
@@ -760,4 +804,4 @@ The deletion flow intentionally applies only to invoices. Warranty certificates 
 
 ## Next section
 
-The next PRD milestone is Section 18.
+The next PRD milestone is Section 19.

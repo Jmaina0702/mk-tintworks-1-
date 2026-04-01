@@ -96,7 +96,7 @@
       <div class="sidebar-overview">
         <div>
           <span>Workspace</span>
-          <strong>Section 17 live</strong>
+          <strong>Section 18 live</strong>
         </div>
         <span class="badge badge-gold">Live</span>
       </div>

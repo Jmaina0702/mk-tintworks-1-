@@ -20,14 +20,153 @@
   <link rel="stylesheet" href="../assets/css/cms-forms.css">
   <link rel="stylesheet" href="../assets/css/cms-badges.css">
   <link rel="stylesheet" href="../assets/css/cms-animations.css">
+  <link rel="stylesheet" href="../assets/css/cms-sales.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 </head>
-<body data-page-title="Sales Dashboard" data-page-description="Watch deal flow, lead quality, and close momentum from one executive surface.">
+<body data-page-title="Sales Dashboard" data-page-description="Track collected revenue, outstanding balances, best-selling films, and top clients from invoice history.">
   <div id="cms-app">
     <aside id="cms-sidebar" class="cms-sidebar"></aside>
     <div class="cms-main">
       <header id="cms-topbar" class="cms-topbar"></header>
       <main class="cms-content">
-        <div class="page-shell" data-module-shell></div>
+        <div class="page-shell sales-dashboard">
+          <section class="hero-banner sales-hero">
+            <div class="content-cluster">
+              <span class="eyebrow">Section 18</span>
+              <h2>See what the business is actually earning, what is still unpaid, and which work is carrying revenue.</h2>
+              <p>
+                This dashboard reads directly from MK Tintworks invoice records. It separates collected revenue
+                from outstanding balances, ranks film performance, shows service and payment mix, and highlights
+                which customers are driving the most spend.
+              </p>
+            </div>
+            <div class="panel-card sales-hero-card">
+              <span class="eyebrow">Reporting Rules</span>
+              <ul class="checklist sales-note-list">
+                <li>The monthly trend always stays fixed to the last six calendar months.</li>
+                <li>The period selector narrows the stat cards, splits, product ranking, and top-client list.</li>
+                <li>Outstanding invoices stay visible across all time so unpaid work never disappears from view.</li>
+              </ul>
+              <p class="sales-status" id="sales-status" aria-live="polite">Loading sales dashboard…</p>
+            </div>
+          </section>
+
+          <section class="panel-card sales-toolbar-card">
+            <div class="panel-heading-copy">
+              <span class="eyebrow">Period View</span>
+              <h3>Change the reporting window without losing the six-month trend context</h3>
+              <p>The selected period affects the KPI cards, mix charts, product ranking, and top clients only.</p>
+            </div>
+            <div class="sales-toolbar">
+              <label class="field sales-period-field" for="period-select">
+                <span>Period</span>
+                <select id="period-select">
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                  <option value="365" selected>This Year</option>
+                  <option value="all">All Time</option>
+                </select>
+              </label>
+              <button class="btn btn-secondary" type="button" id="sales-refresh-btn">Refresh</button>
+            </div>
+          </section>
+
+          <section class="summary-grid sales-summary">
+            <article class="metric-card sales-stat-card" data-tone="success">
+              <span class="metric-label">Collected</span>
+              <strong id="stat-collected">KSh 0</strong>
+              <p id="stat-collected-jobs">0 paid jobs in the selected period.</p>
+            </article>
+            <article class="metric-card sales-stat-card" data-tone="danger">
+              <span class="metric-label">Outstanding</span>
+              <strong id="stat-outstanding">KSh 0</strong>
+              <p id="stat-outstanding-jobs">0 unpaid or partial jobs in the selected period.</p>
+            </article>
+            <article class="metric-card sales-stat-card" data-tone="gold">
+              <span class="metric-label">Average Job Value</span>
+              <strong id="stat-avg">KSh 0</strong>
+              <p id="stat-avg-context">Average invoice value across the selected period.</p>
+            </article>
+            <article class="metric-card sales-stat-card" data-tone="neutral">
+              <span class="metric-label">Total Jobs</span>
+              <strong id="stat-jobs">0</strong>
+              <p id="stat-jobs-context">No invoices fall inside the selected period yet.</p>
+            </article>
+          </section>
+
+          <div class="sales-chart-grid">
+            <section class="panel-card sales-chart-card">
+              <div class="panel-heading-copy">
+                <span class="eyebrow">Monthly Trend</span>
+                <h3>Collected vs outstanding revenue across the last six months</h3>
+                <p>This chart ignores the period filter so month-over-month movement stays visible.</p>
+              </div>
+              <div class="sales-canvas-wrap">
+                <canvas id="chart-monthly"></canvas>
+                <div class="sales-empty" data-empty-for="chart-monthly" hidden></div>
+              </div>
+            </section>
+
+            <section class="panel-card sales-chart-card">
+              <div class="panel-heading-copy">
+                <span class="eyebrow">Product Performance</span>
+                <h3>Which films are producing the most revenue</h3>
+                <p>Revenue ranking is pulled from `film_used` on invoices in the selected period.</p>
+              </div>
+              <div class="sales-canvas-wrap">
+                <canvas id="chart-products"></canvas>
+                <div class="sales-empty" data-empty-for="chart-products" hidden></div>
+              </div>
+            </section>
+
+            <section class="panel-card sales-chart-card">
+              <div class="panel-heading-copy">
+                <span class="eyebrow">Payment Split</span>
+                <h3>How customers are paying</h3>
+                <p>Use this to see if cash, M-Pesa, or transfers are dominating the current period.</p>
+              </div>
+              <div class="sales-canvas-wrap">
+                <canvas id="chart-payment"></canvas>
+                <div class="sales-empty" data-empty-for="chart-payment" hidden></div>
+              </div>
+            </section>
+
+            <section class="panel-card sales-chart-card">
+              <div class="panel-heading-copy">
+                <span class="eyebrow">Service Split</span>
+                <h3>Job count by service type</h3>
+                <p>Compare automotive, residential, and commercial work across the selected period.</p>
+              </div>
+              <div class="sales-canvas-wrap">
+                <canvas id="chart-service"></canvas>
+                <div class="sales-empty" data-empty-for="chart-service" hidden></div>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel-card sales-table-panel">
+            <div class="panel-heading">
+              <div class="panel-heading-copy">
+                <span class="eyebrow">Outstanding Invoices</span>
+                <h3>Every unpaid or partial invoice still on the books</h3>
+                <p>Sort by invoice, client, amount, service date, or days overdue to spot what needs chasing next.</p>
+              </div>
+              <div class="sales-panel-meta">
+                <span class="sidebar-badge" id="unpaid-count" hidden>0</span>
+              </div>
+            </div>
+            <div id="unpaid-table-wrap"></div>
+          </section>
+
+          <section class="panel-card sales-clients-panel">
+            <div class="panel-heading-copy">
+              <span class="eyebrow">Top Clients</span>
+              <h3>Highest-spending clients in the selected period</h3>
+              <p>The widest bar belongs to the customer contributing the most total invoiced spend.</p>
+            </div>
+            <div id="top-clients-wrap"></div>
+          </section>
+        </div>
       </main>
     </div>
   </div>

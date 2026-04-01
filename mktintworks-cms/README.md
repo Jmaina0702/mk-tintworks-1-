@@ -1,13 +1,13 @@
 # MK Tintworks CMS
 
-This directory now holds the CMS implementation through PRD Section 17.
+This directory now holds the CMS implementation through PRD Section 18.
 It contains the Access-protected admin shell, shared CMS design system,
 Worker-backed module clients, the live visual editor, the products manager,
 the gallery manager with client-side image compression, and the new blog
 listing/editor workflow with Workers AI SEO generation plus the testimonials
 moderation pipeline, promotions banner manager, central media library,
 page-level SEO manager, analytics dashboard, invoice generator, warranty
-certificate generator, and the searchable records archive.
+certificate generator, searchable records archive, and the sales dashboard.
 
 ## Current structure
 
@@ -16,9 +16,9 @@ certificate generator, and the searchable records archive.
 - `dashboard.html`
   Main admin landing page with links into every Phase 1 module.
 - `pages/`
-  All CMS routes, including the visual editor, products manager, gallery manager, blog listing, blog editor, testimonials moderation, promotions manager, media library, and invoice generator.
+  All CMS routes, including the visual editor, products manager, gallery manager, blog listing, blog editor, testimonials moderation, promotions manager, media library, invoice generator, records archive, and sales dashboard.
 - `assets/css/`
-  Shared design tokens and shell styles plus module-specific additions such as `cms-gallery.css`, `cms-blog.css`, `cms-promotions.css`, `cms-media.css`, and `cms-invoices.css`.
+  Shared design tokens and shell styles plus module-specific additions such as `cms-gallery.css`, `cms-blog.css`, `cms-promotions.css`, `cms-media.css`, `cms-invoices.css`, and `cms-sales.css`.
 - `assets/js/`
   Auth bootstrap, shared UI helpers, same-origin API usage, and one script per CMS module.
 - `functions/api/[[path]].js`
@@ -28,7 +28,7 @@ certificate generator, and the searchable records archive.
 - `data/`
   Section baseline and status files used by the visual editor and delivery tracking.
 
-## What Sections 6-17 add
+## What Sections 6-18 add
 
 - Section 6:
   Visual editor iframe, page-content API, public-site preview overlay, and build-time content injection.
@@ -54,13 +54,15 @@ certificate generator, and the searchable records archive.
   Warranty generator UI, unique MK certificate numbering, invoice-prefill lookup, branded pdf-lib warranty output, D1 plus R2 persistence, invoice-to-warranty linking, and WhatsApp/email handoff.
 - Section 17:
   Records archive UI with invoice, warranty, and client tabs; protected invoice and warranty archive endpoints; PDF re-download; invoice deletion with strong confirmation; search, filters, CSV export, and revenue summary cards.
+- Section 18:
+  Sales dashboard UI with Chart.js, protected invoice-backed financial aggregation, collected versus outstanding revenue stats, six-month monthly trend, product ranking, payment and service splits, outstanding invoice tracking, and top-client spend ranking.
 
 ## Runtime model
 
 - CMS pages authenticate through Cloudflare Access, then exchange the Access assertion for a JWT via the Worker.
 - CMS module pages call `/api/*` on the same origin; the Pages Function proxy forwards those requests to the Worker.
 - The Worker persists structured module data in D1, stores uploaded assets in R2, and triggers the Pages deploy hook after content mutations.
-- The public website is still a static site, but Sections 6-17 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, generate branded invoice and warranty PDFs from the Worker for CMS billing and after-sales workflows, and expose the protected searchable records archive for business history lookups.
+- The public website is still a static site, but Sections 6-18 now inject live state at build time where needed, generate blog article pages directly from Worker-backed content, surface approved testimonials, fetch active promotions at runtime for the shared header banner, expose a protected media inventory for CMS operations, write saved SEO metadata directly into generated HTML for the six core pages, post first-party analytics events back to the Worker for dashboard reporting, generate branded invoice and warranty PDFs from the Worker for CMS billing and after-sales workflows, expose the protected searchable records archive for business history lookups, and aggregate invoice history into a CMS-only sales reporting dashboard.
 
 ## Deployment note
 

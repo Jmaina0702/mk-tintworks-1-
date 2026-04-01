@@ -15,6 +15,7 @@ import { handlePagesRequest } from "./routes/pages.js";
 import { handleProductsRequest } from "./routes/products.js";
 import { handlePromotionsRequest } from "./routes/promotions.js";
 import { handleRecordsRequest } from "./routes/records.js";
+import { handleSalesRequest } from "./routes/sales.js";
 import { handleSeoRequest } from "./routes/seo.js";
 import {
   handleTestimonialsRequest,
@@ -48,6 +49,7 @@ const PREFIX_ROUTES = [
   ["/api/invoices", handleInvoicesRequest],
   ["/api/warranties", handleWarrantiesRequest],
   ["/api/records", handleRecordsRequest],
+  ["/api/sales", handleSalesRequest],
 ];
 
 const matchHandler = (pathname) => {

@@ -16,7 +16,7 @@ window.MKT_CMS_UI.mountDashboardPage({
     },
   ],
   metrics: [
-    { label: "Phase 1 modules", value: "14", hint: "Every PRD module is linked from this shell.", tone: "gold" },
+    { label: "Phase 1 modules", value: "14", hint: "All planned Section 5-18 modules are now live in the CMS.", tone: "gold" },
     { label: "Seed products", value: "10", hint: "Authoritative pricing preserved from Section 1.", tone: "success" },
     { label: "SEO rows", value: "6", hint: "Migrated metadata already sits in D1.", tone: "neutral" },
     { label: "Analytics events", value: "31", hint: "Historical event rows survived the schema migration.", tone: "neutral" },
@@ -35,7 +35,7 @@ window.MKT_CMS_UI.mountDashboardPage({
     { href: "/pages/invoices.html", label: "Invoices", summary: "Commercial billing document flow.", status: "Live" },
     { href: "/pages/warranty.html", label: "Warranty", summary: "Certificate issuance with invoice prefill and PDF output.", status: "Live" },
     { href: "/pages/records.html", label: "Records", summary: "Searchable archive of invoices, warranties, and clients.", status: "Live" },
-    { href: "/pages/sales.html", label: "Sales", summary: "Lead pipeline and close momentum.", status: "Queued" },
+    { href: "/pages/sales.html", label: "Sales", summary: "Revenue, outstanding balances, best-selling films, and top client spend.", status: "Live" },
   ],
   spotlights: [
     {
@@ -54,9 +54,9 @@ window.MKT_CMS_UI.mountDashboardPage({
       eyebrow: "Next Layers",
       title: "What later sections will plug into this UI",
       items: [
-        { title: "Live list endpoints", meta: "Swap the placeholder rows for protected D1-backed tables." },
-        { title: "True save flows", meta: "Buttons start hitting the Worker once CRUD routes are defined." },
-        { title: "Media uploads and documents", meta: "R2 and PDF flows slot into the views that already exist." },
+        { title: "Financial reporting", meta: "The new sales dashboard now reads invoice history for revenue and performance reporting." },
+        { title: "Next section", meta: "Real-time sync will tighten cache invalidation and publish feedback across CMS surfaces." },
+        { title: "Operational depth", meta: "The CMS now spans content, marketing, documents, archive search, and revenue reporting." },
       ],
     },
   ],
@@ -66,9 +66,11 @@ window.MKT_CMS_UI.mountDashboardPage({
     { title: "Section 4 auth stays active", meta: "Cloudflare Access plus worker JWT exchange gate the CMS routes." },
     { title: "Section 16 warranty generator landed", meta: "Certificate numbering, invoice prefill, and branded PDF generation are now live in the CMS." },
     { title: "Section 17 records archive landed", meta: "Invoices, warranties, and clients can now be searched, filtered, exported, and re-downloaded from one screen." },
+    { title: "Section 18 sales dashboard landed", meta: "Revenue, payment mix, service split, product performance, and top-client ranking now render from invoice data." },
   ],
   quickLinks: [
     { href: "/pages/products.html", label: "Review pricing", summary: "Start with the 10 seed products and their tier positioning." },
+    { href: "/pages/sales.html", label: "Check sales", summary: "Open revenue, outstanding balances, and film performance in one screen." },
     { href: "/pages/testimonials.html", label: "Moderate reviews", summary: "Keep only verified, high-trust customer proof on the site." },
     { href: "/pages/invoices.html", label: "Prepare billing", summary: "Use the invoice shell as the document workflow anchor." },
     { href: "/pages/media.html", label: "Audit assets", summary: "Confirm logos, gallery items, and public URLs stay organized." },
