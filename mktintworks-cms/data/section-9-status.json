@@ -4,7 +4,7 @@
   "completed_at": "2026-03-31T20:15:00Z",
   "worker": {
     "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
-    "version_id": "57763434-ac0f-400d-9795-050350d0888c",
+    "version_id": "59510f6d-9c35-4a80-ae71-74d287459bad",
     "verified": {
       "public_blog_endpoint": true,
       "protected_blog_listing_returns_401_without_jwt": true,
@@ -17,7 +17,12 @@
   "public_site": {
     "project": "mk-tintworks-1",
     "production_host": "https://mk-tintworks-1.pages.dev",
-    "latest_deployment": "https://963ecf83.mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://bdba6c98.mk-tintworks-1.pages.dev",
+    "build_config": {
+      "build_command": "npm run build",
+      "destination_dir": "dist",
+      "root_dir": ""
+    },
     "verified": {
       "blog_index_generated_from_published_articles": true,
       "published_article_pages_generated_at_build": true,
@@ -27,7 +32,7 @@
   "cms": {
     "project": "mktintworks-cms",
     "production_host": "https://mktintworks-cms.pages.dev",
-    "latest_deployment": "https://8b60b087.mktintworks-cms.pages.dev",
+    "latest_deployment": "https://247dab2a.mktintworks-cms.pages.dev",
     "verified": {
       "blog_listing_page_built": true,
       "blog_editor_page_built": true,
@@ -59,6 +64,8 @@
   "notes": [
     "Workers AI remains an enhancement rather than a publishing dependency; manual SEO entry still works if AI is unavailable or quota-limited.",
     "The existing long-form public article bodies were synced back into D1 so the new CMS editor and build pipeline preserve current live content instead of shortening it.",
+    "Only two real legacy article files existed in the repo; older extra cards on blog/index.html were placeholder links rather than additional CMS-backed posts.",
+    "The mk-tintworks-1 Pages project now runs npm run build and deploys dist so deploy-hook rebuilds publish Worker-backed blog output instead of raw source files.",
     "The public website now treats the Worker-backed blog_posts table as the source of truth for blog index output and generated article pages."
   ]
 }

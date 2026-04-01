@@ -1,0 +1,57 @@
+{
+  "section": 12,
+  "title": "Media Library",
+  "completed_at": "2026-04-01T00:00:00+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "59510f6d-9c35-4a80-ae71-74d287459bad",
+    "verified": {
+      "protected_media_listing_returns_401_without_jwt": true,
+      "protected_media_delete_returns_401_without_jwt": true,
+      "shared_media_upload_endpoint_preserved": true,
+      "live_usage_mapping_enabled": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://247dab2a.mktintworks-cms.pages.dev",
+    "verified": {
+      "media_library_ui_built": true,
+      "storage_usage_meter_present": true,
+      "filter_search_copy_delete_flows_wired": true,
+      "image_and_pdf_cards_supported": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://bdba6c98.mk-tintworks-1.pages.dev",
+    "verified": {
+      "production_host_responds": true
+    }
+  },
+  "local_verification": {
+    "root_build_passed": true,
+    "root_build_command": "npm run build"
+  },
+  "live_verification": {
+    "worker_health_200": true,
+    "cms_media_page_200": true,
+    "protected_media_listing_401_without_jwt": true
+  },
+  "features": {
+    "central_media_inventory": true,
+    "live_usage_detection": true,
+    "filename_search": true,
+    "type_filters": true,
+    "orphan_filtering": true,
+    "copy_cdn_url": true,
+    "best_effort_r2_delete": true
+  },
+  "notes": [
+    "Section 12 is a protected CMS-only operations module. It does not add a new public website endpoint.",
+    "Media usage is derived from live references in implemented modules so old uploads can surface as true orphan candidates after editors replace images elsewhere.",
+    "The existing shared image upload endpoint remains in place because other CMS modules still write into the media table through their own upload flows."
+  ]
+}

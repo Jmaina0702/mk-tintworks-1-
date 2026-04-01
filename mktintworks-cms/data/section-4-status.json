@@ -45,6 +45,7 @@
     "The Worker login endpoint requires the CF-Access-Jwt-Assertion header exactly as defined in the PRD, so live JWT exchange depends on the API request passing through the Access-protected admin route.",
     "Public website origins are allowed only for the two intentionally public endpoints so analytics and testimonial submission can work without opening the rest of the API to cross-origin callers.",
     "The current CMS bootstrap page loads the token helper with autoAuth disabled so the Section 1/2/3 documentation shell is not redirected before Section 5 turns it into the real admin UI.",
-    "Cloudflare returned a transient schedules API 7010 error after deployment, but the health endpoint confirmed the new Section 4 Worker version was live."
+    "Cloudflare returned a transient schedules API 7010 error after deployment, but the health endpoint confirmed the new Section 4 Worker version was live.",
+    "As of 2026-04-01 in this workspace, the stable CMS hostname attached to the Pages project is mktintworks-cms.pages.dev. A custom admin hostname such as admin.mktintworks.com must be attached to the Pages project and protected in Cloudflare Access before it can replace the Pages hostname."
   ]
 }

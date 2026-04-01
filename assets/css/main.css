@@ -375,7 +375,9 @@ li + li {
 
 .site-header {
   position: fixed;
-  inset: 0 0 auto;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 1000;
   padding: 18px 0;
   transition: padding var(--ease), background-color var(--ease), box-shadow var(--ease), border-color var(--ease);
@@ -396,6 +398,85 @@ li + li {
   background: var(--glass);
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(18px);
+}
+
+.site-promotions-banner-shell {
+  margin-bottom: 12px;
+}
+
+.promo-banner {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  border-radius: calc(var(--radius-lg) - 2px);
+  background:
+    linear-gradient(135deg, rgba(122, 12, 30, 0.28), rgba(13, 13, 13, 0.92)),
+    rgba(13, 13, 13, 0.92);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition: opacity 0.36s ease, transform 0.36s ease;
+}
+
+.promo-banner.is-visible {
+  opacity: 1;
+  transform: none !important;
+}
+
+.promo-banner img {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.promo-banner-link {
+  display: block;
+}
+
+.promo-anim-fade {
+  transform: none;
+}
+
+.promo-anim-slide-down {
+  transform: translateY(-100%);
+}
+
+.promo-anim-bounce {
+  transform: translateY(-18px);
+  transition-timing-function: cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.promo-anim-zoom {
+  transform: scale(0.92);
+}
+
+.promo-anim-slide-right {
+  transform: translateX(-48px);
+}
+
+.promo-dismiss-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(13, 13, 13, 0.56);
+  color: #fff;
+  font-size: 1.18rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: background-color var(--ease), transform var(--ease);
+}
+
+.promo-dismiss-btn:hover,
+.promo-dismiss-btn:focus-visible {
+  background: rgba(122, 12, 30, 0.82);
+  transform: translateY(-50%) scale(1.04);
 }
 
 .logo {
@@ -2219,7 +2300,7 @@ body.light .launch-meta {
 
   .nav {
     position: fixed;
-    top: 96px;
+    top: var(--site-header-height, 96px);
     right: 20px;
     left: 20px;
     display: grid;
@@ -2335,6 +2416,10 @@ body.light .launch-meta {
   .gallery-grid {
     columns: 2 220px;
   }
+
+  .promo-banner img {
+    max-height: 92px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -2344,6 +2429,10 @@ body.light .launch-meta {
 
   .nav-wrapper {
     padding-inline: 14px;
+  }
+
+  .site-promotions-banner-shell {
+    margin-bottom: 10px;
   }
 
   .hero-actions,
@@ -2384,6 +2473,17 @@ body.light .launch-meta {
 
   .wa-tooltip {
     display: none;
+  }
+
+  .promo-dismiss-btn {
+    top: 10px;
+    right: 10px;
+    transform: none;
+  }
+
+  .promo-dismiss-btn:hover,
+  .promo-dismiss-btn:focus-visible {
+    transform: scale(1.04);
   }
 
   .site-footer {

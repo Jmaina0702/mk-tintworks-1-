@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 10 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 12 on top of the original static marketing site.
 
 ## Current system
 
@@ -37,6 +37,10 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The blog system and Workers AI integration were implemented, including the CMS article list, rich editor, browser-side Word/PDF import, AI SEO generation, article CRUD, public blog APIs, and build-time generation of public blog pages.
 - Section 10:
   The testimonials pipeline was implemented, including the public review form, honeypot and validation layers, Worker-backed moderation routes, email notification, CMS approval/rejection UI, and build-time rendering of approved public testimonials.
+- Section 11:
+  The promotions and announcements banner system was implemented, including the CMS banner manager, Worker-backed scheduling and image upload routes, and the public sitewide rotating banner rendered above the main navigation.
+- Section 12:
+  The media library was implemented, including protected inventory listing, storage usage reporting, live usage detection, copy URL actions, orphan filtering, and best-effort media deletion from R2 plus D1.
 
 ## Architecture
 
@@ -55,7 +59,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 2. [`scripts/build-site.mjs`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts/build-site.mjs) pulls live CMS state from the Worker at build time.
 3. The build injects `window.CMS_PAGE_CONTENT`, `window.CMS_SHARED_CONTENT`, `window.CMS_PRODUCTS_STATE`, `window.CMS_GALLERY_STATE`, and `window.CMS_TESTIMONIALS_STATE` into the generated Pages output.
 4. The build now also generates the public blog index and each published blog article from Worker-backed blog data.
-5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), and [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
+5. Client scripts such as [`assets/js/cms-content.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/cms-content.js), [`assets/js/services.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/services.js), [`assets/js/gallery.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/gallery.js), and [`assets/js/main.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/main.js) can then refresh selected data at runtime with cache-bypassed fetches where needed.
+6. The shared public header runtime now fetches `GET /api/promotions/active` and renders a dismissible rotating banner above the navigation when any scheduled promotion is currently live.
 
 ### 3. Storage model
 
@@ -64,7 +69,7 @@ This repository now implements the MK Tintworks custom CMS architecture through 
 - R2:
   Public media uploads and private document files.
 - KV:
-  Cached page-content snapshots and session-related state.
+  Cached page-content snapshots, session-related state, and the 60-second cached public promotions feed.
 
 ## Section 8 details
 
@@ -176,7 +181,8 @@ Important implementation details:
 
 - The Worker keeps blog publishing usable even if Workers AI is unavailable, because AI metadata generation is optional rather than required.
 - Published article routes are public, but all CMS write/read routes still require JWT auth.
-- Existing static article bodies were synced back into D1 so the CMS editor and new build generator preserve current live long-form content.
+- The only real legacy static article bodies in the repo were the two long-form pages already synced back into D1: `3m-vs-llumar-kenya` and `ntsa-tint-regulations-kenya-2026`.
+- The old `blog/index.html` marketing cards for two extra slugs were placeholder links, not CMS-backed articles, and the fallback index now avoids advertising unsynced posts if a build-time fetch fails.
 
 ### Public blog generation
 
@@ -190,6 +196,7 @@ Section 9 changes the public blog flow from hardcoded static pages to Worker-bac
 - `/blog/` is rendered from the published rows in `blog_posts`
 - `/blog/[slug].html` is generated at build time for each published article
 - related-article cards, metadata, JSON-LD, hero image, and article body now come from D1-backed blog content
+- the public Pages project `mk-tintworks-1` now runs `npm run build` and deploys `dist/`, so deploy hooks publish generated blog output instead of raw source files
 
 ## Section 10 details
 
@@ -253,6 +260,110 @@ Important implementation details:
 - Notification emails are sent server-side through Web3Forms using Worker secrets, so the business email is not exposed in client-side code
 - Approved testimonials are injected into the static build so the public testimonials page updates after moderation-triggered rebuilds rather than depending only on runtime fetches
 
+## Section 11 details
+
+### CMS promotions manager
+
+- Page:
+  [`mktintworks-cms/pages/promotions.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/promotions.html)
+- Client:
+  [`mktintworks-cms/assets/js/promotions.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/promotions.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-promotions.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-promotions.css)
+
+Implemented behavior:
+
+- Live promotions dashboard with totals for active, scheduled, paused, and expired banners
+- Create and edit modal for title, schedule, CTA link, season labeling, animation type, display duration, and active state
+- Canva-export banner upload with browser-side compression, preview, and Worker-backed media storage
+- Delete flow with confirmation and active-banner visibility notes for admins
+- Same-origin CMS API usage through the existing Access plus JWT gateway
+
+### Worker promotions API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/promotions.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/promotions.js)
+
+Endpoints:
+
+- `GET /api/promotions`
+  Protected CMS listing
+- `GET /api/promotions/:id`
+  Protected single-banner load
+- `POST /api/promotions/save`
+  Protected create/update for promotion records
+- `POST /api/promotions/upload-image`
+  Protected image upload to R2 plus media-table insert
+- `DELETE /api/promotions/:id`
+  Protected delete
+- `GET /api/promotions/active`
+  Public active-banner feed for the live website
+
+Important implementation details:
+
+- Protected routes still require JWT auth, while the public site only gets the active-feed endpoint
+- Banner validation covers scheduling, season labels, animation type, image safety, CTA URLs, and display-duration limits
+- Promotion uploads are compressed client-side and then rejected server-side if the final payload still exceeds the configured size ceiling
+- The active public feed is cached in KV for 60 seconds and invalidated on save/delete mutations
+- Active-banner responses normalize image URLs so both R2 uploads and safe public asset paths render correctly on the website
+
+### Public promotions banner runtime
+
+- Client:
+  [`assets/js/main.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/js/main.js)
+- Styles:
+  [`assets/css/main.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets/css/main.css)
+
+Implemented behavior:
+
+- Every public page using the shared header can render a full-width promotions bar above the main navigation
+- Multiple active banners rotate using each banner's configured `display_duration`
+- Dismissal is session-scoped with `sessionStorage`, so closing the banner hides it until the browser session ends
+- The runtime supports the PRD animation set with banner-specific classes and keeps the mobile nav offset aligned with the real header height
+- If no promotion is currently active, the header stays unchanged and no empty placeholder bar is rendered
+
+## Section 12 details
+
+### CMS media library
+
+- Page:
+  [`mktintworks-cms/pages/media.html`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/pages/media.html)
+- Client:
+  [`mktintworks-cms/assets/js/media.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/media.js)
+- Styles:
+  [`mktintworks-cms/assets/css/cms-media.css`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/css/cms-media.css)
+
+Implemented behavior:
+
+- Central file inventory for every media-table row written by CMS upload flows
+- Storage usage meter against the 10 GB Cloudflare R2 free-tier limit
+- Filter tabs for all files, images, documents, and unused assets
+- Filename search with live result counts
+- Image thumbnail rendering plus PDF fallback cards
+- One-click CDN URL copy flow
+- Delete flow with stronger warnings when a file is still referenced
+- Orphan highlighting based on live module references rather than upload-time tags alone
+
+### Worker media API
+
+Primary route:
+[`mktintworks-cms-api/src/routes/media.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/media.js)
+
+Endpoints:
+
+- `GET /api/media`
+  Protected CMS listing with normalized `used_in` output
+- `DELETE /api/media/:id`
+  Protected delete from D1 with best-effort R2 cleanup
+- `POST /api/media/upload-image`
+  Existing protected shared image-upload route preserved for the visual editor and blog flows
+
+Important implementation details:
+
+- Media listing now derives usage from live references in pages, gallery, products, blog posts, promotions, and SEO settings instead of trusting only the stored upload metadata.
+- Stored `used_in` values still act as fallback labels for future modules that may write into the media table before their own Section PRDs are implemented.
+- Section 12 does not add a new public website runtime. It is a protected CMS operations surface only.
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -268,7 +379,7 @@ Important implementation details:
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current live shape after Section 10
+## Current repo shape after Section 12
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -282,6 +393,10 @@ Important implementation details:
   Served from `GET /api/blog/public`
 - Public testimonials data:
   Served from `GET /api/testimonials/public`
+- Public promotions data:
+  Served from `GET /api/promotions/active`
+- Protected media library data:
+  Served from `GET /api/media`
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -290,10 +405,12 @@ Important implementation details:
 ## Operational notes
 
 - Use `npm run build` at the repo root before direct public Pages deployments.
+- The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-10 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, and approved testimonials.
+- The public site still keeps static fallback patterns where useful, but Sections 6-12 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, and uploaded media records.
+- The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 
 ## Next section
 
-The next PRD milestone is Section 11: Promotions & Announcements Banner System.
+The next PRD milestone is Section 13.

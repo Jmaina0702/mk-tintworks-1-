@@ -128,7 +128,11 @@
       return `${(value / 1024).toFixed(1)} KB`;
     }
 
-    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+    if (value < 1024 * 1024 * 1024) {
+      return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    return `${(value / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   };
 
   window.renderStars = (value) => {

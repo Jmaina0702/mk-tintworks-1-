@@ -26,6 +26,7 @@ const PUBLIC_ENDPOINTS = new Set([
   "/api/blog/public",
   "/api/gallery/public",
   "/api/pages/content",
+  "/api/promotions/active",
   "/api/products/site-data",
   "/api/testimonials/public",
   "/api/testimonials/submit",

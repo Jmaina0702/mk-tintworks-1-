@@ -50,7 +50,7 @@
         </div>
         <aside>
           <strong>What this page expects</strong>
-          <p>Cloudflare Access should already be protecting this CMS origin or route.</p>
+          <p>Cloudflare Access should already be protecting this exact CMS origin or route.</p>
           <p>The Worker login exchange runs against the live admin API and stores the JWT in local storage.</p>
         </aside>
       </section>
@@ -64,6 +64,18 @@
           Confirm that Cloudflare Access is active on the CMS URL and that the Worker is reachable through the same protected route.
         </div>
         <div class="surface-note">
+          <strong>Canonical CMS entry right now</strong>
+          <a id="cms-entry-link" href="https://mktintworks-cms.pages.dev">https://mktintworks-cms.pages.dev</a>
+        </div>
+        <div class="surface-note">
+          <strong>Future custom admin hostname</strong>
+          <a id="cms-custom-link" href="https://admin.mktintworks.com">https://admin.mktintworks.com</a>
+        </div>
+        <div class="surface-note">
+          <strong>Host guidance</strong>
+          <p id="auth-host-hint">The gateway will validate whether you are on the right hostname before attempting JWT exchange.</p>
+        </div>
+        <div class="surface-note">
           <strong>What gets stored</strong>
           Only the CMS JWT and its expiry timestamp are stored in the browser. Secrets stay in Cloudflare.
         </div>
@@ -73,7 +85,9 @@
 
   <script>
     window.MKT_CMS_CONFIG = {
-      autoAuth: false
+      autoAuth: false,
+      canonicalCmsOrigin: "https://mktintworks-cms.pages.dev",
+      preferredCustomOrigin: "https://admin.mktintworks.com"
     };
   </script>
   <script src="/assets/js/cms-core.js" defer></script>

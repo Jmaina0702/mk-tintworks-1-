@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -40,6 +40,25 @@ const htmlPages = [
   { file: "blog/index.html", slug: "blog" },
 ];
 
+const copyLegacyBlogPages = async () => {
+  const sourceDir = path.join(root, "blog");
+  const targetDir = path.join(dist, "blog");
+  await mkdir(targetDir, { recursive: true });
+
+  const entries = await readdir(sourceDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || entry.name === "index.html") {
+      continue;
+    }
+
+    await cp(
+      path.join(sourceDir, entry.name),
+      path.join(targetDir, entry.name),
+      { force: true }
+    );
+  }
+};
+
 const escapeHtml = (value) =>
   String(value || "")
     .replace(/&/g, "&amp;")
@@ -59,6 +78,36 @@ const stripHtml = (value) =>
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+const extractFirstImageSource = (value) => {
+  const match = String(value || "").match(
+    /<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i
+  );
+
+  return String(match?.[1] || match?.[2] || match?.[3] || "").trim();
+};
+
+const resolveArticleImageUrl = (article) => {
+  const featured = String(article?.featured_image_url || "").trim();
+  if (featured) {
+    return featured;
+  }
+
+  const contentImage = extractFirstImageSource(article?.content || "");
+  if (!contentImage || contentImage.startsWith("data:")) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(contentImage) || contentImage.startsWith("/")) {
+    return contentImage;
+  }
+
+  if (contentImage.startsWith("assets/")) {
+    return `/${contentImage}`;
+  }
+
+  return "";
+};
 
 const categoryLabel = (value) =>
   String(value || "general")
@@ -212,14 +261,16 @@ const renderBlogCards = (articles) => {
 
   return articles
     .map(
-      (article, index) => `
+      (article, index) => {
+        const previewImage =
+          resolveArticleImageUrl(article) || "/assets/images/og-default.webp";
+
+        return `
           <article class="blog-card glass-card" data-reveal${
             index > 0 ? ` data-reveal-delay="${index}"` : ""
           }>
             <img
-              src="${escapeAttribute(
-                article.featured_image_url || "/assets/images/og-default.webp"
-              )}"
+              src="${escapeAttribute(previewImage)}"
               alt="${escapeAttribute(
                 article.featured_image_alt || article.title || "MK Tintworks article preview"
               )}"
@@ -243,7 +294,8 @@ const renderBlogCards = (articles) => {
               <a href="/blog/${escapeAttribute(article.slug)}.html" class="btn-ghost blog-card-action">Read More</a>
             </div>
           </article>
-      `
+      `;
+      }
     )
     .join("");
 };
@@ -298,7 +350,8 @@ const renderBlogArticlePage = (article, pageContent, sharedContent, relatedArtic
     article.summary ||
     stripHtml(article.content).substring(0, 160);
   const ogImage =
-    article.featured_image_url || `${publicSiteBase}/assets/images/og-default.webp`;
+    resolveArticleImageUrl(article) ||
+    `${publicSiteBase}/assets/images/og-default.webp`;
   const canonical = `https://mktintworks.com/blog/${article.slug}.html`;
   const articleSlug = `blog-${article.slug}`;
   const articleDate = article.published_at || article.created_at;
@@ -546,10 +599,7 @@ for (const page of htmlPages) {
 }
 
 if (!blogStateLoaded) {
-  await cp(path.join(root, "blog"), path.join(dist, "blog"), {
-    recursive: true,
-    force: true,
-  });
+  await copyLegacyBlogPages();
 } else {
   for (const article of blogState.articles) {
     let articlePageContent = {};

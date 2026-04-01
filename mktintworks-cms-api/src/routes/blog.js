@@ -56,6 +56,28 @@ const stripHtml = (value) =>
     .replace(/\s+/g, " ")
     .trim();
 
+const extractFirstImageSource = (value) => {
+  const match = String(value || "").match(
+    /<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i
+  );
+
+  return sanitizeText(match?.[1] || match?.[2] || match?.[3] || "", 2000);
+};
+
+const resolveArticleImageUrl = (row, env) => {
+  const featured = normalizeBlogUrl(row?.featured_image_url, env);
+  if (featured) {
+    return featured;
+  }
+
+  const contentImage = extractFirstImageSource(row?.content || "");
+  if (!contentImage || contentImage.startsWith("data:")) {
+    return "";
+  }
+
+  return normalizeBlogUrl(contentImage, env);
+};
+
 const formatKeywords = (value) => {
   if (Array.isArray(value)) {
     return value
@@ -109,7 +131,7 @@ const normalizeArticleRow = (row, env, { includeContent = false } = {}) => ({
   summary: buildSummary(row),
   keywords: formatKeywords(row?.keywords || ""),
   content: includeContent ? row?.content || "" : undefined,
-  featured_image_url: normalizeBlogUrl(row?.featured_image_url, env),
+  featured_image_url: resolveArticleImageUrl(row, env),
   featured_image_alt: sanitizeText(row?.featured_image_alt || "", 200),
   category: sanitizeText(row?.category || "general", 40).toLowerCase(),
   read_time_minutes: Math.max(1, Number(row?.read_time_minutes || 1)),
@@ -635,7 +657,8 @@ const getPublishedArticles = async (request, env) => {
           status,
           source_type,
           published_at,
-          created_at
+          created_at,
+          content
         `;
 
     const statement = env.DB.prepare(

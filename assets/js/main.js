@@ -4,8 +4,14 @@ let navToggle;
 let navMenu;
 let navBackdrop;
 let themeToggle;
+let promotionsRoot;
+let promotionsTimer;
+let promotionsFadeTimer;
 const THEME_OVERRIDE_KEY = "theme-override";
 const LEGACY_THEME_KEY = "theme";
+const PROMOTIONS_ENDPOINT =
+  "https://mktintworks-cms-api.mktintworks.workers.dev/api/promotions/active";
+const PROMOTIONS_DISMISS_KEY = "mkt-promotions-dismissed";
 
 const sunIcon = `
   <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -42,6 +48,14 @@ const whatsappIcon = `
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Z"></path>
     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.557 4.126 1.526 5.855L.054 23.447a.5.5 0 0 0 .555.61l5.658-1.481A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0Zm0 21.75a9.706 9.706 0 0 1-4.95-1.357l-.356-.21-3.681.963.984-3.595-.232-.372A9.698 9.698 0 0 1 2.25 12C2.25 6.616 6.616 2.25 12 2.25S21.75 6.616 21.75 12 17.384 21.75 12 21.75Z"></path>
   </svg>`;
+
+const escapeHtml = (value) =>
+  String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 const navTemplate = (active) => `
   <header class="site-header" id="site-header">
@@ -179,6 +193,175 @@ const applyTheme = (theme) => {
 localStorage.removeItem(LEGACY_THEME_KEY);
 applyTheme(getThemeOverride() ?? getSystemTheme());
 
+const clearPromotionTimers = () => {
+  if (promotionsTimer) {
+    window.clearTimeout(promotionsTimer);
+    promotionsTimer = null;
+  }
+
+  if (promotionsFadeTimer) {
+    window.clearTimeout(promotionsFadeTimer);
+    promotionsFadeTimer = null;
+  }
+};
+
+const getPromotionDismissed = () => {
+  try {
+    return window.sessionStorage.getItem(PROMOTIONS_DISMISS_KEY) === "true";
+  } catch {
+    return false;
+  }
+};
+
+const setPromotionDismissed = () => {
+  try {
+    window.sessionStorage.setItem(PROMOTIONS_DISMISS_KEY, "true");
+  } catch {
+    // Ignore session storage failures.
+  }
+};
+
+const normalizePromotionDuration = (value) => {
+  const duration = Number(value);
+  if (!Number.isFinite(duration)) {
+    return 5000;
+  }
+
+  return Math.max(2000, Math.min(30000, duration));
+};
+
+const getPromotionAnimation = (value) => {
+  const allowed = new Set([
+    "fade",
+    "slide-down",
+    "bounce",
+    "zoom",
+    "slide-right",
+  ]);
+  const normalized = String(value || "fade").trim().toLowerCase();
+  return allowed.has(normalized) ? normalized : "fade";
+};
+
+const buildPromotionMarkup = (promotion) => {
+  const label =
+    promotion.custom_label || promotion.title || promotion.season || "Promotion";
+  const imageUrl = escapeHtml(String(promotion.image_url || "").trim());
+  const escapedLabel = escapeHtml(label);
+  const imageMarkup = `
+    <img
+      src="${imageUrl}"
+      alt="${escapedLabel}"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+    >
+  `;
+  const linkUrl = String(promotion.link_url || "").trim();
+  let mediaMarkup = imageMarkup;
+
+  if (linkUrl) {
+    const isExternal = /^https?:\/\//i.test(linkUrl);
+    mediaMarkup = `<a href="${escapeHtml(linkUrl)}" class="promo-banner-link"${
+      isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""
+    }>${imageMarkup}</a>`;
+  }
+
+  return `
+    <div class="container site-promotions-banner-shell">
+      <div class="promo-banner promo-anim-${getPromotionAnimation(
+        promotion.animation_type
+      )}" data-promo-inner>
+        ${mediaMarkup}
+        <button class="promo-dismiss-btn" type="button" data-promo-dismiss aria-label="Dismiss promotion banner">
+          &times;
+        </button>
+      </div>
+    </div>
+  `;
+};
+
+const dismissPromotionBanner = () => {
+  setPromotionDismissed();
+  clearPromotionTimers();
+  promotionsRoot?.remove();
+  promotionsRoot = null;
+  updateSiteHeaderHeight();
+};
+
+const renderPromotion = (promotions, index) => {
+  if (!promotionsRoot || !promotions[index]) {
+    return;
+  }
+
+  promotionsRoot.innerHTML = buildPromotionMarkup(promotions[index]);
+  updateSiteHeaderHeight();
+  const inner = promotionsRoot.querySelector("[data-promo-inner]");
+  promotionsRoot
+    .querySelector("[data-promo-dismiss]")
+    ?.addEventListener("click", dismissPromotionBanner, { once: true });
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      inner?.classList.add("is-visible");
+    });
+  });
+
+  if (promotions.length < 2) {
+    return;
+  }
+
+  clearPromotionTimers();
+  promotionsTimer = window.setTimeout(() => {
+    inner?.classList.remove("is-visible");
+    promotionsFadeTimer = window.setTimeout(() => {
+      if (!promotionsRoot) {
+        return;
+      }
+
+      const nextIndex = (index + 1) % promotions.length;
+      renderPromotion(promotions, nextIndex);
+    }, 320);
+  }, normalizePromotionDuration(promotions[index].display_duration));
+};
+
+const initPromotionsBanner = async () => {
+  if (!siteHeader || getPromotionDismissed()) {
+    return;
+  }
+
+  let promotions = [];
+  try {
+    const response = await fetch(PROMOTIONS_ENDPOINT, { cache: "no-store" });
+    if (!response.ok) {
+      return;
+    }
+
+    const payload = await response.json();
+    promotions = Array.isArray(payload?.promotions)
+      ? payload.promotions.filter((promotion) =>
+          String(promotion?.image_url || "").trim()
+        )
+      : [];
+  } catch {
+    return;
+  }
+
+  if (!promotions.length) {
+    return;
+  }
+
+  promotionsRoot = document.createElement("section");
+  promotionsRoot.className = "site-promotions-banner";
+  promotionsRoot.setAttribute("aria-label", "Site promotions");
+  siteHeader.insertBefore(promotionsRoot, siteHeader.firstChild);
+  renderPromotion(promotions, 0);
+};
+
+const updateSiteHeaderHeight = () => {
+  const height = Math.max(96, Math.round(siteHeader?.getBoundingClientRect().height || 96));
+  document.documentElement.style.setProperty("--site-header-height", `${height}px`);
+};
+
 const closeNav = () => {
   if (!siteHeader || !navToggle || !navMenu) return;
   siteHeader.classList.remove("nav-active");
@@ -198,6 +381,8 @@ themeToggle?.addEventListener("click", () => {
   localStorage.setItem(THEME_OVERRIDE_KEY, nextTheme);
   applyTheme(nextTheme);
 });
+
+initPromotionsBanner();
 
 const handleSystemThemeChange = (event) => {
   if (getThemeOverride()) return;
@@ -234,6 +419,7 @@ document.addEventListener("keydown", (event) => {
 const handleHeaderState = () => {
   if (!siteHeader) return;
   siteHeader.classList.toggle("is-scrolled", window.scrollY > 16);
+  updateSiteHeaderHeight();
 };
 
 window.addEventListener("scroll", handleHeaderState, { passive: true });
@@ -374,6 +560,7 @@ document.querySelectorAll("[data-copy-url]").forEach((button) => {
 });
 
 window.addEventListener("resize", () => {
+  updateSiteHeaderHeight();
   if (window.innerWidth > 920) {
     closeNav();
   }

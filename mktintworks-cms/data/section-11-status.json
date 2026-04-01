@@ -1,0 +1,58 @@
+{
+  "section": 11,
+  "title": "Promotions & Announcements Banner System",
+  "completed_at": "2026-04-01T06:52:25.8245843Z",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "59510f6d-9c35-4a80-ae71-74d287459bad",
+    "verified": {
+      "public_active_promotions_endpoint": true,
+      "protected_promotions_listing_returns_401_without_jwt": true,
+      "save_delete_routes_invalidate_active_feed_cache": true,
+      "promotion_image_upload_route_live": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://bdba6c98.mk-tintworks-1.pages.dev",
+    "verified": {
+      "shared_header_runtime_fetches_active_promotions": true,
+      "sitewide_banner_mounts_above_navigation": true,
+      "session_scoped_dismissal_enabled": true,
+      "multi_banner_rotation_uses_display_duration": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "latest_deployment": "https://247dab2a.mktintworks-cms.pages.dev",
+    "verified": {
+      "promotions_page_built": true,
+      "create_edit_modal_wired": true,
+      "banner_image_upload_ready": true,
+      "schedule_animation_and_cta_controls_present": true
+    }
+  },
+  "remote_state": {
+    "active_feed_response": {
+      "promotions": []
+    },
+    "promotions_rows": 0
+  },
+  "features": {
+    "cms_promotions_manager": true,
+    "protected_promotions_crud": true,
+    "canva_banner_upload_flow": true,
+    "seasonal_schedule_support": true,
+    "public_active_feed": true,
+    "kv_cached_active_feed": true,
+    "sitewide_rotating_banner": true,
+    "session_dismissal": true
+  },
+  "notes": [
+    "The public promotions feed is intentionally the only cross-origin promotions endpoint; the rest of the promotions routes remain protected behind the CMS JWT.",
+    "The public header banner renders at runtime from GET /api/promotions/active so future scheduling changes can appear without rebuilding every page shell.",
+    "Remote D1 currently has zero promotion rows, so the live website correctly renders no banner until an admin uploads and activates at least one promotion."
+  ]
+}
