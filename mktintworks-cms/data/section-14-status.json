@@ -1,10 +1,10 @@
 {
   "section": 14,
   "title": "Analytics Dashboard",
-  "completed_at": "2026-04-01T14:36:29.4658268+03:00",
+  "completed_at": "2026-04-01T14:41:16.3592480+03:00",
   "worker": {
     "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
-    "version_id": "667815db-b5e4-4b27-9cc8-244e82ec2bf2",
+    "version_id": "ffa6bd9c-3df6-4a42-91bc-ae3c537cc488",
     "verified": {
       "health_endpoint_returns_200": true,
       "public_event_ingest_returns_200": true,
@@ -15,7 +15,7 @@
   "cms": {
     "project": "mktintworks-cms",
     "production_host": "https://mktintworks-cms.pages.dev",
-    "latest_deployment": "https://c17f2bc0.mktintworks-cms.pages.dev",
+    "latest_deployment": "https://f9f62a1f.mktintworks-cms.pages.dev",
     "verified": {
       "analytics_dashboard_page_built": true,
       "chartjs_loaded": true,
@@ -26,7 +26,7 @@
   "public_site": {
     "project": "mk-tintworks-1",
     "production_host": "https://mk-tintworks-1.pages.dev",
-    "latest_deployment": "https://0afd95db.mk-tintworks-1.pages.dev",
+    "latest_deployment": "https://af7579c9.mk-tintworks-1.pages.dev",
     "verified": {
       "production_host_responds": true,
       "analytics_tracker_script_served": true,
