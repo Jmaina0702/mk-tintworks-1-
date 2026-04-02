@@ -231,58 +231,103 @@
     return payload.content || {};
   };
 
-  const hydrate = async () => {
-    registerAutoEditableElements();
+  let refreshPromise = null;
 
-    const sharedContent = Object.assign(
-      { nav: {}, footer: {} },
-      window.CMS_SHARED_CONTENT || {}
-    );
-    let pageContent = Object.assign({}, window.CMS_PAGE_CONTENT || {});
+  const readSharedContent = () =>
+    Object.assign({ nav: {}, footer: {} }, window.CMS_SHARED_CONTENT || {});
+
+  const readPageContent = () =>
+    window.CMS_PAGE_CONTENT && typeof window.CMS_PAGE_CONTENT === "object"
+      ? Object.assign({}, window.CMS_PAGE_CONTENT)
+      : {};
+
+  const applyKnownContent = () => {
+    const sharedContent = readSharedContent();
+    const pageContent = readPageContent();
 
     applyContentMap("nav", sharedContent.nav);
     applyContentMap("footer", sharedContent.footer);
     if (pageSlug) {
       applyContentMap(pageSlug, pageContent);
     }
-
-    const needsNav = Object.keys(sharedContent.nav).length === 0;
-    const needsFooter = Object.keys(sharedContent.footer).length === 0;
-    const needsPage = pageSlug && Object.keys(pageContent).length === 0;
-
-    if (!needsNav && !needsFooter && !needsPage) {
-      return;
-    }
-
-    try {
-      const [navContent, footerContent, currentPageContent] = await Promise.all([
-        needsNav ? fetchContent("nav") : Promise.resolve(sharedContent.nav),
-        needsFooter ? fetchContent("footer") : Promise.resolve(sharedContent.footer),
-        needsPage ? fetchContent(pageSlug) : Promise.resolve(pageContent),
-      ]);
-
-      window.CMS_SHARED_CONTENT = {
-        nav: navContent,
-        footer: footerContent,
-      };
-      window.CMS_PAGE_CONTENT = currentPageContent;
-
-      applyContentMap("nav", navContent);
-      applyContentMap("footer", footerContent);
-      if (pageSlug) {
-        pageContent = currentPageContent;
-        applyContentMap(pageSlug, pageContent);
-      }
-    } catch {
-      // Static source content remains visible if the CMS API is unavailable.
-    }
   };
 
   const preparePage = () => {
     registerAutoEditableElements();
+    applyKnownContent();
+  };
+
+  const refreshContent = async () => {
+    if (refreshPromise) {
+      return refreshPromise;
+    }
+
+    const requests = [
+      ["nav", fetchContent("nav")],
+      ["footer", fetchContent("footer")],
+    ];
+
+    if (pageSlug) {
+      requests.push(["page", fetchContent(pageSlug)]);
+    }
+
+    refreshPromise = Promise.allSettled(
+      requests.map(([, requestPromise]) => requestPromise)
+    )
+      .then((results) => {
+        let didUpdate = false;
+        const sharedContent = readSharedContent();
+        let pageContent = readPageContent();
+
+        results.forEach((result, index) => {
+          if (result.status !== "fulfilled") {
+            return;
+          }
+
+          const [kind] = requests[index];
+          if (kind === "nav") {
+            sharedContent.nav = result.value;
+            didUpdate = true;
+            return;
+          }
+
+          if (kind === "footer") {
+            sharedContent.footer = result.value;
+            didUpdate = true;
+            return;
+          }
+
+          if (kind === "page") {
+            pageContent = result.value;
+            didUpdate = true;
+          }
+        });
+
+        if (!didUpdate) {
+          return;
+        }
+
+        window.CMS_SHARED_CONTENT = sharedContent;
+        if (pageSlug) {
+          window.CMS_PAGE_CONTENT = pageContent;
+        }
+
+        preparePage();
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+
+    return refreshPromise;
+  };
+
+  const hydrate = () => {
+    preparePage();
+    void refreshContent();
   };
 
   window.MKT_CMS_PREPARE_PAGE = preparePage;
+  window.MKT_CMS_REFRESH_CONTENT = refreshContent;
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", hydrate, { once: true });

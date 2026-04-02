@@ -133,6 +133,7 @@
           <p>Client reviews will appear here as soon as they are approved in the CMS.</p>
         </article>
       `;
+      window.MKT_CMS_PREPARE_PAGE?.();
       return;
     }
 
@@ -162,6 +163,8 @@
         `
       )
       .join("");
+
+    window.MKT_CMS_PREPARE_PAGE?.();
   };
 
   const fetchLatestTestimonials = async () => {
