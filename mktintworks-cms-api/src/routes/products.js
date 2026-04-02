@@ -5,7 +5,6 @@ import {
   fetchProductsWithDiscounts,
   groupProductsByBrand,
   primeProductCaches,
-  readProductSiteCache,
   resolveMediaPublicBaseUrl,
   syncProductCurrentPrices,
   triggerDeploy,
@@ -359,18 +358,6 @@ const uploadProductImage = async (request, env) => {
 
 const getProductsSiteData = async (request, env) => {
   try {
-    const cached = await readProductSiteCache(env);
-    if (cached) {
-      return json(
-        {
-          ...cached,
-          source: "cache",
-        },
-        {},
-        request
-      );
-    }
-
     const payload = await buildProductsSiteData(env);
     await primeProductCaches(env, payload);
 

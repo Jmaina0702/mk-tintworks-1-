@@ -9,7 +9,7 @@ import {
 
 const DEFAULT_MEDIA_PUBLIC_BASE_URL =
   "https://pub-0252224d03e4472da062ccdc92c2482f.r2.dev";
-const DEFAULT_PUBLIC_SITE_BASE_URL = "https://mktintworks.com";
+const DEFAULT_PUBLIC_SITE_BASE_URL = "https://mk-tintworks-1.pages.dev";
 
 const BRAND_GROUPS = ["3m", "llumar", "other"];
 
