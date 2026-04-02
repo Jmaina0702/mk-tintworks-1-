@@ -144,13 +144,17 @@
         (item) => `
           <article class="testimonial-card glass-card">
             <div class="quote-mark" aria-hidden="true">“</div>
-            <p class="testimonial-copy">${escapeHtml(item.review_text)}</p>
+            <p class="testimonial-copy" data-cms-key="testimonials:item_${item.id}_review" data-cms-type="text">${escapeHtml(
+              item.review_text
+            )}</p>
             <div class="stars" aria-label="${item.rating} out of 5 stars">${"★".repeat(
               item.rating
             )}${"☆".repeat(5 - item.rating)}</div>
             <div class="testimonial-meta">
-              <strong>${escapeHtml(item.client_name)}</strong>
-              <span class="testimonial-service-badge">${escapeHtml(
+              <strong data-cms-key="testimonials:item_${item.id}_name" data-cms-type="text">${escapeHtml(
+                item.client_name
+              )}</strong>
+              <span class="testimonial-service-badge" data-cms-key="testimonials:item_${item.id}_service" data-cms-type="text">${escapeHtml(
                 formatService(item.service_type)
               )}</span>
               ${

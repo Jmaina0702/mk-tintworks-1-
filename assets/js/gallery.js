@@ -80,8 +80,10 @@
               decoding="async"
               width="600"
               height="450"
+              data-cms-key="gallery:item_${image.id}_image"
+              data-cms-type="image"
             >
-            <figcaption class="gallery-caption">
+            <figcaption class="gallery-caption" data-cms-key="gallery:item_${image.id}_caption" data-cms-type="text">
               ${escapeHtml(image.caption || image.alt_text || "MK Tintworks installation image")}
             </figcaption>
           </figure>

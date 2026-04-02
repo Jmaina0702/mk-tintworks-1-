@@ -73,10 +73,13 @@
   const renderDiscountBlock = (product) => {
     const discount = product.discount;
     const basePrice = formatKSh(product.base_price);
+    const priceKey = `services:product_${product.product_key}_price`;
 
     if (!discount || discount.status === "expired") {
       return `
-        <p class="product-price">${basePrice}</p>
+        <p class="product-price" data-cms-key="${escapeHtml(
+          priceKey
+        )}" data-cms-type="price">${basePrice}</p>
         <p class="product-discount-note" hidden></p>
         <p class="product-discount-timer" hidden></p>
       `;
@@ -88,7 +91,9 @@
         : "Coming Soon";
 
       return `
-        <p class="product-price">${basePrice}</p>
+        <p class="product-price" data-cms-key="${escapeHtml(
+          priceKey
+        )}" data-cms-type="price">${basePrice}</p>
         <p class="product-discount-note">${label}</p>
         <p
           class="product-discount-timer"
@@ -105,7 +110,9 @@
     return `
       <p class="product-price">
         <span class="product-price-original">${basePrice}</span>
-        <span class="product-price-current">${formatKSh(product.current_price)}</span>
+        <span class="product-price-current" data-cms-key="${escapeHtml(
+          priceKey
+        )}" data-cms-type="price">${formatKSh(product.current_price)}</span>
       </p>
       <p class="product-discount-note">${discountLabel}</p>
       <p
@@ -125,7 +132,9 @@
     return `
       <details class="more-info">
         <summary>More Info <span aria-hidden="true">＋</span></summary>
-        <div class="more-info-body">${extended}</div>
+        <div class="more-info-body" data-cms-key="services:product_${escapeHtml(
+          product.product_key
+        )}_details" data-cms-type="html">${extended}</div>
       </details>
     `;
   };
@@ -136,6 +145,12 @@
       .join("");
 
   const renderProductCard = (product, index) => {
+    const imageKey = `services:product_${product.product_key}_image`;
+    const nameKey = `services:product_${product.product_key}_name`;
+    const taglineKey = `services:product_${product.product_key}_tagline`;
+    const descriptionKey = `services:product_${product.product_key}_description`;
+    const warrantyKey = `services:product_${product.product_key}_warranty`;
+    const ctaKey = `services:product_${product.product_key}_cta`;
     const badge =
       product.tier && product.tier !== "entry"
         ? `<span class="badge ${badgeClass(product.tier)}">${escapeHtml(
@@ -156,18 +171,30 @@
             decoding="async"
             width="520"
             height="390"
+            data-cms-key="${escapeHtml(imageKey)}"
+            data-cms-type="image"
           >
           ${badge}
         </div>
         <div class="product-details">
-          <h3>${escapeHtml(product.name)}</h3>
-          <p class="product-tagline">${escapeHtml(product.tagline)}</p>
-          <p>${escapeHtml(product.short_description)}</p>
+          <h3 data-cms-key="${escapeHtml(nameKey)}" data-cms-type="text">${escapeHtml(
+            product.name
+          )}</h3>
+          <p class="product-tagline" data-cms-key="${escapeHtml(
+            taglineKey
+          )}" data-cms-type="text">${escapeHtml(product.tagline)}</p>
+          <p data-cms-key="${escapeHtml(descriptionKey)}" data-cms-type="text">${escapeHtml(
+            product.short_description
+          )}</p>
           <ul class="product-benefits">${renderBenefits(product.benefits)}</ul>
           ${renderDiscountBlock(product)}
           <p class="product-meta">Professional installation included · Sedan</p>
-          <p class="product-warranty">${escapeHtml(product.warranty_text)}</p>
-          <a href="/book.html" class="btn-primary">Book Now</a>
+          <p class="product-warranty" data-cms-key="${escapeHtml(
+            warrantyKey
+          )}" data-cms-type="text">${escapeHtml(product.warranty_text)}</p>
+          <a href="/book.html" class="btn-primary" data-cms-key="${escapeHtml(
+            ctaKey
+          )}" data-cms-type="link">Book Now</a>
           ${renderMoreInfo(product)}
         </div>
       </article>

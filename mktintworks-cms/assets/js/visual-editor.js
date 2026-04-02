@@ -25,6 +25,7 @@
   let currentWebsiteOrigin = DEFAULT_PREVIEW_ORIGIN;
   let previewLoadId = 0;
   let previewReadyTimer = null;
+  let previewCacheToken = Date.now();
 
   const escapeHtml = (value) =>
     String(value)
@@ -92,16 +93,28 @@
   };
 
   const buildWebsitePages = (origin) => ({
-    home: `${origin}/?cms_preview=true`,
-    services: `${origin}/services.html?cms_preview=true`,
-    gallery: `${origin}/gallery.html?cms_preview=true`,
-    testimonials: `${origin}/testimonials.html?cms_preview=true`,
-    book: `${origin}/book.html?cms_preview=true`,
-    blog: `${origin}/blog/?cms_preview=true`,
-    "blog-3m-vs-llumar-kenya": `${origin}/blog/3m-vs-llumar-kenya.html?cms_preview=true`,
-    "blog-ntsa-tint-regulations-kenya-2026": `${origin}/blog/ntsa-tint-regulations-kenya-2026.html?cms_preview=true`,
-    "404": `${origin}/404.html?cms_preview=true`,
+    home: `${origin}/`,
+    services: `${origin}/services.html`,
+    gallery: `${origin}/gallery.html`,
+    testimonials: `${origin}/testimonials.html`,
+    book: `${origin}/book.html`,
+    blog: `${origin}/blog/`,
+    "blog-3m-vs-llumar-kenya": `${origin}/blog/3m-vs-llumar-kenya.html`,
+    "blog-ntsa-tint-regulations-kenya-2026": `${origin}/blog/ntsa-tint-regulations-kenya-2026.html`,
+    "404": `${origin}/404.html`,
   });
+
+  const buildPreviewPageUrl = (pageKey) => {
+    const baseUrl = buildWebsitePages(currentWebsiteOrigin)[pageKey];
+    if (!baseUrl) {
+      return "";
+    }
+
+    const url = new URL(baseUrl);
+    url.searchParams.set("cms_preview", "true");
+    url.searchParams.set("_cmsr", String(previewCacheToken));
+    return url.toString();
+  };
 
   const clearPreviewReadyTimer = () => {
     if (!previewReadyTimer) {
@@ -219,8 +232,12 @@
     return DEFAULT_PREVIEW_ORIGIN;
   };
 
-  const loadPage = (pageKey) => {
-    const url = buildWebsitePages(currentWebsiteOrigin)[pageKey];
+  const loadPage = (pageKey, { forceRefresh = false } = {}) => {
+    if (forceRefresh) {
+      previewCacheToken = Date.now();
+    }
+
+    const url = buildPreviewPageUrl(pageKey);
     if (!url) {
       return;
     }
@@ -254,6 +271,40 @@
     iframe.contentWindow.postMessage(payload, currentWebsiteOrigin);
   };
 
+  const splitContentKey = (key) => {
+    const [pageSlug, sectionKey] = String(key || "").split(":");
+    return {
+      pageSlug: String(pageSlug || "").trim(),
+      sectionKey: String(sectionKey || "").trim(),
+    };
+  };
+
+  const fetchPersistedPageContent = async (pageSlug) => {
+    const url = `/api/pages/content?slug=${encodeURIComponent(
+      pageSlug
+    )}&_ts=${Date.now()}`;
+    const payload = await window.GET(url);
+    return payload?.content && typeof payload.content === "object"
+      ? payload.content
+      : {};
+  };
+
+  const waitForPersistedValue = async (pageSlug, sectionKey, expectedValue) => {
+    const maxAttempts = 5;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const content = await fetchPersistedPageContent(pageSlug);
+      if (String(content?.[sectionKey] ?? "") === String(expectedValue ?? "")) {
+        return true;
+      }
+
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => window.setTimeout(resolve, 350));
+      }
+    }
+
+    return false;
+  };
+
   const saveElement = async (key, cmsType, value, button) => {
     if (!key) {
       window.showToast("Select an element in the preview first.", "warning");
@@ -265,21 +316,36 @@
     }
 
     try {
-      await window.POST("/api/pages/update", {
+      const { pageSlug, sectionKey } = splitContentKey(key);
+      const result = await window.POST("/api/pages/update", {
         key,
         type: cmsType,
         value,
       });
 
+      const savedValue = result?.value ?? value;
+      const persisted = await waitForPersistedValue(
+        pageSlug,
+        sectionKey,
+        savedValue
+      );
+
+      if (!persisted) {
+        throw new Error(
+          "Save acknowledgement was received, but the persisted content check did not confirm the update."
+        );
+      }
+
       postPreviewUpdate({
         type: "cms:element:update",
         key,
         cmsType,
-        value,
+        value: savedValue,
       });
 
-      window.showToast("Saved — live on website in ~30 seconds", "success");
-      setStatus(`Saved: ${key}`);
+      window.showToast("Saved and verified. Reloading preview...", "success");
+      setStatus(`Saved and verified: ${key}`);
+      loadPage(currentPage, { forceRefresh: true });
     } catch (error) {
       window.showToast(`Save failed: ${error.message}`, "error");
     } finally {
