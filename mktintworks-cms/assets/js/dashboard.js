@@ -44,7 +44,7 @@ window.MKT_CMS_UI.mountDashboardPage({
       title: "Business owner starting points",
       description: "Section 20 ends with practical first steps so the system can move from build to routine use immediately.",
       items: [
-        { title: "Login", meta: "Use the admin URL and Cloudflare Access email OTP flow for mktintworks.co@gmail.com." },
+        { title: "Login", meta: "Use the admin URL and Cloudflare Access email OTP flow for officialmainajames@gmail.com." },
         { title: "Products first", meta: "Confirm all 10 product records have final imagery and correct prices." },
         { title: "Gallery second", meta: "Replace placeholder gallery shots with real completed jobs." },
         { title: "Invoices daily", meta: "Start normal day-to-day usage by issuing a test invoice from the CMS." },

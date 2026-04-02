@@ -1,5 +1,5 @@
 const WORKER_API_BASE = "https://mktintworks-cms-api.mktintworks.workers.dev";
-const DEFAULT_ADMIN_EMAIL = "mktintworks.co@gmail.com";
+const DEFAULT_ADMIN_EMAIL = "officialmainajames@gmail.com";
 
 const json = (data, init = {}) => {
   const headers = new Headers(init.headers || {});

@@ -49,7 +49,7 @@
   },
   "handover": {
     "login_url": "https://admin.mktintworks.com",
-    "login_method": "Enter mktintworks.co@gmail.com and complete the Cloudflare Access email OTP flow.",
+    "login_method": "Enter officialmainajames@gmail.com and complete the Cloudflare Access email OTP flow.",
     "first_action": "Open Products Manager and confirm all 10 products have final images and correct pricing.",
     "second_action": "Open Gallery Manager and replace placeholder imagery with real completed jobs.",
     "third_action": "Open SEO Manager and review the home page title and description.",
