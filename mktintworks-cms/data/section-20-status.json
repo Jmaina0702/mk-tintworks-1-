@@ -1,0 +1,65 @@
+{
+  "section": 20,
+  "title": "Codex Build Instructions",
+  "status": "complete",
+  "completed_at": "2026-04-02T13:24:14.8736783+03:00",
+  "worker": {
+    "url": "https://mktintworks-cms-api.mktintworks.workers.dev",
+    "version_id": "7b4e08a1-614e-4637-90c6-7244a39271ec",
+    "verified": {
+      "health_endpoint_returns_200": true,
+      "gallery_public_returns_200_without_jwt": true,
+      "auth_verify_returns_401_without_jwt": true,
+      "sales_summary_returns_401_without_jwt": true,
+      "required_secrets_present": true,
+      "product_seed_count_is_10": true,
+      "seo_seed_count_is_6": true
+    }
+  },
+  "cms": {
+    "project": "mktintworks-cms",
+    "production_host": "https://mktintworks-cms.pages.dev",
+    "verified": {
+      "preview_dashboard_returns_200": true,
+      "preview_cms_core_uses_session_storage_only": true,
+      "preview_dashboard_asset_reflects_section_20_copy": true,
+      "preview_cms_ui_asset_reflects_section_20_workspace_state": true,
+      "production_host_redirects_to_access": true
+    }
+  },
+  "public_site": {
+    "project": "mk-tintworks-1",
+    "production_host": "https://mk-tintworks-1.pages.dev",
+    "verified": {
+      "home_page_returns_200": true,
+      "services_page_returns_200": true,
+      "testimonials_page_returns_200": true,
+      "blog_index_returns_200": true,
+      "analytics_tracker_present": true,
+      "tawk_widget_present": true,
+      "testimonial_submission_form_present": true
+    }
+  },
+  "compliance": {
+    "jwt_persistence_is_session_scoped": true,
+    "localstorage_token_persistence_removed": true,
+    "warranty_generation_avoids_deleting_persisted_rows": true,
+    "linked_invoice_duplicate_warranty_check_added": true,
+    "worker_package_list_rechecked": true
+  },
+  "handover": {
+    "login_url": "https://admin.mktintworks.com",
+    "login_method": "Enter mktintworks.co@gmail.com and complete the Cloudflare Access email OTP flow.",
+    "first_action": "Open Products Manager and confirm all 10 products have final images and correct pricing.",
+    "second_action": "Open Gallery Manager and replace placeholder imagery with real completed jobs.",
+    "third_action": "Open SEO Manager and review the home page title and description.",
+    "fourth_action": "Open Blog Editor and prepare the first article about window tinting benefits.",
+    "training_note": "Use the invoice generator first because it is the main day-to-day operating workflow."
+  },
+  "notes": [
+    "Section 20 does not introduce a new module. It closes the PRD with final compliance, verification, deployment, and handover work.",
+    "The direct custom website domain could not be reached from this workspace during verification, so website HTTP checks were completed against the live Pages host instead.",
+    "The CMS preview deployment used during verification confirmed the updated dashboard assets and the session-only auth client before this status file was added to the deployed build.",
+    "The Worker and CMS deployments for Section 20 were executed from this workspace on April 2, 2026."
+  ]
+}

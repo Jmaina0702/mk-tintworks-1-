@@ -1,6 +1,6 @@
 # MK Tintworks CMS and Website Summary
 
-This repository now implements the MK Tintworks custom CMS architecture through PRD Section 19 on top of the original static marketing site.
+This repository now implements the MK Tintworks custom CMS architecture through PRD Section 20 on top of the original static marketing site.
 
 ## Current system
 
@@ -55,6 +55,8 @@ This repository now implements the MK Tintworks custom CMS architecture through 
   The sales dashboard was implemented, including a protected invoice-backed summary endpoint, Chart.js CMS reporting, collected versus outstanding revenue tracking, film revenue ranking, payment and service mix charts, outstanding invoice visibility, and top-client spend ranking.
 - Section 19:
   The real-time sync architecture was implemented, including centralized CORS middleware, shared KV cache-key conventions, Worker-side cache priming for pages/products/blog/SEO/promotions/discounts, shared deploy-hook triggering, finalized Worker configuration, and normalized upload-security utilities for the D1 to KV to Pages content pipeline.
+- Section 20:
+  The PRD completion and handover milestone was implemented, including session-only CMS JWT storage, warranty-generation failure handling that avoids deleting persisted warranty rows, final deployment and checklist metadata, and dashboard/readme updates that mark the system complete.
 
 ## Architecture
 
@@ -782,6 +784,37 @@ Section 19 also tightens the shared upload helper:
 - R2 key generation now preserves nested folders such as `seo/og-images` while sanitizing each path segment.
 - Existing upload routes for products, gallery, promotions, SEO, and CMS media continue to use one centralized helper pair for filename and key generation.
 
+## Section 20 details
+
+### Final compliance sweep
+
+- CMS auth client:
+  [`mktintworks-cms/assets/js/cms-core.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/cms-core.js)
+- Warranty route:
+  [`mktintworks-cms-api/src/routes/warranties.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/routes/warranties.js)
+
+Implemented behavior:
+
+- Section 20 replaces the remaining `localStorage` token persistence in the CMS with session-scoped storage, which matches the final PRD security rule and clears naturally on logout or tab closure.
+- The CMS auth helper now falls back to an in-memory session adapter only when `sessionStorage` is unavailable, so browser privacy restrictions do not break admin authentication outright.
+- Warranty generation now produces the PDF and stores it in R2 before the warranty row is inserted into D1, so failure cleanup does not need to delete a persisted warranty record.
+- Linked-invoice warranty creation now also checks the `warranties` table by `invoice_id`, which prevents duplicate certificate generation even if an older invoice row is missing its reverse `warranty_id` link.
+
+### Completion record and handover state
+
+- Dashboard shell:
+  [`mktintworks-cms/assets/js/cms-ui.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/cms-ui.js)
+- Dashboard content:
+  [`mktintworks-cms/assets/js/dashboard.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/dashboard.js)
+- CMS delivery record:
+  [`mktintworks-cms/data/section-20-status.json`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/data/section-20-status.json)
+
+Important implementation details:
+
+- The CMS shell now labels the workspace as Section 20 complete instead of presenting the build as an in-progress milestone.
+- The dashboard hero, spotlight cards, and recent-activity timeline now focus on live operational use, business-owner handover, and final readiness instead of future-section placeholders.
+- The new Section 20 status record captures the completion checkpoint, deployment verification, and the business-owner handover instructions from the PRD.
+
 ## Key directories
 
 - [`assets`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/assets)
@@ -797,7 +830,7 @@ Section 19 also tightens the shared upload helper:
 - [`scripts`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/scripts)
   Build and deployment helpers for the static site
 
-## Current repo shape after Section 19
+## Current repo shape after Section 20
 
 - Worker:
   `https://mktintworks-cms-api.mktintworks.workers.dev`
@@ -849,6 +882,10 @@ Section 19 also tightens the shared upload helper:
   Applied by [`mktintworks-cms-api/src/middleware/cors.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/middleware/cors.js)
 - Shared KV key convention:
   Implemented by [`mktintworks-cms-api/src/utils/cache.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api/src/utils/cache.js)
+- Session-only CMS token storage:
+  Implemented by [`mktintworks-cms/assets/js/cms-core.js`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/assets/js/cms-core.js)
+- Final delivery status record:
+  Tracked in [`mktintworks-cms/data/section-20-status.json`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms/data/section-20-status.json)
 - Published blog pages:
   Generated at build time from Worker-backed `blog_posts` rows
 - CMS preview source discovery:
@@ -860,7 +897,7 @@ Section 19 also tightens the shared upload helper:
 - The `mk-tintworks-1` Pages project must keep `build_command = npm run build` and `destination_dir = dist`; blank build settings will republish raw source files and break CMS-driven blog updates.
 - Deploy the Worker from [`mktintworks-cms-api`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms-api) when backend routes or bindings change.
 - Deploy the CMS Pages app from [`mktintworks-cms`](/c:/Users/DELL/Documents/mk%20tintworks%20%281%29/mktintworks-cms) when admin UI or section status files change.
-- The public site still keeps static fallback patterns where useful, but Sections 6-19 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, the searchable business archive inside the CMS, invoice-backed sales reporting for financial visibility, and the D1 to KV to deploy-hook sync path that moves CMS saves onto the live website.
+- The public site still keeps static fallback patterns where useful, but Sections 6-20 now treat the Worker as the source of truth for editable content, products, gallery items, published blog articles, approved testimonials, active promotions, page-level SEO, uploaded media records, first-party analytics event storage, invoice document generation, warranty certificate generation, the searchable business archive inside the CMS, invoice-backed sales reporting for financial visibility, the D1 to KV to deploy-hook sync path that moves CMS saves onto the live website, and the final completion metadata used for project handover.
 - The promotions banner is intentionally runtime-driven rather than build-injected, so scheduling changes can appear on the live public header without requiring the entire static site shell to change.
 - SEO metadata is intentionally build-injected rather than runtime-only so search crawlers and social scrapers can see the updated tags directly in the generated HTML source.
 - Analytics tracking is intentionally first-party and lightweight, so the CMS gets quick visibility into website behavior without introducing cookies or third-party tracking scripts.
@@ -869,6 +906,6 @@ Section 19 also tightens the shared upload helper:
 - The records system is intentionally CMS-only and protected by Access plus JWT, so PDF re-downloads, invoice deletion, and customer history lookups stay inside the administrative surface.
 - The sync architecture is intentionally layered: D1 remains the permanent source of truth, KV absorbs hot reads between writes and rebuilds, and the deploy hook keeps the public static build aligned without making save operations depend on a successful Pages rebuild.
 
-## Next section
+## PRD status
 
-The next PRD milestone is Section 20.
+Section 20 completes the PRD. There is no further document milestone after this one.

@@ -86,20 +86,6 @@ const validateWarrantyPayload = (payload) => {
   return null;
 };
 
-const deleteWarrantyRow = async (env, warrantyId) => {
-  if (!warrantyId) {
-    return;
-  }
-
-  try {
-    await env.DB.prepare("DELETE FROM warranties WHERE id = ?")
-      .bind(warrantyId)
-      .run();
-  } catch (error) {
-    console.error("Failed to clean up warranty row", warrantyId, error?.message);
-  }
-};
-
 const resolveLinkedInvoice = async (env, payload) => {
   if (payload.invoice_id) {
     return findInvoiceRecordById(env, payload.invoice_id);
@@ -110,6 +96,23 @@ const resolveLinkedInvoice = async (env, payload) => {
   }
 
   return null;
+};
+
+const findWarrantyByInvoiceId = async (env, invoiceId) => {
+  if (!invoiceId) {
+    return null;
+  }
+
+  return env.DB.prepare(
+    `
+      SELECT id, certificate_number
+      FROM warranties
+      WHERE invoice_id = ?
+      LIMIT 1
+    `
+  )
+    .bind(invoiceId)
+    .first();
 };
 
 export const generateWarranty = async (request, env) => {
@@ -135,6 +138,7 @@ export const generateWarranty = async (request, env) => {
   let linkedInvoiceId = null;
   let invoiceLinked = false;
   let pdfKey = "";
+  let pdfStored = false;
 
   try {
     const linkedInvoice = await resolveLinkedInvoice(env, payload);
@@ -150,12 +154,36 @@ export const generateWarranty = async (request, env) => {
       );
     }
 
+    linkedInvoiceId = linkedInvoice?.id || null;
+
+    const existingWarranty = await findWarrantyByInvoiceId(env, linkedInvoiceId);
+    if (existingWarranty) {
+      return buildValidationError(
+        `Invoice ${linkedInvoice.invoice_number} already maps to warranty ${existingWarranty.certificate_number}.`,
+        request,
+        409
+      );
+    }
+
     const clientId = await resolveClient(env, payload);
     const vehicleId = payload.registration_no
       ? await resolveVehicle(env, clientId, payload)
       : null;
     const certificateNumber = await generateCertNumber(env);
-    linkedInvoiceId = linkedInvoice?.id || null;
+    pdfKey = `documents/warranty-${certificateNumber}.pdf`;
+
+    const pdfBytes = await generateWarrantyPDF({
+      ...payload,
+      certificate_number: certificateNumber,
+      invoice_ref: payload.invoice_ref || linkedInvoice?.invoice_number || "",
+    });
+
+    await env.DOCUMENTS_BUCKET.put(pdfKey, pdfBytes, {
+      httpMetadata: {
+        contentType: "application/pdf",
+      },
+    });
+    pdfStored = true;
 
     const insert = await env.DB.prepare(
       `
@@ -174,7 +202,7 @@ export const generateWarranty = async (request, env) => {
           pdf_r2_key,
           created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, datetime('now'))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `
     )
       .bind(
@@ -188,34 +216,12 @@ export const generateWarranty = async (request, env) => {
         payload.what_is_covered,
         payload.what_is_not_covered,
         payload.additional_notes || null,
-        payload.issue_date
+        payload.issue_date,
+        pdfKey
       )
       .run();
 
     warrantyId = Number(insert.meta?.last_row_id || 0);
-    pdfKey = `documents/warranty-${certificateNumber}.pdf`;
-
-    const pdfBytes = await generateWarrantyPDF({
-      ...payload,
-      certificate_number: certificateNumber,
-      invoice_ref: payload.invoice_ref || linkedInvoice?.invoice_number || "",
-    });
-
-    await env.DOCUMENTS_BUCKET.put(pdfKey, pdfBytes, {
-      httpMetadata: {
-        contentType: "application/pdf",
-      },
-    });
-
-    await env.DB.prepare(
-      `
-        UPDATE warranties
-        SET pdf_r2_key = ?
-        WHERE id = ?
-      `
-    )
-      .bind(pdfKey, warrantyId)
-      .run();
 
     if (linkedInvoiceId) {
       await env.DB.prepare(
@@ -263,7 +269,10 @@ export const generateWarranty = async (request, env) => {
         .catch(() => {});
     }
 
-    await deleteWarrantyRow(env, warrantyId);
+    if (pdfStored && !warrantyId && pdfKey) {
+      env.DOCUMENTS_BUCKET.delete(pdfKey).catch(() => {});
+    }
+
     return serverError(request);
   }
 };

@@ -25,8 +25,42 @@
         : DEFAULT_WORKER_API_BASE)
   ).replace(/\/$/, "");
   const loginPath = String(config.loginPath || "/index.html");
+  const memorySession = new Map();
+
+  const createSessionStorageAdapter = () => {
+    try {
+      const probeKey = "__mkt_cms_session_probe__";
+      window.sessionStorage.setItem(probeKey, "1");
+      window.sessionStorage.removeItem(probeKey);
+
+      return {
+        setItem(key, value) {
+          window.sessionStorage.setItem(key, value);
+        },
+        getItem(key) {
+          return window.sessionStorage.getItem(key);
+        },
+        removeItem(key) {
+          window.sessionStorage.removeItem(key);
+        },
+      };
+    } catch {
+      return {
+        setItem(key, value) {
+          memorySession.set(key, String(value));
+        },
+        getItem(key) {
+          return memorySession.has(key) ? memorySession.get(key) : null;
+        },
+        removeItem(key) {
+          memorySession.delete(key);
+        },
+      };
+    }
+  };
 
   let authInFlight = null;
+  const tokenStorage = createSessionStorageAdapter();
 
   const getCurrentPath = () =>
     `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -42,18 +76,18 @@
       return;
     }
 
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(TOKEN_EXPIRY_KEY, String(expiresAt));
+    tokenStorage.setItem(TOKEN_KEY, token);
+    tokenStorage.setItem(TOKEN_EXPIRY_KEY, String(expiresAt));
   };
 
-  const getToken = () => localStorage.getItem(TOKEN_KEY);
+  const getToken = () => tokenStorage.getItem(TOKEN_KEY);
 
   const getTokenExpiry = () =>
-    parseInt(localStorage.getItem(TOKEN_EXPIRY_KEY) || "0", 10);
+    parseInt(tokenStorage.getItem(TOKEN_EXPIRY_KEY) || "0", 10);
 
   const clearToken = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    tokenStorage.removeItem(TOKEN_KEY);
+    tokenStorage.removeItem(TOKEN_EXPIRY_KEY);
   };
 
   const nowInSeconds = () => Math.floor(Date.now() / 1000);

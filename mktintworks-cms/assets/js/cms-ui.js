@@ -96,9 +96,9 @@
       <div class="sidebar-overview">
         <div>
           <span>Workspace</span>
-          <strong>Section 19 live</strong>
+          <strong>Section 20 complete</strong>
         </div>
-        <span class="badge badge-gold">Live</span>
+        <span class="badge badge-gold">Complete</span>
       </div>
     </div>
     <nav class="sidebar-nav" aria-label="CMS navigation">
