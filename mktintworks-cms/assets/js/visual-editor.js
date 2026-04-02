@@ -1,5 +1,7 @@
 (function initVisualEditor(window, document) {
   const DEFAULT_PREVIEW_ORIGIN = "https://mk-tintworks-1.pages.dev";
+  const PUBLIC_CONTENT_API_BASE =
+    "https://mktintworks-cms-api.mktintworks.workers.dev";
   const TRUSTED_PREVIEW_ORIGINS = new Set([
     "https://mk-tintworks-1.pages.dev",
     "https://mktintworks.com",
@@ -280,13 +282,52 @@
   };
 
   const fetchPersistedPageContent = async (pageSlug) => {
-    const url = `/api/pages/content?slug=${encodeURIComponent(
-      pageSlug
-    )}&_ts=${Date.now()}`;
-    const payload = await window.GET(url);
+    const url = new URL(`${PUBLIC_CONTENT_API_BASE}/api/pages/content`);
+    url.searchParams.set("slug", pageSlug);
+    url.searchParams.set("_ts", String(Date.now()));
+
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      mode: "cors",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Persistence check failed: HTTP ${response.status}`);
+    }
+
+    const payload = await response.json().catch(() => null);
     return payload?.content && typeof payload.content === "object"
       ? payload.content
       : {};
+  };
+
+  const updatePageContent = async (key, cmsType, value) => {
+    const token = await window.MKT_CMS_AUTH.ensureToken();
+    const response = await fetch(`${PUBLIC_CONTENT_API_BASE}/api/pages/update`, {
+      method: "POST",
+      mode: "cors",
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        key,
+        type: cmsType,
+        value,
+      }),
+    });
+
+    const payload = await response
+      .json()
+      .catch(async () => ({ error: `HTTP ${response.status}` }));
+
+    if (!response.ok) {
+      throw new Error(payload?.error || payload?.message || `HTTP ${response.status}`);
+    }
+
+    return payload;
   };
 
   const waitForPersistedValue = async (pageSlug, sectionKey, expectedValue) => {
@@ -317,24 +358,9 @@
 
     try {
       const { pageSlug, sectionKey } = splitContentKey(key);
-      const result = await window.POST("/api/pages/update", {
-        key,
-        type: cmsType,
-        value,
-      });
+      const result = await updatePageContent(key, cmsType, value);
 
       const savedValue = result?.value ?? value;
-      const persisted = await waitForPersistedValue(
-        pageSlug,
-        sectionKey,
-        savedValue
-      );
-
-      if (!persisted) {
-        throw new Error(
-          "Save acknowledgement was received, but the persisted content check did not confirm the update."
-        );
-      }
 
       postPreviewUpdate({
         type: "cms:element:update",
@@ -343,9 +369,40 @@
         value: savedValue,
       });
 
-      window.showToast("Saved and verified. Reloading preview...", "success");
-      setStatus(`Saved and verified: ${key}`);
-      loadPage(currentPage, { forceRefresh: true });
+      let verificationMatched = false;
+      let verificationError = null;
+
+      try {
+        verificationMatched = await waitForPersistedValue(
+          pageSlug,
+          sectionKey,
+          savedValue
+        );
+      } catch (error) {
+        verificationError = error;
+      }
+
+      if (verificationMatched) {
+        window.showToast("Saved and verified. Reloading preview...", "success");
+        setStatus(`Saved and verified: ${key}`);
+        loadPage(currentPage, { forceRefresh: true });
+        return;
+      }
+
+      if (verificationError) {
+        window.showToast(
+          "Saved. Preview updated, but verification could not be completed on this request.",
+          "warning"
+        );
+        setStatus(`Saved: ${key} (verification unavailable)`);
+        return;
+      }
+
+      window.showToast(
+        "Saved response received, but persistence could not be confirmed yet. Preview was updated immediately.",
+        "warning"
+      );
+      setStatus(`Saved: ${key} (verification pending)`);
     } catch (error) {
       window.showToast(`Save failed: ${error.message}`, "error");
     } finally {
