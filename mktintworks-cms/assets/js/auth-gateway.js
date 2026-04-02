@@ -140,15 +140,13 @@
       );
       window.setTimeout(redirectToNext, 500);
     } catch (error) {
+      const failureMessage = buildAccessFailureMessage(error.message);
       setState(
         "Access verification failed",
-        buildAccessFailureMessage(error.message),
+        failureMessage,
         "primary"
       );
-      window.showToast(
-        "Cloudflare Access is required before the CMS can issue a JWT.",
-        "warning"
-      );
+      window.showToast(failureMessage, "warning", 6000);
     }
   };
 
