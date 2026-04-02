@@ -366,7 +366,12 @@ const getProductsSiteData = async (request, env) => {
         ...payload,
         source: "database",
       },
-      {},
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "CDN-Cache-Control": "no-store",
+        },
+      },
       request
     );
   } catch (error) {

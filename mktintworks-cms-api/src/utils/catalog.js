@@ -59,10 +59,31 @@ const normalizeDateValue = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const resolveDiscountStatus = (row) => {
+  const fallback = normalizeText(row?.status).toLowerCase() || "scheduled";
+  const startDate = normalizeDateValue(row?.start_datetime);
+  const endDate = normalizeDateValue(row?.end_datetime);
+
+  if (!startDate || !endDate) {
+    return fallback;
+  }
+
+  const now = Date.now();
+  if (endDate.getTime() <= now) {
+    return "expired";
+  }
+
+  if (startDate.getTime() <= now) {
+    return "active";
+  }
+
+  return "scheduled";
+};
+
 const sortDiscountRows = (rows) =>
   rows.sort((left, right) => {
-    const leftStatus = normalizeText(left.status).toLowerCase();
-    const rightStatus = normalizeText(right.status).toLowerCase();
+    const leftStatus = resolveDiscountStatus(left);
+    const rightStatus = resolveDiscountStatus(right);
     const priority = { active: 0, scheduled: 1, expired: 2 };
     const leftPriority = priority[leftStatus] ?? 3;
     const rightPriority = priority[rightStatus] ?? 3;
@@ -135,7 +156,7 @@ export const normalizeDiscountRow = (row) => {
     return null;
   }
 
-  const status = normalizeText(row.status).toLowerCase() || "scheduled";
+  const status = resolveDiscountStatus(row);
   const percentage = asNumber(row.percentage);
   const discountedPrice = asNumber(row.discounted_price);
 
