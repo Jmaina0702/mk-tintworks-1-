@@ -173,13 +173,19 @@ export const updatePageContent = async (request, env) => {
 export const getPageContent = async (request, env) => {
   const url = new URL(request.url);
   const slug = String(url.searchParams.get("slug") || "").trim();
+  const bypassCache = /^(1|true|yes)$/i.test(
+    String(url.searchParams.get("fresh") || "").trim()
+  );
 
   if (!slug) {
     return json({ error: "slug parameter required" }, { status: 400 }, request);
   }
 
   try {
-    const cached = await readCacheJson(env, buildPageCacheKey(slug));
+    const cached = bypassCache
+      ? null
+      : await readCacheJson(env, buildPageCacheKey(slug));
+
     if (cached) {
       return json(
         { content: cached, source: "cache" },

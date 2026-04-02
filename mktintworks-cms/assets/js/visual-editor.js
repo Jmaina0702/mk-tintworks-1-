@@ -284,6 +284,7 @@
   const fetchPersistedPageContent = async (pageSlug) => {
     const url = new URL(`${PUBLIC_CONTENT_API_BASE}/api/pages/content`);
     url.searchParams.set("slug", pageSlug);
+    url.searchParams.set("fresh", "1");
     url.searchParams.set("_ts", String(Date.now()));
 
     const response = await fetch(url, {

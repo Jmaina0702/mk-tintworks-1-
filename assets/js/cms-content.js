@@ -1,6 +1,9 @@
 (function initCmsContent(window, document) {
   const API_BASE = "https://mktintworks-cms-api.mktintworks.workers.dev";
   const pageSlug = String(window.CMS_PAGE_SLUG || "").trim();
+  const isPreviewMode = new URLSearchParams(window.location.search).get(
+    "cms_preview"
+  ) === "true";
   const AUTO_EDITABLE_SELECTOR = [
     "main h1",
     "main h2",
@@ -62,6 +65,9 @@
   const buildFreshContentUrl = (slug) => {
     const url = new URL(`${API_BASE}/api/pages/content`);
     url.searchParams.set("slug", slug);
+    if (isPreviewMode) {
+      url.searchParams.set("fresh", "1");
+    }
     url.searchParams.set("_ts", String(Date.now()));
     return url;
   };
