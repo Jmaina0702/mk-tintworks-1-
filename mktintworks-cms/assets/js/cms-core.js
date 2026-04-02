@@ -3,26 +3,72 @@
   const TOKEN_EXPIRY_KEY = "cms_token_expiry";
   const DEFAULT_WORKER_API_BASE =
     "https://mktintworks-cms-api.mktintworks.workers.dev";
+  const DEFAULT_CANONICAL_CMS_ORIGIN = "https://mktintworks-cms.pages.dev";
+  const DEFAULT_CUSTOM_ADMIN_ORIGIN = "https://admin.mktintworks.com";
   const defaultConfig = {
     apiBase: window.API_BASE,
     autoAuth: true,
     loginPath: "/index.html",
   };
   const config = Object.assign({}, defaultConfig, window.MKT_CMS_CONFIG || {});
-  const shouldUseSameOriginApi = () => {
-    const hostname = String(window.location.hostname || "").toLowerCase();
-    return (
-      hostname === "admin.mktintworks.com" ||
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.endsWith(".pages.dev")
-    );
+  const canonicalCmsOrigin = String(
+    config.canonicalCmsOrigin || DEFAULT_CANONICAL_CMS_ORIGIN
+  ).replace(/\/$/, "");
+  const preferredCustomOrigin = String(
+    config.preferredCustomOrigin || DEFAULT_CUSTOM_ADMIN_ORIGIN
+  ).replace(/\/$/, "");
+  const currentOrigin = String(window.location.origin || "").replace(/\/$/, "");
+  const currentPath =
+    `${window.location.pathname || "/"}${window.location.search || ""}${window.location.hash || ""}`;
+  const currentHost = String(window.location.hostname || "").toLowerCase();
+  const canonicalHost = (() => {
+    try {
+      return new URL(canonicalCmsOrigin).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  })();
+  const customHost = (() => {
+    try {
+      return new URL(preferredCustomOrigin).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  })();
+  const isLocalHost = currentHost === "localhost" || currentHost === "127.0.0.1";
+  const isPagesPreviewHost =
+    currentHost.endsWith(".mktintworks-cms.pages.dev") &&
+    currentHost !== canonicalHost;
+  const shouldUseSameOriginApi = () =>
+    currentHost === canonicalHost || currentHost === customHost || isLocalHost;
+  const resolvedApiBase = () => {
+    if (config.apiBase) {
+      return String(config.apiBase).replace(/\/$/, "");
+    }
+
+    if (shouldUseSameOriginApi()) {
+      return currentOrigin;
+    }
+
+    if (isPagesPreviewHost) {
+      return canonicalCmsOrigin;
+    }
+
+    return DEFAULT_WORKER_API_BASE;
   };
+  const redirectPreviewDeploymentToCanonical = () => {
+    if (!isPagesPreviewHost || !canonicalCmsOrigin || currentOrigin === canonicalCmsOrigin) {
+      return;
+    }
+
+    const target = new URL(currentPath, `${canonicalCmsOrigin}/`).toString();
+    if (window.location.href !== target) {
+      window.location.replace(target);
+    }
+  };
+  redirectPreviewDeploymentToCanonical();
   const API_BASE = String(
-    config.apiBase ||
-      (shouldUseSameOriginApi()
-        ? window.location.origin
-        : DEFAULT_WORKER_API_BASE)
+    resolvedApiBase()
   ).replace(/\/$/, "");
   const loginPath = String(config.loginPath || "/index.html");
   const memorySession = new Map();
